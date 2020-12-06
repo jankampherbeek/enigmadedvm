@@ -8,6 +8,7 @@
 package com.radixpro.enigma.dedvm.astron
 
 import com.radixpro.enigma.dedvm.core.DateTimeParts
+import com.radixpro.enigma.dedvm.core.Location
 import swisseph.SweDate
 import swisseph.SwissEph
 
@@ -48,5 +49,26 @@ object SeFrontend {
         return result
     }
 
+    /**
+     * Calculate the longitudes for all cusps using the Placidus system.
+     */
+    fun defineLongitudeForPlacidus(jdUt:Double, flags: Int, location: Location) : DoubleArray {
+        val cusps = DoubleArray(13)     // cusp positions will be on indexes 1..12
+        val ascMc = DoubleArray(10)
+        val system = 'P'.toInt()             // Placidus
+        swissEph.swe_houses(jdUt, flags, location.geoLat, location.geoLon, system, cusps, ascMc)
+        return cusps
+    }
+
+    /**
+     * Calculate the value of true Epsilon (obliquity of the earth axis, corrected for nutation).
+     */
+    fun defineEpsilon(jdUt: Double, flags: Int): Double {
+        val seId = -1
+        val results = DoubleArray(6)
+        val errorMsg = StringBuffer()
+        swissEph.swe_calc_ut(jdUt, seId, flags, results, errorMsg)
+        return results[0]
+    }
 
 }
