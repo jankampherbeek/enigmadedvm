@@ -71,4 +71,32 @@ object SeFrontend {
         return results[0]
     }
 
+    /**
+     * Calculate right ascension of the MC.
+     */
+    fun defineArmc(jdUt:Double, flags: Int, location: Location): Double {
+        val cusps = DoubleArray(13)
+        val ascMc = DoubleArray(10)     // armc at index
+        val system = 'W'.toInt()             // sign houses for fast calculation
+        swissEph.swe_houses(jdUt, flags, location.geoLat, location.geoLon, system, cusps, ascMc)
+        return ascMc[2]
+    }
+
+
+    /**
+     * Define house (identified by number) for a given ecliptical longitude while ignoring the effect of latitude.
+     * @param armc: Right ascension of the MC
+     * @param geoLat: geographical latitude
+     * @param epsilon: true obliquity of the earth axis
+     * @param eclLon: ecliptical longitude
+     */
+    fun defineEclipticalHousePosition(armc: Double, geoLat: Double, epsilon: Double, eclLon: Double): Int {
+        val hSys = 'P'.toInt()
+        val lonLat= DoubleArray(2)
+        lonLat[0] = eclLon
+        lonLat[1] = 0.0
+        val errorMsg = StringBuffer()
+        return swissEph.swe_house_pos(armc, geoLat, epsilon, hSys, lonLat, errorMsg).toInt()
+    }
+
 }
