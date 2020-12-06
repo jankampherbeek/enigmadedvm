@@ -24,11 +24,29 @@ object SeFrontend {
     private const val GREGORIAN = true
     private val swissEph = SwissEph(PATH)
 
-fun defineJdUt(dtParts: DateTimeParts): Double {
-    val time = ((dtParts.hour - dtParts.offsetUt) + dtParts.minute/MINUTES_PER_HOUR + dtParts.second/SECONDS_PER_HOUR)
-    val sweDate = SweDate(dtParts.year, dtParts.month, dtParts.day, time, GREGORIAN)
-    return sweDate.julDay
-}
+    /**
+     * Calculate Julian Day for UT.
+     */
+    fun defineJdUt(dtParts: DateTimeParts): Double {
+        val time = ((dtParts.hour - dtParts.offsetUt) + dtParts.minute / MINUTES_PER_HOUR + dtParts.second / SECONDS_PER_HOUR)
+        val sweDate = SweDate(dtParts.year, dtParts.month, dtParts.day, time, GREGORIAN)
+        return sweDate.julDay
+    }
+
+    /**
+     * Calculate the longitude for a celestial body.
+     * @param seId: the id as used by the Swiss Ephemeris
+     * @returns array with longitude at position 0 and daily speed at position 1
+     */
+    fun defineLongitudeForBody(jdUt: Double, seId: Int, flags: Int): DoubleArray {
+        val allPositions = DoubleArray(6)
+        val errorMsg = StringBuffer()
+        swissEph.swe_calc_ut(jdUt, seId, flags, allPositions, errorMsg)
+        val result = DoubleArray(2)
+        result[0] = allPositions[0]
+        result[1] = allPositions[3]
+        return result
+    }
 
 
 }
