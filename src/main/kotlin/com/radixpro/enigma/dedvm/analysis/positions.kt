@@ -1,7 +1,7 @@
 package com.radixpro.enigma.dedvm.analysis
 
 import com.radixpro.enigma.dedvm.astron.SeFrontend
-import com.radixpro.enigma.dedvm.core.CelPointPosition
+import com.radixpro.enigma.dedvm.core.PointPosition
 import com.radixpro.enigma.dedvm.core.CelPoints
 import com.radixpro.enigma.dedvm.core.Location
 import com.radixpro.enigma.dedvm.util.Range
@@ -25,7 +25,7 @@ class SignPosition {
 /**
  * Position of a specific longitude in Placidus houses. Latitude is ignored.
  */
-class HousePosition() {
+class HousePosition {
 
     /**
      * If od the house wwwhere the point with given longitude (eclLon) is positioned.
@@ -42,20 +42,20 @@ class HousePosition() {
 /**
  * Distance from Mc in longitude.
  */
-class McDistance() {
+class McDistance {
 
     /**
      * Find celestial object that is closest to te MC, measured alongside the ecliptic and ignoring latitude.
      */
-    fun closestToMc(celPoints: List<CelPointPosition>, longMc: Double): CelPoints {
+    fun closestToMc(points: List<PointPosition>, longMc: Double): CelPoints {
         var shortestDistance = 180.0
-        var distance = 0.0
+        var distance: Double
         var shortestPoint = CelPoints.SUN
-        for (celPoint in celPoints) {
+        for (celPoint in points) {
             distance = Range.checkValue(celPoint.lon - longMc, 0.0, 180.0)
             if (distance <= shortestDistance) {
                 shortestDistance = distance
-                shortestPoint = celPoint.point
+                shortestPoint = celPoint.point as CelPoints
             }
         }
         return shortestPoint

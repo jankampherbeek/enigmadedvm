@@ -16,9 +16,9 @@ data class ChartInputData(val id: Int,
                           val dateTimeParts: DateTimeParts,
                           val location: Location)
 
-data class CelPointPosition(val point: CelPoints,
-                            val lon: Double,
-                            val speed: Double)
+data class PointPosition(val point: Points,
+                         val lon: Double,
+                         val speed: Double)
 
 data class Chart(val id: String,
                  val name: String,
@@ -27,6 +27,9 @@ data class Chart(val id: String,
                  val armc: Double,
                  val epsilon: Double,
                  val dateTimeParts: DateTimeParts,
-                 val celPointPositions: List<CelPointPosition>,
+                 val pointPositions: List<PointPosition>,
                  val cusps: List<Double>)
 
+data class ActualAspect(val point1: Points,
+                        val point2: Points,
+                        val aspect: Aspects)
