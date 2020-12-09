@@ -25,16 +25,16 @@ class SignPosition {
 /**
  * Position of a specific longitude in Placidus houses. Latitude is ignored.
  */
-class HousePosition {
+class HousePosition(private val seFrontend: SeFrontend) {
 
     /**
      * If od the house wwwhere the point with given longitude (eclLon) is positioned.
      * Id is 1 for house 1 ... 12 for house 12.
      */
     fun idOfHouse(eclLon: Double, jdUt: Double, flags: Int, location: Location): Int {
-        val armc = SeFrontend.defineArmc(jdUt, flags, location)
-        val epsilon = SeFrontend.defineEpsilon(jdUt, flags)
-        return SeFrontend.defineEclipticalHousePosition(armc, location.geoLat, epsilon, eclLon)
+        val armc = seFrontend.defineArmc(jdUt, flags, location)
+        val epsilon = seFrontend.defineEpsilon(jdUt, flags)
+        return seFrontend.defineEclipticalHousePosition(armc, location.geoLat, epsilon, eclLon)
     }
 
 }

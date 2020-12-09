@@ -30,6 +30,10 @@ data class Chart(val id: String,
                  val pointPositions: List<PointPosition>,
                  val cusps: List<Double>)
 
+data class AllCharts(val name: String,
+                     val creation: String,
+                     val charts: List<Chart>)
+
 data class ActualAspect(val point1: Points,
                         val point2: Points,
                         val aspect: Aspects)
