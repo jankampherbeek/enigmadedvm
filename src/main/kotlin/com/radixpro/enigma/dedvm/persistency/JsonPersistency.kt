@@ -15,7 +15,6 @@ import java.io.File.separator as SEPARATOR
 import java.io.FileReader
 import java.io.IOException
 import java.time.LocalDateTime
-import java.util.*
 
 /**
  * Reader for Json files.
@@ -79,7 +78,27 @@ class ChartsWriter(private val jsonWriter: JsonWriter) {
     private fun createPathFileName(name: String): String {
         return ".${SEPARATOR}testdata${SEPARATOR}${name}"
     }
+}
 
+
+class AllChartsReader(private val jsonReader: JsonReader, private val mapper: ChartMapper) {
+
+    fun readAllCharts(fileName: String): AllCharts {
+        // todo define path
+        val pathAndName = ".${SEPARATOR}testdata${SEPARATOR}${fileName}"
+        val file = File(pathAndName)
+        val json = jsonReader.readObjectFromFile(file)
+        return mapper.jsonToAllCharts(json)
+    }
+}
+
+class ResultsWriter(private val jsonWriter: JsonWriter) {
+
+    fun writeResults(fileName: String, object2Write: Any) {
+        val pathAndName = ".${SEPARATOR}testdata${SEPARATOR}${fileName}"
+        val file = File(pathAndName)
+        jsonWriter.write2File(pathAndName, object2Write, true)
+    }
 }
 
 

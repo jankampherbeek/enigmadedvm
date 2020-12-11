@@ -6,8 +6,6 @@ import org.json.simple.JSONObject
 import org.json.simple.JSONValue
 import org.junit.jupiter.api.Test
 
-import org.junit.jupiter.api.Assertions.*
-
 internal class ChartMapperTest {
 
     private val delta = 0.00000001

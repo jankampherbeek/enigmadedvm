@@ -37,3 +37,16 @@ data class AllCharts(val name: String,
 data class ActualAspect(val point1: Points,
                         val point2: Points,
                         val aspect: Aspects)
+
+/**
+ * Identification of a chart and a list of counted values.
+ */
+data class ChartCount(val id: String,
+                      val name: String,
+                      val counts: List<Int>)
+
+/**
+ * Counts of Sun, Moon and Ascendant in signs
+ */
+data class SMAInSign(val totals: List<Int>,
+                     val countsPerChart: List<ChartCount> )

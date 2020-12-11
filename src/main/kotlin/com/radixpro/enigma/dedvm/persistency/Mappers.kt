@@ -5,9 +5,9 @@ import org.json.simple.JSONArray
 import org.json.simple.JSONObject
 
 /**
- * Mapper for objcts with Charts.
+ * Mapper for objects with Charts.
  */
-class ChartMapper() {
+class ChartMapper {
 
     /**
      * Maps Json for a set of charts (AllCharts) to an object AllCharts.
