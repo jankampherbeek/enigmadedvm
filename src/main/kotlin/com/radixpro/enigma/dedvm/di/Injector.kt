@@ -19,6 +19,10 @@ object Injector {
         return ChartsCalculator(injectSeFrontend())
     }
 
+    fun injectChartsWriter(): ChartsWriter {
+        return ChartsWriter(injectJsonWriter())
+    }
+
     fun injectControldataCalendar(): ControlDataCalendar {
         return ControlDataCalendar()
     }
@@ -40,7 +44,7 @@ object Injector {
     }
 
     fun injectInputDataHandler(): InputDataHandler {
-        return InputDataHandler(injectCsvInputDataReader(), injectChartsCalculator(), injectControlDataCreator(), injectJsonWriter())
+        return InputDataHandler(injectCsvInputDataReader(), injectChartsCalculator(), injectControlDataCreator(), injectChartsWriter())
     }
 
     fun injectJsonReader():JsonReader {

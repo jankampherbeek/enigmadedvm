@@ -77,7 +77,7 @@ class ChartsWriter(private val jsonWriter: JsonWriter) {
     }
 
     private fun createPathFileName(name: String): String {
-        return ".${SEPARATOR}data${SEPARATOR}${name}_calculatedCharts.json"
+        return ".${SEPARATOR}testdata${SEPARATOR}${name}"
     }
 
 }
