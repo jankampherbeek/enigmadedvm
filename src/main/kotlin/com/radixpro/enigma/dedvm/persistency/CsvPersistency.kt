@@ -75,7 +75,8 @@ class CsvInputDataReader(private val linesReader: CsvLinesReader) {
 
     private fun createDateTime(dateTxt: String, timeTxt: String, offset: Double, dst: String): DateTimeParts {
         val dateParts = dateTxt.split("/")
-        val timeParts = timeTxt + "00:00".split(":")
+        val timeTxtDefaultSeconds = "$timeTxt:00"
+        val timeParts = timeTxtDefaultSeconds.split(":")
         var dstValue = 0.0
         if (dst == "Y") dstValue = 1.0
         val combinedOffsetUt = offset + dstValue

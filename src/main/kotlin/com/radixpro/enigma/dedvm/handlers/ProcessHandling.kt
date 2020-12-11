@@ -44,11 +44,11 @@ class SMAInSignHandler(private val allChartsReader: AllChartsReader,
         for (chart in allCharts.charts) {
             val sunPos = signPosition.idOfSign(chart.pointPositions[0].lon)
             val moonPos = signPosition.idOfSign(chart.pointPositions[1].lon)
-            val ascPos = signPosition.idOfSign(chart.cusps[1])
+            val ascPos = signPosition.idOfSign(chart.cusps[0])
             val counts: MutableList<Int> = ArrayList()
-            counts[0] = sunPos
-            counts[1] = moonPos
-            counts[2] = ascPos
+            counts.add(sunPos)
+            counts.add(moonPos)
+            counts.add(ascPos)
             val chartCount = ChartCount(chart.id, chart.name, counts.toList())
             chartCounts.add(chartCount)
         }
@@ -56,13 +56,15 @@ class SMAInSignHandler(private val allChartsReader: AllChartsReader,
     }
 
     private fun defineTotals(detailCount: List<ChartCount>): SMAInSign {
-        val totals = mutableListOf(0,0,0,0,0,0,0,0,0,0,0,0)   // 12 values
+        val totalsSun = mutableListOf(0,0,0,0,0,0,0,0,0,0,0,0)
+        val totalsMoon = mutableListOf(0,0,0,0,0,0,0,0,0,0,0,0)
+        val totalsAsc = mutableListOf(0,0,0,0,0,0,0,0,0,0,0,0)
         for (chartCount in detailCount) {
-            totals[chartCount.counts[0]-1]++        // Sun
-            totals[chartCount.counts[1]-1]++        // Moon
-            totals[chartCount.counts[2]-1]++        // Ascendant
+            totalsSun[chartCount.counts[0]-1]++
+            totalsMoon[chartCount.counts[1]-1]++
+            totalsAsc[chartCount.counts[2]-1]++
         }
-        return SMAInSign(totals, detailCount)
+        return SMAInSign(totalsSun, totalsMoon, totalsAsc, detailCount)
     }
 
 

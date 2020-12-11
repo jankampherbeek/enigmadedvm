@@ -7,12 +7,21 @@ import com.radixpro.enigma.dedvm.analysis.SignPosition
 import com.radixpro.enigma.dedvm.astron.ChartsCalculator
 import com.radixpro.enigma.dedvm.astron.SeFrontend
 import com.radixpro.enigma.dedvm.handlers.InputDataHandler
+import com.radixpro.enigma.dedvm.handlers.SMAInSignHandler
 import com.radixpro.enigma.dedvm.persistency.*
 
 object Injector {
 
+    fun injectAllChartsReader(): AllChartsReader {
+        return AllChartsReader(injectJsonReader(), injectChartMapper())
+    }
+
     fun injectAspectsForChart(): AspectsForChart {
         return AspectsForChart()
+    }
+
+    fun injectChartMapper(): ChartMapper {
+        return ChartMapper()
     }
 
     fun injectChartsCalculator(): ChartsCalculator {
@@ -63,12 +72,20 @@ object Injector {
         return McDistance()
     }
 
+    fun injectResultsWriter(): ResultsWriter {
+        return ResultsWriter(injectJsonWriter())
+    }
+
     fun injectSeFrontend(): SeFrontend {
         return SeFrontend
     }
 
     fun injectSignPosition(): SignPosition {
         return SignPosition()
+    }
+
+    fun injectSMAInSignHandler(): SMAInSignHandler {
+        return SMAInSignHandler(injectAllChartsReader(), injectSignPosition(), injectResultsWriter())
     }
 
 

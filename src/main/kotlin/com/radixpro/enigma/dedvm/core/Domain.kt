@@ -46,7 +46,9 @@ data class ChartCount(val id: String,
                       val counts: List<Int>)
 
 /**
- * Counts of Sun, Moon and Ascendant in signs
+ * Counts of Sun, Moon and Ascendant in signs plus t5otals
  */
-data class SMAInSign(val totals: List<Int>,
+data class SMAInSign(val totalsSun: List<Int>,
+                     val totalsMoon: List<Int>,
+                     val totalsAsc: List<Int>,
                      val countsPerChart: List<ChartCount> )

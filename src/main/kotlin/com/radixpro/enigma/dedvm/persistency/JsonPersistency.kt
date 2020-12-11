@@ -31,18 +31,6 @@ class JsonReader {
             throw RuntimeException("Could not read file : " + inputData + " . Original message " + ioe.message)
         }
     }
-
-    fun readArrayFromFile(inputData: File): JSONArray {
-        val parser = JSONParser()
-        return try {
-            val jsonObject = parser.parse(FileReader(inputData))
-            jsonObject as JSONArray
-        } catch (pe: ParseException) {
-            throw RuntimeException("Could not parse results of : " + inputData + " . Original message " + pe.message)
-        } catch (ioe: IOException) {
-            throw RuntimeException("Could not read file : " + inputData + " . Original message " + ioe.message)
-        }
-    }
 }
 
 /**
