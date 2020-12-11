@@ -64,7 +64,7 @@ class CsvInputDataReader(private val linesReader: CsvLinesReader) {
             // index 5 (calendar) ignored, for this project always Gregorian assumed
             val timeTxt: String = line[6].trim { it <= ' ' }
             val offset: Double = line[7].trim { it <= ' ' }.toDouble()
-            val dst: Double = line[8].trim { it <= ' ' }.toDouble()
+            val dst: String = line[8].trim { it <= ' ' }
             val dateTime = createDateTime(dateTxt, timeTxt, offset, dst)
             val location = createLocation(lonTxt, latTxt)
             return ChartInputData(id, name, dateTime, location)
@@ -73,10 +73,12 @@ class CsvInputDataReader(private val linesReader: CsvLinesReader) {
         }
     }
 
-    private fun createDateTime(dateTxt: String, timeTxt: String, offset: Double, dst: Double): DateTimeParts {
+    private fun createDateTime(dateTxt: String, timeTxt: String, offset: Double, dst: String): DateTimeParts {
         val dateParts = dateTxt.split("/")
-        val timeParts = timeTxt.split(":")
-        val combinedOffsetUt = offset + dst
+        val timeParts = timeTxt + "00:00".split(":")
+        var dstValue = 0.0
+        if (dst == "Y") dstValue = 1.0
+        val combinedOffsetUt = offset + dstValue
         return DateTimeParts(dateParts[0].toInt(), dateParts[1].toInt(), dateParts[2].toInt(),
             timeParts[0].toInt(), timeParts[1].toInt(), timeParts[2].toInt(), combinedOffsetUt)
     }

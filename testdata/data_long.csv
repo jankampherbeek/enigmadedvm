@@ -1,11 +1,11 @@
 Id,Name,longitude,latitude,date,cal,time,zone,dst
 395,Oswald Spengler,10E58,51N48,1880/5/29,g,18:30,0.73111,n
 396,Hermann Keyserling,24E50,58N53,1880/7/20,g,21:55,1.65,n
-397,Pierre Teilhard de Chardin,6E20,44N41,1881/5/1,7:00,0.42222,n
-398,Karl Jaspers,8E13,53N08,1883/2/23,14:30,0.54778,n
-399,Roberto Assagioli,12E21,45N27,1888/2/27,12:00,0.83222,n
-400,Ernst Kretschmer,8E47,52N06,1888/10/8,8:00,0.58556,n
-401,Fritz Künkel,15E20,52N57,1889/9/6,18:30,1.02222,n
-402,Martin Heidegger,9E07,47N59,1889/9/26,11:30,0.60778,n
-403,Wilhelm H. C. Tenhaeff,4E29,51N55,1894/1/18,6:00,0.32556,n
-394,Carl Gustac Jung,9E20,47N36,1875/7/26,19:30,0.62222,n
+397,Pierre Teilhard de Chardin,6E20,44N41,1881/5/1,g,7:00,0.42222,n
+398,Karl Jaspers,8E13,53N08,1883/2/23,g,14:30,0.54778,n
+399,Roberto Assagioli,12E21,45N27,1888/2/27,g,12:00,0.83222,n
+400,Ernst Kretschmer,8E47,52N06,1888/10/8,g,8:00,0.58556,n
+401,Fritz Künkel,15E20,52N57,1889/9/6,g,18:30,1.02222,n
+402,Martin Heidegger,9E07,47N59,1889/9/26,g,11:30,0.60778,n
+403,Wilhelm H. C. Tenhaeff,4E29,51N55,1894/1/18,g,6:00,0.32556,n
+394,Carl Gustac Jung,9E20,47N36,1875/7/26,g,19:30,0.62222,n

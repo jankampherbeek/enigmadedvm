@@ -6,10 +6,8 @@ import com.radixpro.enigma.dedvm.analysis.McDistance
 import com.radixpro.enigma.dedvm.analysis.SignPosition
 import com.radixpro.enigma.dedvm.astron.ChartsCalculator
 import com.radixpro.enigma.dedvm.astron.SeFrontend
-import com.radixpro.enigma.dedvm.persistency.CsvInputDataReader
-import com.radixpro.enigma.dedvm.persistency.CsvLinesReader
-import com.radixpro.enigma.dedvm.persistency.JsonReader
-import com.radixpro.enigma.dedvm.persistency.JsonWriter
+import com.radixpro.enigma.dedvm.handlers.InputDataHandler
+import com.radixpro.enigma.dedvm.persistency.*
 
 object Injector {
 
@@ -19,6 +17,14 @@ object Injector {
 
     fun injectChartsCalculator(): ChartsCalculator {
         return ChartsCalculator(injectSeFrontend())
+    }
+
+    fun injectControldataCalendar(): ControlDataCalendar {
+        return ControlDataCalendar()
+    }
+
+    fun injectControlDataCreator(): ControlDataCreator {
+        return ControlDataCreator(injectListRandomizer(), injectControldataCalendar() )
     }
 
     fun injectCsvInputDataReader(): CsvInputDataReader {
@@ -33,12 +39,20 @@ object Injector {
         return HousePosition(injectSeFrontend())
     }
 
+    fun injectInputDataHandler(): InputDataHandler {
+        return InputDataHandler(injectCsvInputDataReader(), injectChartsCalculator(), injectControlDataCreator(), injectJsonWriter())
+    }
+
     fun injectJsonReader():JsonReader {
         return JsonReader()
     }
 
     fun injectJsonWriter(): JsonWriter {
         return JsonWriter()
+    }
+
+    fun injectListRandomizer(): ListRandomizer {
+        return ListRandomizer()
     }
 
     fun injectMcDistance(): McDistance {
