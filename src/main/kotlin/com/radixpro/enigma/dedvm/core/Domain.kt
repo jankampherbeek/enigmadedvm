@@ -46,9 +46,16 @@ data class ChartCount(val id: String,
                       val counts: List<Int>)
 
 /**
- * Counts of Sun, Moon and Ascendant in signs plus t5otals
+ * Counts of Sun, Moon and Ascendant in signs plus totals
  */
 data class SMAInSign(val totalsSun: List<Int>,
                      val totalsMoon: List<Int>,
                      val totalsAsc: List<Int>,
                      val countsPerChart: List<ChartCount> )
+
+/**
+ * Counts of bodies in signs or houses.
+ */
+data class BodiesInRange(val bodySpec: List<CelPoints>,
+                         val totals: List<Int>,
+                         val details: List<ChartCount>)

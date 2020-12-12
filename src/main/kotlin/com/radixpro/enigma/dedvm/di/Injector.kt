@@ -6,6 +6,7 @@ import com.radixpro.enigma.dedvm.analysis.McDistance
 import com.radixpro.enigma.dedvm.analysis.SignPosition
 import com.radixpro.enigma.dedvm.astron.ChartsCalculator
 import com.radixpro.enigma.dedvm.astron.SeFrontend
+import com.radixpro.enigma.dedvm.handlers.BodiesInHouseHandler
 import com.radixpro.enigma.dedvm.handlers.InputDataHandler
 import com.radixpro.enigma.dedvm.handlers.SMAInSignHandler
 import com.radixpro.enigma.dedvm.persistency.*
@@ -18,6 +19,10 @@ object Injector {
 
     fun injectAspectsForChart(): AspectsForChart {
         return AspectsForChart()
+    }
+
+    fun injectBodiesInHouseHandler(): BodiesInHouseHandler {
+        return BodiesInHouseHandler(injectAllChartsReader(), injectHousePosition(), injectResultsWriter())
     }
 
     fun injectChartMapper(): ChartMapper {
