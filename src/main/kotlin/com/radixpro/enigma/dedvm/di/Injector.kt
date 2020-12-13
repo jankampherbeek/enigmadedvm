@@ -6,9 +6,7 @@ import com.radixpro.enigma.dedvm.analysis.McDistance
 import com.radixpro.enigma.dedvm.analysis.SignPosition
 import com.radixpro.enigma.dedvm.astron.ChartsCalculator
 import com.radixpro.enigma.dedvm.astron.SeFrontend
-import com.radixpro.enigma.dedvm.handlers.BodiesInHouseHandler
-import com.radixpro.enigma.dedvm.handlers.InputDataHandler
-import com.radixpro.enigma.dedvm.handlers.SMAInSignHandler
+import com.radixpro.enigma.dedvm.handlers.*
 import com.radixpro.enigma.dedvm.persistency.*
 
 object Injector {
@@ -53,6 +51,10 @@ object Injector {
         return CsvLinesReader()
     }
 
+    fun injectElevationHandler(): ElevationHandler {
+        return ElevationHandler(injectAllChartsReader(), injectResultsWriter())
+    }
+
     fun injectHousePosition(): HousePosition {
         return HousePosition(injectSeFrontend())
     }
@@ -76,6 +78,11 @@ object Injector {
     fun injectMcDistance(): McDistance {
         return McDistance()
     }
+
+    fun injectProminentAspectsHandler(): ProminentAspectsHandler {
+        return ProminentAspectsHandler(injectAllChartsReader(), injectAspectsForChart(), injectSignPosition(), injectResultsWriter())
+    }
+
 
     fun injectResultsWriter(): ResultsWriter {
         return ResultsWriter(injectJsonWriter())

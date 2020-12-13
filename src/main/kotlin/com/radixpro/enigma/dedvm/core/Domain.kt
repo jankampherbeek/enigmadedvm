@@ -59,3 +59,26 @@ data class SMAInSign(val totalsSun: List<Int>,
 data class BodiesInRange(val bodySpec: List<CelPoints>,
                          val totals: List<Int>,
                          val details: List<ChartCount>)
+
+/**
+ * Specification of a point with a specific maximum of minimum in a chart.
+ */
+data class MinMaxPositionsPerChart(val id: String,
+                                   val name: String,
+                                   val point: CelPoints,
+                                   val distance: Double)
+
+/**
+ * Counts of bodies that are closest to the MC, measured in longitude.
+ */
+data class ElevationValues(val bodySpec: List<CelPoints>,
+                           val totals: List<Int>,
+                           val details: List<MinMaxPositionsPerChart>)
+
+/**
+ * Counts of specific aspects per celestial body.
+ */
+data class AspectCounts(val bodySpec: List<CelPoints>,
+                        val totals: List<Int>,
+                        val details: List<ChartCount>)
+
