@@ -100,6 +100,9 @@ object Injector {
         return SMAInSignHandler(injectAllChartsReader(), injectSignPosition(), injectResultsWriter())
     }
 
+    fun injectUnaspectedPointsHandler(): UnaspectedPointsHandler {
+        return UnaspectedPointsHandler(injectAllChartsReader(), injectAspectsForChart(), injectResultsWriter())
+    }
 
 
 }

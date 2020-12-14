@@ -292,5 +292,63 @@ class ProminentAspectsHandler(private val allChartsReader: AllChartsReader,
         }
         return AspectCounts(supportedBodies, totalsForPra.toList(), detailCount)
     }
+}
+
+class UnaspectedPointsHandler(private val allChartsReader: AllChartsReader,
+                              private val aspectsForChart: AspectsForChart,
+                              private val resultsWriter: ResultsWriter) {
+
+    private val fileNameForNASData = "NASResults.json"
+    private val fileNameForNASControlData = "NASControlDataResults.json"
+    private val supportedBodies = listOf(CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
+        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON)
+
+    fun processCharts() {
+        handleCharts()
+        handleControlData()
+    }
+
+    private fun handleCharts() {
+        val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
+        val details = defineDetails(allCharts)
+        val praCounts = defineTotals(details)
+        resultsWriter.writeResults(fileNameForNASData, praCounts)
+    }
+
+    private fun handleControlData() {
+        val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
+        val details = defineDetails(allCharts)
+        val praCounts = defineTotals(details)
+        resultsWriter.writeResults(fileNameForNASControlData, praCounts)
+    }
+
+    private fun defineDetails(allCharts: AllCharts): List<ChartCount> {
+        val chartCounts: MutableList<ChartCount> = ArrayList()
+        for (chart in allCharts.charts) {
+            val nasValues = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)   // 11 positions
+            val allAspects = aspectsForChart.findAspects(chart)
+            for (point in supportedBodies) {
+                var count = 0
+                for (asp in allAspects) {
+                    if (CelPoints.MEAN_NODE != asp.point1 && CelPoints.MEAN_NODE != asp.point2
+                        && CelPoints.MEAN_APOGEE != asp.point1 && CelPoints.MEAN_APOGEE != asp.point2
+                        && point == asp.point1 || point == asp.point2) count++
+                }
+                if (count == 0) nasValues[supportedBodies.indexOf(point)] = 1
+            }
+            chartCounts.add(ChartCount(chart.id, chart.name, nasValues))
+        }
+        return chartCounts.toList()
+    }
+
+    private fun defineTotals(detailCount: List<ChartCount>): AspectCounts {
+        val totalsForPra = mutableListOf(0,0,0,0,0,0,0,0,0,0,0,0)
+        for (chartCount in detailCount) {
+            for (i in 0..10) {
+                totalsForPra[i]+= chartCount.counts[i]
+            }
+        }
+        return AspectCounts(supportedBodies, totalsForPra.toList(), detailCount)
+    }
 
 }
