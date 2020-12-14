@@ -350,5 +350,81 @@ class UnaspectedPointsHandler(private val allChartsReader: AllChartsReader,
         }
         return AspectCounts(supportedBodies, totalsForPra.toList(), detailCount)
     }
+}
+
+
+class MaxPointsHandler(private val allChartsReader: AllChartsReader,
+                       private val signPosition: SignPosition,
+                       private val housePosition: HousePosition,
+                       private val resultsWriter: ResultsWriter) {
+
+    private val fileNameForMAXData = "MAXResults.json"
+    private val fileNameForMAXControlData = "MAXControlDataResults.json"
+    private val supportedBodies = listOf(CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
+        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO)
+    private val flags = 0 or 2 or 256           // 2 = SwissEph, 256 = speed
+
+    fun processCharts() {
+        handleCharts()
+        handleControlData()
+    }
+
+    private fun handleCharts() {
+        val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
+        val details = defineDetails(allCharts)
+        val maxCounts = defineTotals(details)
+        resultsWriter.writeResults(fileNameForMAXData, maxCounts)
+    }
+
+    private fun handleControlData() {
+        val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
+        val details = defineDetails(allCharts)
+        val maxCounts = defineTotals(details)
+        resultsWriter.writeResults(fileNameForMAXControlData, maxCounts)
+    }
+
+    private fun defineDetails(allCharts: AllCharts): List<ChartCount> {
+        val chartCounts: MutableList<ChartCount> = ArrayList()
+        for (chart in allCharts.charts) {
+            val maxValues = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)   // 10 positions
+            for (point in supportedBodies) {
+                if (isMax(point, chart)) maxValues[supportedBodies.indexOf(point)] = 1
+            }
+            chartCounts.add(ChartCount(chart.id, chart.name, maxValues))
+        }
+        return chartCounts.toList()
+    }
+
+    private fun defineTotals(detailCount: List<ChartCount>): MaxCounts {
+        val totalsForMax = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 10 positions
+        for (chartCount in detailCount) {
+            for (i in 0..9) {
+                totalsForMax[i]+= chartCount.counts[i]
+            }
+        }
+        return MaxCounts(supportedBodies, totalsForMax.toList(), detailCount)
+    }
+
+    private fun isMax(point: CelPoints, chart: Chart): Boolean {
+        var lon = 0.0
+        for (pointPos in chart.pointPositions) if (pointPos.point == point) lon = pointPos.lon
+        val sign = signPosition.idOfSign(lon)
+        val house = housePosition.idOfHouse(lon, chart.jdUt, flags, chart.location)
+        when (point) {
+            CelPoints.SUN -> { if ( (1 == sign || 5 == sign) && !(7 == house || 11 == house || 12 == house)) return true}
+            CelPoints.MOON -> { if ( (2 == sign || 4 == sign) && !(8 == house || 10 == house )) return true}
+            CelPoints.MERCURY -> { if ( (3 == sign || 6 == sign) && !(4 == house || 8 == house || 9 == house || 12 == house)) return true}
+            CelPoints.VENUS -> { if ( (2 == sign || 7 == sign || 12 == sign) && !(1 == house || 6 == house || 8 == house )) return true}
+            CelPoints.MARS -> { if ( (1 == sign || 8 == sign || 10 == sign) && !(2 == house || 4 == house || 7 == house || 12 == house)) return true}
+            CelPoints.JUPITER -> { if ( (4 == sign || 9 == sign || 12 == sign) && !(3 == house || 6 == house || 10 == house)) return true}
+            CelPoints.SATURN -> { if ( (7 == sign || 10 == sign || 11 == sign) && !(1 == house || 4 == house || 5 == house || 12 == house)) return true}
+            CelPoints.URANUS -> { if ( (8 == sign || 10 == sign || 11 == sign) && !(2 == house || 4 == house || 5 == house)) return true}
+            CelPoints.NEPTUNE -> { if ( (9 == sign || 12 == sign) && !(3 == house || 6 == house || 10 == house || 11 == house)) return true}
+            CelPoints.PLUTO -> { if ( (1 == sign || 8 == sign) && !(2 == house || 7 == house)) return true}
+        }
+        return false
+    }
 
 }
+
+

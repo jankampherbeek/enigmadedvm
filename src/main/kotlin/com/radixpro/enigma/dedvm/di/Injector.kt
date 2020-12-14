@@ -75,6 +75,10 @@ object Injector {
         return ListRandomizer()
     }
 
+    fun injectMaxPointsHandler(): MaxPointsHandler {
+        return MaxPointsHandler(injectAllChartsReader(), injectSignPosition(), injectHousePosition(), injectResultsWriter())
+    }
+
     fun injectMcDistance(): McDistance {
         return McDistance()
     }

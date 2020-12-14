@@ -82,3 +82,9 @@ data class AspectCounts(val bodySpec: List<CelPoints>,
                         val totals: List<Int>,
                         val details: List<ChartCount>)
 
+/**
+ * Counts of max points per celestial body.
+ */
+data class MaxCounts(val bodySpec: List<CelPoints>,
+                     val totals: List<Int>,
+                     val details: List<ChartCount>)
