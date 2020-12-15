@@ -8,6 +8,8 @@ import com.radixpro.enigma.dedvm.persistency.AllChartsReader
 import com.radixpro.enigma.dedvm.persistency.ResultsWriter
 import com.radixpro.enigma.dedvm.util.Range
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 private const val fileNameForCharts = "calculatedcharts.json"
 private const val fileNameForControlData = "controlcharts.json"
@@ -82,8 +84,6 @@ class BodiesInHouseHandler(private val allChartsReader: AllChartsReader,
 
     private val fileNameForAscMcData = "BAMResults.json"
     private val fileNameForAscMcControlData = "BAMControlDataResults.json"
-    private val fileNameForCornerData = "BCOResults.json"
-    private val fileNameForCornerControlData = "BCOControlDataResults.json"
     private val flags = 0 or 2 or 256           // 2 = SwissEph, 256 = speed
     private val supportedBodies = listOf(CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
         CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON)
@@ -94,11 +94,6 @@ class BodiesInHouseHandler(private val allChartsReader: AllChartsReader,
         handleControlData(cusps, fileNameForAscMcControlData)
     }
 
-    fun processCorners() {
-        val cusps = listOf(1, 4, 7, 10)
-        handleCharts(cusps, fileNameForCornerData)
-        handleControlData(cusps, fileNameForCornerControlData)
-    }
 
     private fun handleCharts(cusps: List<Int>, fileName: String) {
         val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
@@ -138,6 +133,71 @@ class BodiesInHouseHandler(private val allChartsReader: AllChartsReader,
             }
         }
         return BodiesInRange(supportedBodies, totalsForSigns.toList(), detailCount)
+    }
+
+}
+
+class BodiesAtCornersHandler(private val allChartsReader: AllChartsReader, private val resultsWriter: ResultsWriter) {
+
+    private val fileNameForCornerData = "BCOResults.json"
+    private val fileNameForCornerControlData = "BCOControlDataResults.json"
+    private val supportedBodies = listOf(CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
+        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON)
+
+    fun processCharts() {
+        val cusps = listOf(1, 4, 7, 10)
+        handleCharts(cusps, fileNameForCornerData)
+        handleControlData(cusps, fileNameForCornerControlData)
+    }
+
+    private fun handleCharts(cusps: List<Int>, fileName: String) {
+        val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
+        val detailCount = defineDetailsCount(allCharts, cusps)
+        val bodiesInRange = defineTotals(detailCount)
+        resultsWriter.writeResults(fileName, bodiesInRange)
+    }
+
+
+    private fun handleControlData(cusps: List<Int>, fileName: String) {
+        val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
+        val detailCount = defineDetailsCount(allCharts, cusps)
+        val bodiesInRange = defineTotals(detailCount)
+        resultsWriter.writeResults(fileName, bodiesInRange)
+    }
+
+    private fun defineDetailsCount(allCharts: AllCharts, cusps: List<Int>): List<ChartCount> {
+        val chartCounts: MutableList<ChartCount> = ArrayList()
+        for (chart in allCharts.charts) {
+            val details: MutableList<Int> = ArrayList()
+            val asc = chart.cusps[0]
+            val desc = chart.cusps[6]
+            val mc = chart.cusps[9]
+            val ic = chart.cusps[3]
+            for (pointPos in chart.pointPositions) {
+                val orb = if (pointPos.point == CelPoints.SUN || pointPos.point == CelPoints.MOON) 8.0 else 6.0
+                if (pointPos.point != CelPoints.MEAN_APOGEE && pointPos.point != CelPoints.MEAN_NODE) {
+                    if (withinOrb(asc, pointPos.lon, orb) || withinOrb(desc, pointPos.lon, orb) ||
+                        withinOrb(mc, pointPos.lon, orb) || withinOrb(ic, pointPos.lon, orb )) details.add(1) else details.add(0)
+                }
+            }
+            chartCounts.add(ChartCount(chart.id, chart.name, details.toList()))
+        }
+        return chartCounts.toList()
+    }
+
+    private fun withinOrb(lon1: Double, lon2: Double, orb: Double): Boolean {
+        val diff = (max(lon1, lon2) - min(lon1, lon2))
+        return Range.checkValue(diff, 0.0, 360.0) <= orb
+    }
+
+    private fun defineTotals(detailCount: List<ChartCount>): BodiesInRange {
+        val totalsForBodies  = mutableListOf(0,0,0,0,0,0,0,0,0,0,0)     // 11 positions
+        for (chartCount in detailCount) {
+            for (i in 0..10) {
+                totalsForBodies[i]+= chartCount.counts[i]
+            }
+        }
+        return BodiesInRange(supportedBodies, totalsForBodies.toList(), detailCount)
     }
 
 }

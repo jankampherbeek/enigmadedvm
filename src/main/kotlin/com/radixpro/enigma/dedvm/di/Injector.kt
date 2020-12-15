@@ -19,6 +19,10 @@ object Injector {
         return AspectsForChart()
     }
 
+    fun injectBodiesAtCornersHandler(): BodiesAtCornersHandler {
+        return BodiesAtCornersHandler(injectAllChartsReader(), injectResultsWriter())
+    }
+
     fun injectBodiesInHouseHandler(): BodiesInHouseHandler {
         return BodiesInHouseHandler(injectAllChartsReader(), injectHousePosition(), injectResultsWriter())
     }

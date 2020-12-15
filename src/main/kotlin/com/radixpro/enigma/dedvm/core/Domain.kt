@@ -54,7 +54,7 @@ data class SMAInSign(val totalsSun: List<Int>,
                      val countsPerChart: List<ChartCount> )
 
 /**
- * Counts of bodies in signs or houses.
+ * Counts of bodies at specific positions.
  */
 data class BodiesInRange(val bodySpec: List<CelPoints>,
                          val totals: List<Int>,
