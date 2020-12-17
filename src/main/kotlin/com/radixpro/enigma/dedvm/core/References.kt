@@ -35,7 +35,8 @@ enum class MundanePoints(override val id: Int, override val nameTxt: String): Po
 
 enum class EmptyPoints(override val id: Int, override val nameTxt: String): Points {
     EXISTS_NOT(1000, "Does not exist"),
-    ERROR(1001, "Result of error")
+    ERROR(1001, "Result of error"),
+    TOTAL(1002, "Placeholder for total")
 }
 
 

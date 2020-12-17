@@ -88,3 +88,28 @@ data class AspectCounts(val bodySpec: List<CelPoints>,
 data class MaxCounts(val bodySpec: List<CelPoints>,
                      val totals: List<Int>,
                      val details: List<ChartCount>)
+
+/**
+ * Counts of values for a specific body, according to principles as defined by Threes Brouwers.
+ */
+data class PrincipleBodyDetail(val body: Points,
+                               val values: MutableList<Int>)
+
+/**
+ * Counts of values for a specific chart, according to principles as defined by Threes Brouwers.
+ */
+data class PrincipleChartDetails(val id: String,
+                                 val name: String,
+                                 val description: String,
+                                 val totals: PrincipleBodyDetail,
+                                 val details: List<PrincipleBodyDetail>)
+
+
+data class PrincipleComplete(val principleIndex: Int,
+                             val totals: List<PrincipleBodyDetail>,
+                             val details: List<PrincipleChartDetails>)
+
+data class PrinciplePlayers(val house: Int,
+                            val point: CelPoints,
+                            val checkMcOrAsc: Boolean)
+

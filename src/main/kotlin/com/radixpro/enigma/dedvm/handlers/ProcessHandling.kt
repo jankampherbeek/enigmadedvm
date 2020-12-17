@@ -17,9 +17,11 @@ private const val fileNameForControlData = "controlcharts.json"
 /**
  * Counts the numer of occurrences of Sun, Moon and Ascendant in signs.
  */
-class SMAInSignHandler(private val allChartsReader: AllChartsReader,
-                       private val signPosition: SignPosition,
-                       private val resultsWriter: ResultsWriter ) {
+class SMAInSignHandler(
+    private val allChartsReader: AllChartsReader,
+    private val signPosition: SignPosition,
+    private val resultsWriter: ResultsWriter
+) {
 
 
     private val fileNameForSMAData = "SMAResults.json"
@@ -61,13 +63,13 @@ class SMAInSignHandler(private val allChartsReader: AllChartsReader,
     }
 
     private fun defineTotals(detailCount: List<ChartCount>): SMAInSign {
-        val totalsSun = mutableListOf(0,0,0,0,0,0,0,0,0,0,0,0)
-        val totalsMoon = mutableListOf(0,0,0,0,0,0,0,0,0,0,0,0)
-        val totalsAsc = mutableListOf(0,0,0,0,0,0,0,0,0,0,0,0)
+        val totalsSun = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        val totalsMoon = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        val totalsAsc = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         for (chartCount in detailCount) {
-            totalsSun[chartCount.counts[0]-1]++
-            totalsMoon[chartCount.counts[1]-1]++
-            totalsAsc[chartCount.counts[2]-1]++
+            totalsSun[chartCount.counts[0] - 1]++
+            totalsMoon[chartCount.counts[1] - 1]++
+            totalsAsc[chartCount.counts[2] - 1]++
         }
         return SMAInSign(totalsSun, totalsMoon, totalsAsc, detailCount)
     }
@@ -77,16 +79,19 @@ class SMAInSignHandler(private val allChartsReader: AllChartsReader,
 /**
  * Counts the occurrence of Sun .. Pluto and Cheiron in specific houses.
  */
-class BodiesInHouseHandler(private val allChartsReader: AllChartsReader,
-                           private val housePosition: HousePosition,
-                           private val resultsWriter: ResultsWriter
-                           ) {
+class BodiesInHouseHandler(
+    private val allChartsReader: AllChartsReader,
+    private val housePosition: HousePosition,
+    private val resultsWriter: ResultsWriter
+) {
 
     private val fileNameForAscMcData = "BAMResults.json"
     private val fileNameForAscMcControlData = "BAMControlDataResults.json"
     private val flags = 0 or 2 or 256           // 2 = SwissEph, 256 = speed
-    private val supportedBodies = listOf(CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
-        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON)
+    private val supportedBodies = listOf(
+        CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
+        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON
+    )
 
     fun processChartsAscMc() {
         val cusps = listOf(1, 10)
@@ -126,10 +131,10 @@ class BodiesInHouseHandler(private val allChartsReader: AllChartsReader,
     }
 
     private fun defineTotals(detailCount: List<ChartCount>): BodiesInRange {
-        val totalsForSigns  = mutableListOf(0,0,0,0,0,0,0,0,0,0,0,0)
+        val totalsForSigns = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         for (chartCount in detailCount) {
             for (i in 0..10) {
-                totalsForSigns[i]+= chartCount.counts[i]
+                totalsForSigns[i] += chartCount.counts[i]
             }
         }
         return BodiesInRange(supportedBodies, totalsForSigns.toList(), detailCount)
@@ -141,8 +146,10 @@ class BodiesAtCornersHandler(private val allChartsReader: AllChartsReader, priva
 
     private val fileNameForCornerData = "BCOResults.json"
     private val fileNameForCornerControlData = "BCOControlDataResults.json"
-    private val supportedBodies = listOf(CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
-        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON)
+    private val supportedBodies = listOf(
+        CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
+        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON
+    )
 
     fun processCharts() {
         val cusps = listOf(1, 4, 7, 10)
@@ -177,7 +184,8 @@ class BodiesAtCornersHandler(private val allChartsReader: AllChartsReader, priva
                 val orb = if (pointPos.point == CelPoints.SUN || pointPos.point == CelPoints.MOON) 8.0 else 6.0
                 if (pointPos.point != CelPoints.MEAN_APOGEE && pointPos.point != CelPoints.MEAN_NODE) {
                     if (withinOrb(asc, pointPos.lon, orb) || withinOrb(desc, pointPos.lon, orb) ||
-                        withinOrb(mc, pointPos.lon, orb) || withinOrb(ic, pointPos.lon, orb )) details.add(1) else details.add(0)
+                        withinOrb(mc, pointPos.lon, orb) || withinOrb(ic, pointPos.lon, orb)
+                    ) details.add(1) else details.add(0)
                 }
             }
             chartCounts.add(ChartCount(chart.id, chart.name, details.toList()))
@@ -191,10 +199,10 @@ class BodiesAtCornersHandler(private val allChartsReader: AllChartsReader, priva
     }
 
     private fun defineTotals(detailCount: List<ChartCount>): BodiesInRange {
-        val totalsForBodies  = mutableListOf(0,0,0,0,0,0,0,0,0,0,0)     // 11 positions
+        val totalsForBodies = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11 positions
         for (chartCount in detailCount) {
             for (i in 0..10) {
-                totalsForBodies[i]+= chartCount.counts[i]
+                totalsForBodies[i] += chartCount.counts[i]
             }
         }
         return BodiesInRange(supportedBodies, totalsForBodies.toList(), detailCount)
@@ -210,8 +218,10 @@ class ElevationHandler(private val allChartsReader: AllChartsReader, private val
 
     private val fileNameForELEVData = "ELEVResults.json"
     private val fileNameForELEVControlData = "ELEVControlDataResults.json"
-    private val supportedBodies = listOf(CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
-        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON)
+    private val supportedBodies = listOf(
+        CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
+        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON
+    )
 
     fun processCharts() {
         handleCharts()
@@ -254,7 +264,7 @@ class ElevationHandler(private val allChartsReader: AllChartsReader, private val
     }
 
     private fun defineTotals(details: List<MinMaxPositionsPerChart>): ElevationValues {
-        val totals = mutableListOf(0,0,0,0,0,0,0,0,0,0,0)       // 11 positions
+        val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)       // 11 positions
         for (mmPos in details) {
             when (mmPos.point) {
                 CelPoints.SUN -> totals[0]++
@@ -275,15 +285,19 @@ class ElevationHandler(private val allChartsReader: AllChartsReader, private val
 
 }
 
-class ProminentAspectsHandler(private val allChartsReader: AllChartsReader,
-                              private val aspectsForChart: AspectsForChart,
-                              private val signPosition: SignPosition,
-                              private val resultsWriter: ResultsWriter) {
+class ProminentAspectsHandler(
+    private val allChartsReader: AllChartsReader,
+    private val aspectsForChart: AspectsForChart,
+    private val signPosition: SignPosition,
+    private val resultsWriter: ResultsWriter
+) {
 
     private val fileNameForPRAData = "PRAResults.json"
     private val fileNameForPRAControlData = "PRAControlDataResults.json"
-    private val supportedBodies = listOf(CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
-        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON)
+    private val supportedBodies = listOf(
+        CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
+        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON
+    )
 
     fun processCharts() {
         handleCharts()
@@ -309,31 +323,34 @@ class ProminentAspectsHandler(private val allChartsReader: AllChartsReader,
         for (chart in allCharts.charts) {
             val praAspects = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)   // 11 positions
             val signAscIndex = signPosition.idOfSign(chart.cusps[0])
-            val signAsc = Signs.values()[signAscIndex-1]
+            val signAsc = Signs.values()[signAscIndex - 1]
             val rulerAsc = signAsc.strong
             val allAspects = aspectsForChart.findAspects(chart)
 
             for (asp in allAspects) {
                 if (asp.point1 != CelPoints.MEAN_APOGEE && asp.point1 != CelPoints.MEAN_NODE &&
-                    asp.point2 != CelPoints.MEAN_APOGEE && asp.point2 != CelPoints.MEAN_NODE) {
+                    asp.point2 != CelPoints.MEAN_APOGEE && asp.point2 != CelPoints.MEAN_NODE
+                ) {
 
                     if ((asp.point1 == CelPoints.SUN ||
-                        asp.point1 == CelPoints.MOON ||
-                        asp.point1 == rulerAsc ||
-                        asp.point1 == MundanePoints.ASC ||
-                        asp.point1 == MundanePoints.MC
-                         ) && (supportedBodies.contains(asp.point2))) praAspects[supportedBodies.indexOf(asp.point2)]++
+                                asp.point1 == CelPoints.MOON ||
+                                asp.point1 == rulerAsc ||
+                                asp.point1 == MundanePoints.ASC ||
+                                asp.point1 == MundanePoints.MC
+                                ) && (supportedBodies.contains(asp.point2))
+                    ) praAspects[supportedBodies.indexOf(asp.point2)]++
                     if ((asp.point2 == CelPoints.SUN ||
-                        asp.point2 == CelPoints.MOON ||
-                        asp.point2 == rulerAsc ||
-                        asp.point2 == MundanePoints.ASC ||
-                        asp.point2 == MundanePoints.MC
-                    ) && (supportedBodies.contains(asp.point1))) praAspects[supportedBodies.indexOf(asp.point1)]++
+                                asp.point2 == CelPoints.MOON ||
+                                asp.point2 == rulerAsc ||
+                                asp.point2 == MundanePoints.ASC ||
+                                asp.point2 == MundanePoints.MC
+                                ) && (supportedBodies.contains(asp.point1))
+                    ) praAspects[supportedBodies.indexOf(asp.point1)]++
                 }
             }
 
             var maxCount = 0
-            val totals =  mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)   // 11 positions
+            val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)   // 11 positions
             for (i in 0..10) if (praAspects[i] > maxCount) maxCount++
             for (i in 0..10) if (praAspects[i] == maxCount) totals[i]++
 
@@ -344,24 +361,28 @@ class ProminentAspectsHandler(private val allChartsReader: AllChartsReader,
 
 
     private fun defineTotals(detailCount: List<ChartCount>): AspectCounts {
-        val totalsForPra = mutableListOf(0,0,0,0,0,0,0,0,0,0,0,0)
+        val totalsForPra = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         for (chartCount in detailCount) {
             for (i in 0..10) {
-                totalsForPra[i]+= chartCount.counts[i]
+                totalsForPra[i] += chartCount.counts[i]
             }
         }
         return AspectCounts(supportedBodies, totalsForPra.toList(), detailCount)
     }
 }
 
-class UnaspectedPointsHandler(private val allChartsReader: AllChartsReader,
-                              private val aspectsForChart: AspectsForChart,
-                              private val resultsWriter: ResultsWriter) {
+class UnaspectedPointsHandler(
+    private val allChartsReader: AllChartsReader,
+    private val aspectsForChart: AspectsForChart,
+    private val resultsWriter: ResultsWriter
+) {
 
     private val fileNameForNASData = "NASResults.json"
     private val fileNameForNASControlData = "NASControlDataResults.json"
-    private val supportedBodies = listOf(CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
-        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON)
+    private val supportedBodies = listOf(
+        CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
+        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON
+    )
 
     fun processCharts() {
         handleCharts()
@@ -392,7 +413,8 @@ class UnaspectedPointsHandler(private val allChartsReader: AllChartsReader,
                 for (asp in allAspects) {
                     if (CelPoints.MEAN_NODE != asp.point1 && CelPoints.MEAN_NODE != asp.point2
                         && CelPoints.MEAN_APOGEE != asp.point1 && CelPoints.MEAN_APOGEE != asp.point2
-                        && point == asp.point1 || point == asp.point2) count++
+                        && point == asp.point1 || point == asp.point2
+                    ) count++
                 }
                 if (count == 0) nasValues[supportedBodies.indexOf(point)] = 1
             }
@@ -402,10 +424,10 @@ class UnaspectedPointsHandler(private val allChartsReader: AllChartsReader,
     }
 
     private fun defineTotals(detailCount: List<ChartCount>): AspectCounts {
-        val totalsForPra = mutableListOf(0,0,0,0,0,0,0,0,0,0,0,0)
+        val totalsForPra = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         for (chartCount in detailCount) {
             for (i in 0..10) {
-                totalsForPra[i]+= chartCount.counts[i]
+                totalsForPra[i] += chartCount.counts[i]
             }
         }
         return AspectCounts(supportedBodies, totalsForPra.toList(), detailCount)
@@ -413,15 +435,19 @@ class UnaspectedPointsHandler(private val allChartsReader: AllChartsReader,
 }
 
 
-class MaxPointsHandler(private val allChartsReader: AllChartsReader,
-                       private val signPosition: SignPosition,
-                       private val housePosition: HousePosition,
-                       private val resultsWriter: ResultsWriter) {
+class MaxPointsHandler(
+    private val allChartsReader: AllChartsReader,
+    private val signPosition: SignPosition,
+    private val housePosition: HousePosition,
+    private val resultsWriter: ResultsWriter
+) {
 
     private val fileNameForMAXData = "MAXResults.json"
     private val fileNameForMAXControlData = "MAXControlDataResults.json"
-    private val supportedBodies = listOf(CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
-        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO)
+    private val supportedBodies = listOf(
+        CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
+        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO
+    )
     private val flags = 0 or 2 or 256           // 2 = SwissEph, 256 = speed
 
     fun processCharts() {
@@ -459,7 +485,7 @@ class MaxPointsHandler(private val allChartsReader: AllChartsReader,
         val totalsForMax = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 10 positions
         for (chartCount in detailCount) {
             for (i in 0..9) {
-                totalsForMax[i]+= chartCount.counts[i]
+                totalsForMax[i] += chartCount.counts[i]
             }
         }
         return MaxCounts(supportedBodies, totalsForMax.toList(), detailCount)
@@ -471,20 +497,189 @@ class MaxPointsHandler(private val allChartsReader: AllChartsReader,
         val sign = signPosition.idOfSign(lon)
         val house = housePosition.idOfHouse(lon, chart.jdUt, flags, chart.location)
         when (point) {
-            CelPoints.SUN -> { if ( (1 == sign || 5 == sign) && !(7 == house || 11 == house || 12 == house)) return true}
-            CelPoints.MOON -> { if ( (2 == sign || 4 == sign) && !(8 == house || 10 == house )) return true}
-            CelPoints.MERCURY -> { if ( (3 == sign || 6 == sign) && !(4 == house || 8 == house || 9 == house || 12 == house)) return true}
-            CelPoints.VENUS -> { if ( (2 == sign || 7 == sign || 12 == sign) && !(1 == house || 6 == house || 8 == house )) return true}
-            CelPoints.MARS -> { if ( (1 == sign || 8 == sign || 10 == sign) && !(2 == house || 4 == house || 7 == house || 12 == house)) return true}
-            CelPoints.JUPITER -> { if ( (4 == sign || 9 == sign || 12 == sign) && !(3 == house || 6 == house || 10 == house)) return true}
-            CelPoints.SATURN -> { if ( (7 == sign || 10 == sign || 11 == sign) && !(1 == house || 4 == house || 5 == house || 12 == house)) return true}
-            CelPoints.URANUS -> { if ( (8 == sign || 10 == sign || 11 == sign) && !(2 == house || 4 == house || 5 == house)) return true}
-            CelPoints.NEPTUNE -> { if ( (9 == sign || 12 == sign) && !(3 == house || 6 == house || 10 == house || 11 == house)) return true}
-            CelPoints.PLUTO -> { if ( (1 == sign || 8 == sign) && !(2 == house || 7 == house)) return true}
+            CelPoints.SUN -> {
+                if ((1 == sign || 5 == sign) && !(7 == house || 11 == house || 12 == house)) return true
+            }
+            CelPoints.MOON -> {
+                if ((2 == sign || 4 == sign) && !(8 == house || 10 == house)) return true
+            }
+            CelPoints.MERCURY -> {
+                if ((3 == sign || 6 == sign) && !(4 == house || 8 == house || 9 == house || 12 == house)) return true
+            }
+            CelPoints.VENUS -> {
+                if ((2 == sign || 7 == sign || 12 == sign) && !(1 == house || 6 == house || 8 == house)) return true
+            }
+            CelPoints.MARS -> {
+                if ((1 == sign || 8 == sign || 10 == sign) && !(2 == house || 4 == house || 7 == house || 12 == house)) return true
+            }
+            CelPoints.JUPITER -> {
+                if ((4 == sign || 9 == sign || 12 == sign) && !(3 == house || 6 == house || 10 == house)) return true
+            }
+            CelPoints.SATURN -> {
+                if ((7 == sign || 10 == sign || 11 == sign) && !(1 == house || 4 == house || 5 == house || 12 == house)) return true
+            }
+            CelPoints.URANUS -> {
+                if ((8 == sign || 10 == sign || 11 == sign) && !(2 == house || 4 == house || 5 == house)) return true
+            }
+            CelPoints.NEPTUNE -> {
+                if ((9 == sign || 12 == sign) && !(3 == house || 6 == house || 10 == house || 11 == house)) return true
+            }
+            CelPoints.PLUTO -> {
+                if ((1 == sign || 8 == sign) && !(2 == house || 7 == house)) return true
+            }
         }
         return false
     }
+}
+
+
+class PrincipleHandler(
+    private val allChartsReader: AllChartsReader,
+    private val signPosition: SignPosition,
+    private val housePosition: HousePosition,
+    private val aspectsForChart: AspectsForChart,
+    private val resultsWriter: ResultsWriter
+) {
+    private val fileNamePrefixForPRIData = "PRIResults_"
+    private val fileNamePrefixForPRIControlData = "PRIControlDataResults_"
+    private val supportedBodies = listOf(
+        CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
+        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON, CelPoints.MEAN_NODE, CelPoints.MEAN_APOGEE
+    )
+    private val flags = 0 or 2 or 256           // 2 = SwissEph, 256 = speed
+
+    fun processCharts() {
+        for (i in 1..12) {
+            handleCharts(i)
+            handleControlData(i)
+        }
+    }
+
+    private fun handleCharts(index: Int) {
+        val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
+        val details = defineDetails(index, allCharts)
+        val principleComplete = defineTotals(index, details)
+        resultsWriter.writeResults("$fileNamePrefixForPRIData$index.json", principleComplete)
+    }
+
+    private fun handleControlData(index: Int) {
+        val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
+        val details = defineDetails(index, allCharts)
+        val principleComplete = defineTotals(index, details)
+        resultsWriter.writeResults("$fileNamePrefixForPRIControlData$index.json", principleComplete)
+    }
+
+    private fun defineDetails(index: Int, allCharts: AllCharts): List<PrincipleChartDetails> {
+
+        val descr = "Asp/planet - in house - asp/lord - asp asc/mc (if appl.) - total"
+        val players = definePlayers(index)
+        val chartDetails: MutableList<PrincipleChartDetails> = ArrayList()
+        for (chart in allCharts.charts) {
+            val ruler = defineRuler(index, chart)
+            val lonRuler = defineLongitudePoint(ruler, chart)
+            val lonPlayer = defineLongitudePoint(players.point, chart)
+            val bodyDetails: MutableList<PrincipleBodyDetail> = ArrayList()
+            val totalValues = mutableListOf(0, 0, 0, 0, 0)
+            for (lonPointToCheck in chart.pointPositions) {
+                val priValues = mutableListOf(0, 0, 0, 0, 0)
+                var orb = defineOrb(lonPointToCheck.point, players.point)
+                if (players.point != lonPointToCheck.point && checkAspect(lonPlayer, lonPointToCheck.lon, orb)) priValues[0] = 1
+                if (checkHouse(chart, lonPointToCheck.lon) == index) priValues[1] = 1
+                orb = defineOrb(lonPointToCheck.point, ruler)
+                if (ruler != lonPointToCheck.point && checkAspect(lonRuler, lonPointToCheck.lon, orb)) priValues[2] = 1
+                orb = defineOrb(lonPointToCheck.point, MundanePoints.ASC)
+                if (players.checkMcOrAsc && index == 1 && checkAspect(chart.cusps[0], lonPointToCheck.lon, orb)) priValues[3] = 1
+                orb = defineOrb(lonPointToCheck.point, MundanePoints.MC)
+                if (players.checkMcOrAsc && index == 10 && checkAspect(chart.cusps[9], lonPointToCheck.lon, orb)) priValues[3] = 1
+                for (i in 0..3) priValues[4] += priValues[i]
+                for (i in 0..4) totalValues[i] += priValues[i]
+                bodyDetails.add(PrincipleBodyDetail(lonPointToCheck.point, priValues))
+            }
+            val totals = PrincipleBodyDetail(EmptyPoints.TOTAL, totalValues)
+            chartDetails.add(PrincipleChartDetails(chart.id, chart.name, descr, totals, bodyDetails))
+        }
+        return chartDetails.toList()
+    }
+
+    private fun defineTotals(index: Int, chartDetails: List<PrincipleChartDetails>): PrincipleComplete {
+        val totalsPerBody: MutableList<PrincipleBodyDetail> = ArrayList()
+        for (point in supportedBodies) {
+            totalsPerBody.add(PrincipleBodyDetail(point, mutableListOf(0, 0, 0, 0, 0)))
+        }
+        for (detailsRow in chartDetails) {                                      // check all PrincipleChartDetails
+            val allDetails = detailsRow.details                                 // list of PrincipleBodyDetail
+            for (bodyDetails in allDetails) {                                   // specific PrincipleBodyDetail
+                val bodyIndex = supportedBodies.indexOf(bodyDetails.body)       // index of body
+                for (i in 0..4) {
+                    totalsPerBody[bodyIndex].values[i] += bodyDetails.values[i]
+                }
+            }
+        }
+        return PrincipleComplete(index, totalsPerBody.toList(), chartDetails)
+    }
+
+
+    private fun defineOrb(point1: Points, point2: Points): Double {
+        if (CelPoints.SUN == point1 || CelPoints.MOON == point1 || CelPoints.SUN == point2 || CelPoints.MOON == point2) return 8.0
+        return 6.0
+    }
+
+    private fun checkAspect(pos1: Double, pos2: Double, orb: Double): Boolean {
+        return aspectsForChart.findAnyAspect(pos1, pos2, orb)
+    }
+
+
+    private fun checkHouse(chart: Chart, lon: Double): Int {
+        return housePosition.idOfHouse(lon, chart.jdUt, flags, chart.location)
+    }
+
+    private fun defineRuler(priIndex: Int, chart: Chart): CelPoints {
+        val lonCusp = chart.cusps[priIndex - 1]
+        return when (val signOnCusp = signPosition.idOfSign(lonCusp)) {
+            1 -> CelPoints.MARS
+            2, 7 -> CelPoints.VENUS
+            3, 6 -> CelPoints.MERCURY
+            4 -> CelPoints.MOON
+            5 -> CelPoints.SUN
+            8 -> CelPoints.PLUTO
+            9 -> CelPoints.JUPITER
+            10 -> CelPoints.SATURN
+            11 -> CelPoints.URANUS
+            12 -> CelPoints.NEPTUNE
+            else -> throw IllegalArgumentException("Received ${signOnCusp.toString()} as index for a zodiac sign, while only 1..12 are supported.")
+        }
+    }
+
+
+    private fun defineLongitudePoint(player: CelPoints, chart: Chart): Double {
+        for (pointPos in chart.pointPositions) {
+            if (player == pointPos.point) return pointPos.lon
+        }
+        throw IllegalArgumentException("Received ${player.name} as player but could not find it in the accompanying chart.")
+    }
+
+
+    private fun definePlayers(priIndex: Int): PrinciplePlayers {
+        when (priIndex) {
+            1 -> return PrinciplePlayers(1, CelPoints.MARS, true)
+            2 -> return PrinciplePlayers(2, CelPoints.VENUS, false)
+            3 -> return PrinciplePlayers(3, CelPoints.MERCURY, false)
+            4 -> return PrinciplePlayers(4, CelPoints.MOON, false)
+            5 -> return PrinciplePlayers(5, CelPoints.SUN, false)
+            6 -> return PrinciplePlayers(6, CelPoints.MERCURY, false)
+            7 -> return PrinciplePlayers(7, CelPoints.VENUS, false)
+            8 -> return PrinciplePlayers(8, CelPoints.PLUTO, false)
+            9 -> return PrinciplePlayers(9, CelPoints.JUPITER, false)
+            10 -> return PrinciplePlayers(10, CelPoints.SATURN, true)
+            11 -> return PrinciplePlayers(11, CelPoints.URANUS, false)
+            12 -> return PrinciplePlayers(12, CelPoints.NEPTUNE, false)
+        }
+        throw IllegalArgumentException("Received ${priIndex.toString()} as index for a Principle, while only 1..12 are supported.")
+    }
+
 
 }
+
+
 
 

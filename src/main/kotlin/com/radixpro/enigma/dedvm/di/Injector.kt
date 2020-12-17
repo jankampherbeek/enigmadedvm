@@ -87,6 +87,10 @@ object Injector {
         return McDistance()
     }
 
+    fun injectPrincipleHandler(): PrincipleHandler {
+        return PrincipleHandler(injectAllChartsReader(), injectSignPosition(), injectHousePosition(), injectAspectsForChart(), injectResultsWriter())
+    }
+
     fun injectProminentAspectsHandler(): ProminentAspectsHandler {
         return ProminentAspectsHandler(injectAllChartsReader(), injectAspectsForChart(), injectSignPosition(), injectResultsWriter())
     }

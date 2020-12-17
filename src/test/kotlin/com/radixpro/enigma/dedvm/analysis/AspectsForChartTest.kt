@@ -34,6 +34,17 @@ internal class AspectsForChartTest {
         aspectsFound.size shouldBe expectedAspects.size
     }
 
+    @Test
+    fun `Happy flow for finding a specific aspect should geive the correct result`() {
+        AspectsForChart().findAnyAspect(113.0, 114.0, 5.0) shouldBe(true)
+    }
+
+    @Test
+    fun `Finding a specific aspect with overflow should geive the correct result`() {
+        AspectsForChart().findAnyAspect(359.0, 88.0, 5.0) shouldBe(true)
+    }
+
+
     private fun createExpectedAspects(): List<ActualAspect> {
         val expectedAspects = mutableListOf<ActualAspect>()
         expectedAspects.add(ActualAspect(CelPoints.SUN, CelPoints.MERCURY, Aspects.CONJUNCTION))
