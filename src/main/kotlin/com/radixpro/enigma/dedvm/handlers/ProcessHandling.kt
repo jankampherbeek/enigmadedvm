@@ -575,22 +575,20 @@ class PrincipleHandler(
         val players = definePlayers(index)
         val chartDetails: MutableList<PrincipleChartDetails> = ArrayList()
         for (chart in allCharts.charts) {
+            val asc = PointPosition(MundanePoints.ASC, chart.cusps[0], 0.0)
+            val mc = PointPosition(MundanePoints.MC, chart.cusps[9], 0.0)
             val ruler = defineRuler(index, chart)
-            val lonRuler = defineLongitudePoint(ruler, chart)
-            val lonPlayer = defineLongitudePoint(players.point, chart)
+            val lonRuler = definePointPos(ruler, chart)
+            val lonPlayer = definePointPos(players.point, chart)
             val bodyDetails: MutableList<PrincipleBodyDetail> = ArrayList()
             val totalValues = mutableListOf(0, 0, 0, 0, 0)
             for (lonPointToCheck in chart.pointPositions) {
                 val priValues = mutableListOf(0, 0, 0, 0, 0)
-                var orb = defineOrb(lonPointToCheck.point, players.point)
-                if (players.point != lonPointToCheck.point && checkAspect(lonPlayer, lonPointToCheck.lon, orb)) priValues[0] = 1
+                if (players.point != lonPointToCheck.point && checkAspect(lonPlayer, lonPointToCheck)) priValues[0] = 1
                 if (checkHouse(chart, lonPointToCheck.lon) == index) priValues[1] = 1
-                orb = defineOrb(lonPointToCheck.point, ruler)
-                if (ruler != lonPointToCheck.point && checkAspect(lonRuler, lonPointToCheck.lon, orb)) priValues[2] = 1
-                orb = defineOrb(lonPointToCheck.point, MundanePoints.ASC)
-                if (players.checkMcOrAsc && index == 1 && checkAspect(chart.cusps[0], lonPointToCheck.lon, orb)) priValues[3] = 1
-                orb = defineOrb(lonPointToCheck.point, MundanePoints.MC)
-                if (players.checkMcOrAsc && index == 10 && checkAspect(chart.cusps[9], lonPointToCheck.lon, orb)) priValues[3] = 1
+                if (ruler != lonPointToCheck.point && checkAspect(lonRuler, lonPointToCheck)) priValues[2] = 1
+                if (players.checkMcOrAsc && index == 1 && checkAspect(asc, lonPointToCheck)) priValues[3] = 1
+                if (players.checkMcOrAsc && index == 10 && checkAspect(mc, lonPointToCheck)) priValues[3] = 1
                 for (i in 0..3) priValues[4] += priValues[i]
                 for (i in 0..4) totalValues[i] += priValues[i]
                 bodyDetails.add(PrincipleBodyDetail(lonPointToCheck.point, priValues))
@@ -619,13 +617,13 @@ class PrincipleHandler(
     }
 
 
-    private fun defineOrb(point1: Points, point2: Points): Double {
-        if (CelPoints.SUN == point1 || CelPoints.MOON == point1 || CelPoints.SUN == point2 || CelPoints.MOON == point2) return 8.0
-        return 6.0
+    private fun defineOrb(partner1: Points, partner2: Points, aspect: Aspects): Double {
+        return if (partner1 == CelPoints.SUN || partner1 == CelPoints.MOON || partner2 == CelPoints.SUN || partner2 == CelPoints.MOON) aspect.orbForLights
+        else aspect.orb
     }
 
-    private fun checkAspect(pos1: Double, pos2: Double, orb: Double): Boolean {
-        return aspectsForChart.findAnyAspect(pos1, pos2, orb)
+    private fun checkAspect(pos1: PointPosition, pos2: PointPosition): Boolean {
+        return aspectsForChart.findAnyAspect(pos1, pos2)
     }
 
 
@@ -651,11 +649,11 @@ class PrincipleHandler(
     }
 
 
-    private fun defineLongitudePoint(player: CelPoints, chart: Chart): Double {
+    private fun definePointPos(player: Points, chart: Chart): PointPosition {
         for (pointPos in chart.pointPositions) {
-            if (player == pointPos.point) return pointPos.lon
+            if (player == pointPos.point) return pointPos
         }
-        throw IllegalArgumentException("Received ${player.name} as player but could not find it in the accompanying chart.")
+        throw IllegalArgumentException("Received ${player.nameTxt} as player but could not find it in the accompanying chart.")
     }
 
 

@@ -43,12 +43,13 @@ enum class EmptyPoints(override val id: Int, override val nameTxt: String): Poin
 /**
  * Supported aspects.
  */
-enum class Aspects(val degrees: Double, val orb: Double, val nameTxt: String) {
-    CONJUNCTION(0.0, 8.0, "Conjunction"),
-    OPPOSITION(180.0, 8.0, "Opposition"),
-    TRIGON(120.0, 7.0, "Trigon"),
-    SQUARE(90.0, 7.0, "Square"),
-    SEXTILE(60.0, 6.0, "Sextile")
+enum class Aspects(val degrees: Double, val orbForLights: Double, val orb: Double, val nameTxt: String) {
+    CONJUNCTION(0.0, 8.0, 6.0, "Conjunction"),
+    OPPOSITION(180.0, 8.0, 6.0,"Opposition"),
+    TRIGON(120.0, 8.0, 6.0,"Trigon"),
+    SQUARE(90.0, 8.0, 6.0,"Square"),
+    SEXTILE(60.0, 6.0, 4.0, "Sextile"),
+    INCONJUNCT(150.0, 3.5, 3.0, "Inconjunct")
 }
 
 enum class Signs(val index: Int, val nameTxt:String, val abbr: String, val strong: Points, val weak: Points, val exalt: Points, val fall: Points) {

@@ -24,18 +24,20 @@ class AspectsForChart {
         return actualAspects.toList()
     }
 
-    fun findAnyAspect(lon1: Double, lon2: Double, orb: Double): Boolean {
-        val pos1 = min(lon1, lon2)
-        val pos2 = max(lon1, lon2)
+    fun findAnyAspect(firstPoint: PointPosition, secondPoint: PointPosition): Boolean {
+        val pos1 = min(firstPoint.lon, secondPoint.lon)
+        val pos2 = max(firstPoint.lon, secondPoint.lon)
         val distance1 = pos2 - pos1
         val distance2 = pos1 - pos2 + fullCircle
         var found = false
         for (aspect in Aspects.values()) {
+            val orb = defineOrb(firstPoint.point, secondPoint.point, aspect)
             val angle = aspect.degrees
             if ((abs(distance1 - angle) <= orb) || (abs(distance2 - angle) < orb)) found = true
         }
         return found
     }
+
 
     private fun checkForAspect(firstPoint: PointPosition, secondPoint: PointPosition) {
         val pos1 = min(firstPoint.lon, secondPoint.lon)
@@ -44,10 +46,15 @@ class AspectsForChart {
         val distance2 = pos1 - pos2 + fullCircle
         for (aspect in Aspects.values()) {
             val angle = aspect.degrees
-            val orb = aspect.orb
+            val orb = defineOrb(firstPoint.point, secondPoint.point, aspect)
             val found = (abs(distance1 - angle) <= orb) || (abs(distance2 - angle) < orb)
             if (found) actualAspects.add(ActualAspect(firstPoint.point, secondPoint.point, aspect))
         }
+    }
+
+    private fun defineOrb(partner1: Points, partner2: Points, aspect: Aspects): Double {
+        return if (partner1 == CelPoints.SUN || partner1 == CelPoints.MOON || partner2 == CelPoints.SUN || partner2 == CelPoints.MOON) aspect.orbForLights
+        else aspect.orb
     }
 
 

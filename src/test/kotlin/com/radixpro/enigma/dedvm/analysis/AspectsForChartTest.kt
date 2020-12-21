@@ -36,12 +36,16 @@ internal class AspectsForChartTest {
 
     @Test
     fun `Happy flow for finding a specific aspect should geive the correct result`() {
-        AspectsForChart().findAnyAspect(113.0, 114.0, 5.0) shouldBe(true)
+        val point1 = PointPosition(CelPoints.JUPITER, 113.0, 0.2)
+        val point2 = PointPosition(CelPoints.SATURN, 114.0, 0.1)
+        AspectsForChart().findAnyAspect(point1, point2) shouldBe(true)
     }
 
     @Test
     fun `Finding a specific aspect with overflow should geive the correct result`() {
-        AspectsForChart().findAnyAspect(359.0, 88.0, 5.0) shouldBe(true)
+        val point1 = PointPosition(CelPoints.JUPITER, 359.0, 0.2)
+        val point2 = PointPosition(CelPoints.SATURN, 88.0, 0.1)
+        AspectsForChart().findAnyAspect(point1, point2) shouldBe(true)
     }
 
 
@@ -53,11 +57,16 @@ internal class AspectsForChartTest {
         expectedAspects.add(ActualAspect(CelPoints.SUN, CelPoints.MEAN_NODE, Aspects.OPPOSITION))
         expectedAspects.add(ActualAspect(CelPoints.MOON, CelPoints.VENUS, Aspects.SQUARE))
         expectedAspects.add(ActualAspect(CelPoints.MOON, CelPoints.MARS, Aspects.TRIGON))
+        expectedAspects.add(ActualAspect(CelPoints.MOON, CelPoints.JUPITER, Aspects.INCONJUNCT))
+        expectedAspects.add(ActualAspect(CelPoints.MOON, CelPoints.PLUTO, Aspects.INCONJUNCT))
         expectedAspects.add(ActualAspect(CelPoints.MOON, CelPoints.MEAN_NODE, Aspects.SEXTILE))
         expectedAspects.add(ActualAspect(CelPoints.MOON, MundanePoints.MC, Aspects.SQUARE))
         expectedAspects.add(ActualAspect(CelPoints.MERCURY, CelPoints.CHIRON, Aspects.TRIGON))
+        expectedAspects.add(ActualAspect(CelPoints.MERCURY, CelPoints.URANUS, Aspects.INCONJUNCT))
+        expectedAspects.add(ActualAspect(CelPoints.MERCURY, CelPoints.MEAN_APOGEE, Aspects.INCONJUNCT))
+        expectedAspects.add(ActualAspect(CelPoints.VENUS, CelPoints.MARS, Aspects.INCONJUNCT))
         expectedAspects.add(ActualAspect(CelPoints.VENUS, CelPoints.NEPTUNE, Aspects.TRIGON))
-        expectedAspects.add(ActualAspect(CelPoints.VENUS, CelPoints.PLUTO, Aspects.SEXTILE))
+        expectedAspects.add(ActualAspect(CelPoints.VENUS, CelPoints.MEAN_NODE, Aspects.INCONJUNCT))
         expectedAspects.add(ActualAspect(CelPoints.VENUS, MundanePoints.ASC, Aspects.SEXTILE))
         expectedAspects.add(ActualAspect(CelPoints.VENUS, MundanePoints.MC, Aspects.CONJUNCTION))
         expectedAspects.add(ActualAspect(CelPoints.MARS, CelPoints.PLUTO, Aspects.SQUARE))
@@ -67,15 +76,13 @@ internal class AspectsForChartTest {
         expectedAspects.add(ActualAspect(CelPoints.JUPITER, CelPoints.PLUTO, Aspects.CONJUNCTION))
         expectedAspects.add(ActualAspect(CelPoints.JUPITER, MundanePoints.MC, Aspects.SEXTILE))
         expectedAspects.add(ActualAspect(CelPoints.SATURN, CelPoints.PLUTO, Aspects.CONJUNCTION))
-        expectedAspects.add(ActualAspect(CelPoints.SATURN, MundanePoints.MC, Aspects.SEXTILE))
-        expectedAspects.add(ActualAspect(CelPoints.SATURN, CelPoints.MEAN_APOGEE, Aspects.SQUARE))
         expectedAspects.add(ActualAspect(CelPoints.URANUS, CelPoints.MEAN_APOGEE, Aspects.CONJUNCTION))
-        expectedAspects.add(ActualAspect(CelPoints.NEPTUNE, CelPoints.PLUTO, Aspects.SEXTILE))
         expectedAspects.add(ActualAspect(CelPoints.NEPTUNE, CelPoints.MEAN_NODE, Aspects.SQUARE))
         expectedAspects.add(ActualAspect(CelPoints.NEPTUNE, MundanePoints.ASC, Aspects.SEXTILE))
         expectedAspects.add(ActualAspect(CelPoints.NEPTUNE, MundanePoints.MC, Aspects.TRIGON))
         expectedAspects.add(ActualAspect(CelPoints.PLUTO, MundanePoints.ASC, Aspects.CONJUNCTION))
         expectedAspects.add(ActualAspect(CelPoints.PLUTO, MundanePoints.MC, Aspects.SEXTILE))
+        expectedAspects.add(ActualAspect(CelPoints.MEAN_NODE, MundanePoints.ASC, Aspects.INCONJUNCT))
         return expectedAspects.toList()
     }
 
