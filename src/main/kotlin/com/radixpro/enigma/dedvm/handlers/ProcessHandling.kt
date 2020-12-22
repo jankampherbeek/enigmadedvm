@@ -569,9 +569,9 @@ class PrincipleHandler(
         resultsWriter.writeResults("$fileNamePrefixForPRIControlData$index.json", principleComplete)
     }
 
-    private fun defineDetails(index: Int, allCharts: AllCharts): List<PrincipleChartDetails> {
+    private fun defineDetails(index: Int, allCharts: AllCharts): List<PrincipleChartDetails > {
 
-        val descr = "Asp/planet - in house - asp/lord - asp asc/mc (if appl.) - total"
+        val descr = "Planet in own sign - asp/planet - in house - asp/lord - asp asc/mc (if appl.) - total"
         val players = definePlayers(index)
         val chartDetails: MutableList<PrincipleChartDetails> = ArrayList()
         for (chart in allCharts.charts) {
@@ -581,16 +581,19 @@ class PrincipleHandler(
             val lonRuler = definePointPos(ruler, chart)
             val lonPlayer = definePointPos(players.point, chart)
             val bodyDetails: MutableList<PrincipleBodyDetail> = ArrayList()
-            val totalValues = mutableListOf(0, 0, 0, 0, 0)
+            val totalValues = mutableListOf(0, 0, 0, 0, 0, 0)
             for (lonPointToCheck in chart.pointPositions) {
-                val priValues = mutableListOf(0, 0, 0, 0, 0)
-                if (players.point != lonPointToCheck.point && checkAspect(lonPlayer, lonPointToCheck)) priValues[0] = 1
-                if (checkHouse(chart, lonPointToCheck.lon) == index) priValues[1] = 1
-                if (ruler != lonPointToCheck.point && checkAspect(lonRuler, lonPointToCheck)) priValues[2] = 1
-                if (players.checkMcOrAsc && index == 1 && checkAspect(asc, lonPointToCheck)) priValues[3] = 1
-                if (players.checkMcOrAsc && index == 10 && checkAspect(mc, lonPointToCheck)) priValues[3] = 1
-                for (i in 0..3) priValues[4] += priValues[i]
-                for (i in 0..4) totalValues[i] += priValues[i]
+                val priValues = mutableListOf(0, 0, 0, 0, 0, 0)
+                // check planet in own sign and set priValues[0] to 1 if this is the case
+                if (checkInOwnSign(lonPointToCheck)) priValues[0] = 1
+
+                if (players.point != lonPointToCheck.point && checkAspect(lonPlayer, lonPointToCheck)) priValues[1] = 1
+                if (checkHouse(chart, lonPointToCheck.lon) == index) priValues[2] = 1
+                if (ruler != lonPointToCheck.point && checkAspect(lonRuler, lonPointToCheck)) priValues[3] = 1
+                if (players.checkMcOrAsc && index == 1 && checkAspect(asc, lonPointToCheck)) priValues[4] = 1
+                if (players.checkMcOrAsc && index == 10 && checkAspect(mc, lonPointToCheck)) priValues[4] = 1
+                for (i in 0..4) priValues[5] += priValues[i]
+                for (i in 0..5) totalValues[i] += priValues[i]
                 bodyDetails.add(PrincipleBodyDetail(lonPointToCheck.point, priValues))
             }
             val totals = PrincipleBodyDetail(EmptyPoints.TOTAL, totalValues)
@@ -602,13 +605,13 @@ class PrincipleHandler(
     private fun defineTotals(index: Int, chartDetails: List<PrincipleChartDetails>): PrincipleComplete {
         val totalsPerBody: MutableList<PrincipleBodyDetail> = ArrayList()
         for (point in supportedBodies) {
-            totalsPerBody.add(PrincipleBodyDetail(point, mutableListOf(0, 0, 0, 0, 0)))
+            totalsPerBody.add(PrincipleBodyDetail(point, mutableListOf(0, 0, 0, 0, 0, 0)))
         }
         for (detailsRow in chartDetails) {                                      // check all PrincipleChartDetails
             val allDetails = detailsRow.details                                 // list of PrincipleBodyDetail
             for (bodyDetails in allDetails) {                                   // specific PrincipleBodyDetail
                 val bodyIndex = supportedBodies.indexOf(bodyDetails.body)       // index of body
-                for (i in 0..4) {
+                for (i in 0..5) {
                     totalsPerBody[bodyIndex].values[i] += bodyDetails.values[i]
                 }
             }
@@ -616,10 +619,11 @@ class PrincipleHandler(
         return PrincipleComplete(index, totalsPerBody.toList(), chartDetails)
     }
 
-
-    private fun defineOrb(partner1: Points, partner2: Points, aspect: Aspects): Double {
-        return if (partner1 == CelPoints.SUN || partner1 == CelPoints.MOON || partner2 == CelPoints.SUN || partner2 == CelPoints.MOON) aspect.orbForLights
-        else aspect.orb
+    private fun checkInOwnSign(pointToCheck: PointPosition): Boolean {
+        val signIndex = signPosition.idOfSign(pointToCheck.lon)
+        var signRuler: Points = EmptyPoints.EXISTS_NOT
+        for (sign in Signs.values()) if (signIndex == sign.index) signRuler = sign.strong
+        return signRuler == pointToCheck.point
     }
 
     private fun checkAspect(pos1: PointPosition, pos2: PointPosition): Boolean {
