@@ -14,6 +14,20 @@ import kotlin.math.min
 private const val fileNameForCharts = "calculatedcharts.json"
 private const val fileNameForControlData = "controlcharts.json"
 
+
+fun checkForCuspOrb(lon: Double, speed: Double, house: Int, cusp: Double): Int {
+    var newHouse = house
+    val signForLon = SignPosition().idOfSign(lon)
+    val signForCusp = SignPosition().idOfSign(cusp)
+    val diff =  Range.checkValue(abs(house - lon), 0.0, 360.0)
+    val corner = house == 1 || house == 4 || house == 7 || house == 10
+    val close = (diff < 3.0) || (diff < 4.0 && corner)
+    if (speed > 0 && signForLon == signForCusp && close) newHouse++
+    if (newHouse > 12) newHouse = 1
+    return newHouse
+}
+
+
 /**
  * Counts the numer of occurrences of Sun, Moon and Ascendant in signs.
  */
@@ -121,7 +135,8 @@ class BodiesInHouseHandler(
             val details: MutableList<Int> = ArrayList()
             for (pointPos in chart.pointPositions) {
                 if (pointPos.point != CelPoints.MEAN_APOGEE && pointPos.point != CelPoints.MEAN_NODE) {
-                    val house = housePosition.idOfHouse(pointPos.lon, chart.jdUt, flags, chart.location)
+                    var house =  housePosition.idOfHouse(pointPos.lon, chart.jdUt, flags, chart.location)
+                    house = checkForCuspOrb(pointPos.lon, pointPos.speed, house, chart.cusps[house-1])
                     if (cusps.contains(house)) details.add(1) else details.add(0)
                 }
             }
@@ -493,9 +508,14 @@ class MaxPointsHandler(
 
     private fun isMax(point: CelPoints, chart: Chart): Boolean {
         var lon = 0.0
-        for (pointPos in chart.pointPositions) if (pointPos.point == point) lon = pointPos.lon
+        var speed = 0.0
+        for (pointPos in chart.pointPositions) if (pointPos.point == point) {
+            lon = pointPos.lon
+            speed = pointPos.speed
+        }
         val sign = signPosition.idOfSign(lon)
-        val house = housePosition.idOfHouse(lon, chart.jdUt, flags, chart.location)
+        var house = housePosition.idOfHouse(lon, chart.jdUt, flags, chart.location)
+        house = checkForCuspOrb(lon, speed, house, chart.cusps[house-1])
         when (point) {
             CelPoints.SUN -> {
                 if ((1 == sign || 5 == sign) && !(7 == house || 11 == house || 12 == house)) return true
@@ -588,7 +608,7 @@ class PrincipleHandler(
                 if (checkInOwnSign(lonPointToCheck)) priValues[0] = 1
 
                 if (players.point != lonPointToCheck.point && checkAspect(lonPlayer, lonPointToCheck)) priValues[1] = 1
-                if (checkHouse(chart, lonPointToCheck.lon) == index) priValues[2] = 1
+                if (checkHouse(chart, lonPointToCheck.lon, lonPointToCheck.speed) == index) priValues[2] = 1
                 if (ruler != lonPointToCheck.point && checkAspect(lonRuler, lonPointToCheck)) priValues[3] = 1
                 if (players.checkMcOrAsc && index == 1 && checkAspect(asc, lonPointToCheck)) priValues[4] = 1
                 if (players.checkMcOrAsc && index == 10 && checkAspect(mc, lonPointToCheck)) priValues[4] = 1
@@ -631,8 +651,9 @@ class PrincipleHandler(
     }
 
 
-    private fun checkHouse(chart: Chart, lon: Double): Int {
-        return housePosition.idOfHouse(lon, chart.jdUt, flags, chart.location)
+    private fun checkHouse(chart: Chart, lon: Double, speed: Double): Int {
+        val house =  housePosition.idOfHouse(lon, chart.jdUt, flags, chart.location)
+        return checkForCuspOrb(lon, speed, house, chart.cusps[house-1])
     }
 
     private fun defineRuler(priIndex: Int, chart: Chart): CelPoints {

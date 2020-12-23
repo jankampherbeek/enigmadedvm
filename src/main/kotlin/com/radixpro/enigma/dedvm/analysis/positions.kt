@@ -28,7 +28,7 @@ class SignPosition {
 class HousePosition(private val seFrontend: SeFrontend) {
 
     /**
-     * If od the house wwwhere the point with given longitude (eclLon) is positioned.
+     * If od the house where the point with given longitude (eclLon) is positioned.
      * Id is 1 for house 1 ... 12 for house 12.
      */
     fun idOfHouse(eclLon: Double, jdUt: Double, flags: Int, location: Location): Int {
