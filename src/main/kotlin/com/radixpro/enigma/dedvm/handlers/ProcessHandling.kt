@@ -133,20 +133,26 @@ class BodiesInHouseHandler(
         val chartCounts: MutableList<ChartCount> = ArrayList()
         for (chart in allCharts.charts) {
             val details: MutableList<Int> = ArrayList()
-            for (pointPos in chart.pointPositions) {
-                if (pointPos.point != CelPoints.MEAN_APOGEE && pointPos.point != CelPoints.MEAN_NODE) {
+              for (point in supportedBodies) {
+                  val pointPos = findPointInChart(point, chart)
                     var house =  housePosition.idOfHouse(pointPos.lon, chart.jdUt, flags, chart.location)
                     house = checkForCuspOrb(pointPos.lon, pointPos.speed, house, chart.cusps[house-1])
                     if (cusps.contains(house)) details.add(1) else details.add(0)
-                }
-            }
+              }
             chartCounts.add(ChartCount(chart.id, chart.name, details.toList()))
         }
         return chartCounts.toList()
     }
 
+    private fun findPointInChart(point: Points, chart: Chart):PointPosition {
+        for (pointPos in chart.pointPositions) {
+            if (point == pointPos.point) return pointPos
+        }
+        throw RuntimeException("Could not find point in chart for BAM")    // TODO create specific exception
+    }
+
     private fun defineTotals(detailCount: List<ChartCount>): BodiesInRange {
-        val totalsForSigns = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        val totalsForSigns = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         for (chartCount in detailCount) {
             for (i in 0..10) {
                 totalsForSigns[i] += chartCount.counts[i]
@@ -266,7 +272,7 @@ class ElevationHandler(private val allChartsReader: AllChartsReader, private val
             var distance = 0.0
             for (pointPos in chart.pointPositions) {
                 if (pointPos.point != CelPoints.MEAN_NODE && pointPos.point != CelPoints.MEAN_APOGEE) {      // todo check which bodies to use
-                    distance = Range.checkValue(abs(mc - pointPos.lon), 0.0, 180.0)
+                    distance = abs(Range.checkValue(abs(mc - pointPos.lon), -180.0, 180.0))
                     if (distance <= shortestDistance) {
                         shortestDistance = distance
                         pointWithShortestDistance = pointPos.point as CelPoints
@@ -376,7 +382,7 @@ class ProminentAspectsHandler(
 
 
     private fun defineTotals(detailCount: List<ChartCount>): AspectCounts {
-        val totalsForPra = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        val totalsForPra = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         for (chartCount in detailCount) {
             for (i in 0..10) {
                 totalsForPra[i] += chartCount.counts[i]
@@ -424,22 +430,23 @@ class UnaspectedPointsHandler(
             val nasValues = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)   // 11 positions
             val allAspects = aspectsForChart.findAspects(chart)
             for (point in supportedBodies) {
-                var count = 0
-                for (asp in allAspects) {
-                    if (CelPoints.MEAN_NODE != asp.point1 && CelPoints.MEAN_NODE != asp.point2
-                        && CelPoints.MEAN_APOGEE != asp.point1 && CelPoints.MEAN_APOGEE != asp.point2
-                        && point == asp.point1 || point == asp.point2
-                    ) count++
-                }
-                if (count == 0) nasValues[supportedBodies.indexOf(point)] = 1
+                if (checkAspects(point, allAspects)) nasValues[supportedBodies.indexOf(point)] = 1
             }
             chartCounts.add(ChartCount(chart.id, chart.name, nasValues))
         }
         return chartCounts.toList()
     }
 
+    private fun checkAspects(point: Points, allAspects: List<ActualAspect>): Boolean {
+            var count = 0
+            for (asp in allAspects) {
+                if (point == asp.point1 || point == asp.point2) count++
+            }
+            return count == 0
+    }
+
     private fun defineTotals(detailCount: List<ChartCount>): AspectCounts {
-        val totalsForPra = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        val totalsForPra = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         for (chartCount in detailCount) {
             for (i in 0..10) {
                 totalsForPra[i] += chartCount.counts[i]

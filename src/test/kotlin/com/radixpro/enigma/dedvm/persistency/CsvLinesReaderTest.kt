@@ -21,4 +21,12 @@ internal class CsvLinesReaderTest {
         allLines[1][1] shouldBe "Hermann Keyserling"
     }
 
+
+    @Test
+    fun `Temporary test to read 100 lines form original research`() {
+        val  fileName =  "testdata${SEPARATOR}Dataanoniemeersteonderzoeksgroep.csv"
+        CsvLinesReader().readLinesFromCsv(fileName).size shouldBe 100
+    }
+
+
 }

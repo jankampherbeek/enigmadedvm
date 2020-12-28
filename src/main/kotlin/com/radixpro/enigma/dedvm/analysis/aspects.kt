@@ -8,18 +8,18 @@ import kotlin.math.min
 class AspectsForChart {
 
     private val fullCircle = 360.0
-    private val actualAspects: MutableList<ActualAspect> = ArrayList()
 
     fun findAspects(chart: Chart): List<ActualAspect> {
+        val actualAspects: MutableList<ActualAspect> = ArrayList()
         val mc = PointPosition(MundanePoints.MC, chart.cusps[10], 0.0)
         val asc = PointPosition(MundanePoints.ASC, chart.cusps[1], 0.0)
         val celPoints = chart.pointPositions
         for (i in celPoints.indices) {
             for (j in i + 1 until celPoints.size) {
-                checkForAspect(celPoints[i], celPoints[j])
+                actualAspects.addAll(checkForAspect(celPoints[i], celPoints[j]))
             }
-            checkForAspect(celPoints[i], mc)
-            checkForAspect(celPoints[i], asc)
+            actualAspects.addAll(checkForAspect(celPoints[i], mc))
+            actualAspects.addAll(checkForAspect(celPoints[i], asc))
         }
         return actualAspects.toList()
     }
@@ -39,7 +39,8 @@ class AspectsForChart {
     }
 
 
-    private fun checkForAspect(firstPoint: PointPosition, secondPoint: PointPosition) {
+    private fun checkForAspect(firstPoint: PointPosition, secondPoint: PointPosition): List<ActualAspect> {
+        val foundAspects: MutableList<ActualAspect> = ArrayList()
         val pos1 = min(firstPoint.lon, secondPoint.lon)
         val pos2 = max(firstPoint.lon, secondPoint.lon)
         val distance1 = pos2 - pos1
@@ -48,8 +49,9 @@ class AspectsForChart {
             val angle = aspect.degrees
             val orb = defineOrb(firstPoint.point, secondPoint.point, aspect)
             val found = (abs(distance1 - angle) <= orb) || (abs(distance2 - angle) < orb)
-            if (found) actualAspects.add(ActualAspect(firstPoint.point, secondPoint.point, aspect))
+            if (found) foundAspects.add(ActualAspect(firstPoint.point, secondPoint.point, aspect))
         }
+        return foundAspects.toList()
     }
 
     private fun defineOrb(partner1: Points, partner2: Points, aspect: Aspects): Double {

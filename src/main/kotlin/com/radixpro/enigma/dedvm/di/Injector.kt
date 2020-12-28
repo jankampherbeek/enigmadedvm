@@ -8,6 +8,7 @@ import com.radixpro.enigma.dedvm.astron.ChartsCalculator
 import com.radixpro.enigma.dedvm.astron.SeFrontend
 import com.radixpro.enigma.dedvm.handlers.*
 import com.radixpro.enigma.dedvm.persistency.*
+import com.radixpro.enigma.dedvm.ui.Dashboard
 
 object Injector {
 
@@ -53,6 +54,10 @@ object Injector {
 
     fun injectCsvLinesReader(): CsvLinesReader {
         return CsvLinesReader()
+    }
+
+    fun injectDashboard(): Dashboard {
+        return Dashboard()
     }
 
     fun injectElevationHandler(): ElevationHandler {
