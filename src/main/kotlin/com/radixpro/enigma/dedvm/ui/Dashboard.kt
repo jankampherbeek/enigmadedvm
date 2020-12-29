@@ -1,3 +1,9 @@
+/*
+ * Jan Kampherbeek, (c) 2020, 2021.
+ * EnigmaDedVM is open source.
+ * Please check the file copyright.txt in the root of the source for further details.
+ */
+
 package com.radixpro.enigma.dedvm.ui
 
 import com.radixpro.enigma.dedvm.ui.UiDictionary.GAP
@@ -14,36 +20,58 @@ import javafx.stage.Modality
 import javafx.stage.Stage
 
 class Dashboard {
-
+    // texts
+    private val txtBtnDataFile = "Chart data"
+    private val txtBtnEventData = "Event data"
+    private val txtBtnCharts = "Charts"
+    private val txtBtnExit = "Exit"
+    private val txtBtnHelp = "Help"
+    private val txtBtnRun = "Run"
+    private val txtBtnLanguage = "Nederlands/Dutch"
+    private val txtCbSelectAll = "Select all"
+    private val txtCbSunMoonAscInSign = "Sun, Moon, Asc in sign"
+    private val txtCbInHouses1Or10 = "In houses 1 or 10"
+    private val txtCbAtCorners = "At corners"
+    private val txtCbElevated = "Elevated"
+    private val txtCbProminent = "Prominent"
+    private val txtCbUnaspected = "Unaspected"
+    private val txtCbMaximal = "Maximal"
+    private val txtCbPrinciples = "Principles"
+    private val txtLblInfo = "EnigmaDedVM contains a set\nof methods to analyse charts.\nIt is created originally to support\nan investigation into " +
+            "astrological\naspects of suicide by dutch researcher\nVivian Muller, but it can be used for\nnumerous other investigations."
+    private val txtLblRetrieveDataFile = "Retrieve the data file"
+    private val txtLblRetrieveEventFile = "Retrieve the event file"
+    private val txtLblShowCharts =  "Show charts"
+    private val txtTitle = "Enigma DedVM version 0.9 (Beta)"
+    // buttons
+    private val btnDataFile = ButtonBuilder().setText(txtBtnDataFile).setPrefWidth(100.0).setDisabled(false).setFocusTraversable(true).build()
+    private val btnEventFile = ButtonBuilder().setText(txtBtnEventData).setPrefWidth(100.0).setDisabled(false).setFocusTraversable(true).build()
+    private val btnCharts = ButtonBuilder().setText(txtBtnCharts).setPrefWidth(100.0).setDisabled(true).setFocusTraversable(false).build()
+    private val btnExit = ButtonBuilder().setText(txtBtnExit).setDisabled(false).setFocusTraversable(true).build()
+    private val btnHelp = ButtonBuilder().setText(txtBtnHelp).setDisabled(false).setFocusTraversable(true).build()
+    private val btnRun = ButtonBuilder().setText(txtBtnRun).setDisabled(true).setFocusTraversable(false).build()
+    private val btnLanguage = ButtonBuilder().setText(txtBtnLanguage).setPrefWidth(200.0).setDisabled(false).setFocusTraversable(true).build()
+    // checkboxes
+    private val cbAll = CheckBox(txtCbSelectAll)
+    private val cbSma = CheckBox(txtCbSunMoonAscInSign)
+    private val cbBam = CheckBox(txtCbInHouses1Or10)
+    private val cbBco = CheckBox(txtCbAtCorners)
+    private val cbElev = CheckBox(txtCbElevated)
+    private val cbPra = CheckBox(txtCbProminent)
+    private val cbNas = CheckBox(txtCbUnaspected)
+    private val cbMax = CheckBox(txtCbMaximal)
+    private val cbPri = CheckBox(txtCbPrinciples)
+    // general
     private val height = 500.0
     private val width = 600.0
-
     private val stage = Stage()
-    private val btnDataFile = ButtonBuilder().setText("Find data").setPrefWidth(100.0).setDisabled(false).setFocusTraversable(true).build()
-    private val btnEventFile = ButtonBuilder().setText("Event data").setPrefWidth(100.0).setDisabled(false).setFocusTraversable(true).build()
-    private val btnCharts = ButtonBuilder().setText("Charts").setPrefWidth(100.0).setDisabled(true).setFocusTraversable(false).build()
-    private val btnExit = ButtonBuilder().setText("Exit").setDisabled(false).setFocusTraversable(true).build()
-    private val btnHelp = ButtonBuilder().setText("Help").setDisabled(false).setFocusTraversable(true).build()
-    private val btnRun = ButtonBuilder().setText("Run").setDisabled(true).setFocusTraversable(false).build()
-    private val btnLanguage = ButtonBuilder().setText("Nederlands/Dutch").setPrefWidth(200.0).setDisabled(false).setFocusTraversable(true).build()
-
-    private val cbAll = CheckBox("Select all")
-    private val cbSma = CheckBox("Sun, Moon, Asc in sign")
-    private val cbBam = CheckBox("In houses 1 or 10")
-    private val cbBco = CheckBox("At corners")
-    private val cbElev = CheckBox("Elevated")
-    private val cbPra = CheckBox("Prominent")
-    private val cbNas = CheckBox("Unaspected")
-    private val cbMax = CheckBox("Maximal")
-    private val cbPri = CheckBox("Principles")
-
 
     fun showDashboard() {
 
         stage.minHeight = height
         stage.minWidth = width
         stage.initModality(Modality.APPLICATION_MODAL)
-        stage.title = "Enigma DedVM version 0.9 (Beta)"
+        stage.title = txtTitle
         stage.scene = Scene(createGridPane())
         stage.show()
 
@@ -51,18 +79,16 @@ class Dashboard {
 
     private fun createGridPane(): GridPane {
         val grid = GridPaneBuilder().setHGap(GAP).setVGap(GAP).setPrefWidth(width).setPrefHeight(height).setStyleSheet(styleSheet).build()
-        // row, col, rowspan, colspan
         grid.add(createTitlePane(), 0, 0, 3, 1)
         grid.add(createImagePane(),0, 1, 1, 3)
         grid.add(createGenInfoPane(),0, 4, 1, 8)
         grid.add(createLanguagePane(), 0, 13, 1, 1)
-        grid.add(createSingleLinePane("Retrieve the data file"),1, 1, 1, 1)
-        grid.add(createSingleLinePane("Retrieve the event file"),1, 2, 1, 1)
-        grid.add(createSingleLinePane("Show charts"),1, 3, 1, 1)
+        grid.add(createSingleLinePane(txtLblRetrieveDataFile),1, 1, 1, 1)
+        grid.add(createSingleLinePane(txtLblRetrieveEventFile),1, 2, 1, 1)
+        grid.add(createSingleLinePane(txtLblShowCharts),1, 3, 1, 1)
         grid.add(btnDataFile, 2, 1, 1, 1)
         grid.add(btnEventFile, 2, 2, 1, 1)
         grid.add(btnCharts, 2, 3, 1, 1)
-
         grid.add(cbAll, 1, 4, 2, 1)
         grid.add(cbSma, 1, 5, 2, 1)
         grid.add(cbBam, 1, 6, 2, 1)
@@ -72,14 +98,12 @@ class Dashboard {
         grid.add(cbNas, 1, 10, 2, 1)
         grid.add(cbMax, 1, 11, 2, 1)
         grid.add(cbPri, 1, 12, 2, 1)
-
         grid.add(createMainButtonBar(), 1, 13, 2, 1)
-
         return grid
     }
 
     private fun createTitlePane(): Pane {
-        val lblTitle = LabelBuilder().setText("Enigma DedVM version 0.9 (Beta)").setPrefWidth(width).setAlignment(Pos.CENTER).setStyleClass("titletext").build()
+        val lblTitle = LabelBuilder().setText(txtTitle).setPrefWidth(width).setAlignment(Pos.CENTER).setStyleClass("titletext").build()
         return PaneBuilder().setHeight(57.0).setWidth(width).setStyleClass("titlepane").setChildren(arrayOf(lblTitle)).build()
     }
 
@@ -96,14 +120,7 @@ class Dashboard {
     }
 
     private fun createGenInfoPane(): Pane {
-        val infoText = "EnigmaDedVM contains a set\n"+
-                "of methods to analyse charts.\n"+
-                "It is created originally to support\n" +
-                "an investigation into astrological\n"+
-                "aspects of suicide by dutch researcher\n"+
-                "Vivian Muller, but it can be used for\n"+
-                "numerous other investigations."
-        val lblInfo = LabelBuilder().setText(infoText).setPrefWidth(230.0).setAlignment(Pos.CENTER).build()
+        val lblInfo = LabelBuilder().setText(txtLblInfo).setPrefWidth(230.0).setAlignment(Pos.CENTER).build()
         lblInfo.isWrapText = true
         lblInfo.textAlignment = TextAlignment.CENTER
         return PaneBuilder().setHeight(120.0).setWidth(250.0).setChildren(arrayOf(lblInfo)).build()
@@ -116,7 +133,7 @@ class Dashboard {
     private fun createSingleLinePane(text: String): Pane {
         val lbl = LabelBuilder().setText(text).build()
         val pane = PaneBuilder().setHeight(28.0).setWidth(300.0).setChildren(arrayOf(lbl)).build()
-        pane.style = "-fx-background-color: lightblue;";
+        pane.style = "-fx-background-color: lightblue;"
         return pane
     }
 

@@ -1,3 +1,8 @@
+/*
+ * Jan Kampherbeek, (c) 2020, 2021.
+ * EnigmaDedVM is open source.
+ * Please check the file copyright.txt in the root of the source for further details.
+ */
 package com.radixpro.enigma.dedvm.ui
 
 import javafx.geometry.Insets
@@ -32,21 +37,6 @@ class LabelBuilder() {
 
     fun setPrefWidth(prefWidth: Double): LabelBuilder {
         this.prefWidth = prefWidth
-        return this
-    }
-
-    fun setPrefHeight(prefHeight: Double): LabelBuilder {
-        this.prefHeight = prefHeight
-        return this
-    }
-
-    fun setLayoutX(layoutX: Double): LabelBuilder {
-        this.layoutX = layoutX
-        return this
-    }
-
-    fun setLayoutY(layoutY: Double): LabelBuilder {
-        this.layoutY = layoutY
         return this
     }
 
