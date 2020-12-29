@@ -186,8 +186,8 @@ class HBoxBuilder {
 /**
  * Creates a Button, based on the Builder pattern.
  */
-class ButtonBuilder() {
-    private var text = ""
+class ButtonBuilder(rbKey:String) {
+    private var text = Rosetta.getText(rbKey)
     private var disabled = false
     private var focusTraversable = false
     private var prefWidth = 0.0

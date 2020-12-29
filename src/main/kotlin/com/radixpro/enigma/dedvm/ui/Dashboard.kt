@@ -7,8 +7,10 @@
 package com.radixpro.enigma.dedvm.ui
 
 import com.radixpro.enigma.dedvm.ui.UiDictionary.GAP
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Scene
+import javafx.scene.control.Button
 import javafx.scene.control.ButtonBar
 import javafx.scene.control.CheckBox
 import javafx.scene.image.Image
@@ -21,61 +23,82 @@ import javafx.stage.Stage
 
 class Dashboard {
     // texts
-    private val txtBtnDataFile = "Chart data"
-    private val txtBtnEventData = "Event data"
-    private val txtBtnCharts = "Charts"
-    private val txtBtnExit = "Exit"
-    private val txtBtnHelp = "Help"
-    private val txtBtnRun = "Run"
-    private val txtBtnLanguage = "Nederlands/Dutch"
-    private val txtCbSelectAll = "Select all"
-    private val txtCbSunMoonAscInSign = "Sun, Moon, Asc in sign"
-    private val txtCbInHouses1Or10 = "In houses 1 or 10"
-    private val txtCbAtCorners = "At corners"
-    private val txtCbElevated = "Elevated"
-    private val txtCbProminent = "Prominent"
-    private val txtCbUnaspected = "Unaspected"
-    private val txtCbMaximal = "Maximal"
-    private val txtCbPrinciples = "Principles"
-    private val txtLblInfo = "EnigmaDedVM contains a set\nof methods to analyse charts.\nIt is created originally to support\nan investigation into " +
-            "astrological\naspects of suicide by dutch researcher\nVivian Muller, but it can be used for\nnumerous other investigations."
-    private val txtLblRetrieveDataFile = "Retrieve the data file"
-    private val txtLblRetrieveEventFile = "Retrieve the event file"
-    private val txtLblShowCharts =  "Show charts"
-    private val txtTitle = "Enigma DedVM version 0.9 (Beta)"
+    private lateinit var txtLblInfo : String
+    private lateinit var txtLblRetrieveDataFile: String
+    private lateinit var txtLblRetrieveEventFile : String
+    private lateinit var txtLblShowCharts : String
+    private lateinit var txtTitle : String
     // buttons
-    private val btnDataFile = ButtonBuilder().setText(txtBtnDataFile).setPrefWidth(100.0).setDisabled(false).setFocusTraversable(true).build()
-    private val btnEventFile = ButtonBuilder().setText(txtBtnEventData).setPrefWidth(100.0).setDisabled(false).setFocusTraversable(true).build()
-    private val btnCharts = ButtonBuilder().setText(txtBtnCharts).setPrefWidth(100.0).setDisabled(true).setFocusTraversable(false).build()
-    private val btnExit = ButtonBuilder().setText(txtBtnExit).setDisabled(false).setFocusTraversable(true).build()
-    private val btnHelp = ButtonBuilder().setText(txtBtnHelp).setDisabled(false).setFocusTraversable(true).build()
-    private val btnRun = ButtonBuilder().setText(txtBtnRun).setDisabled(true).setFocusTraversable(false).build()
-    private val btnLanguage = ButtonBuilder().setText(txtBtnLanguage).setPrefWidth(200.0).setDisabled(false).setFocusTraversable(true).build()
+    private lateinit var btnDataFile : Button
+    private lateinit var btnEventFile : Button
+    private lateinit var btnCharts : Button
+    private lateinit var btnExit  : Button
+    private lateinit var btnHelp  : Button
+    private lateinit var btnRun : Button
+    private lateinit var btnLanguage  : Button
     // checkboxes
-    private val cbAll = CheckBox(txtCbSelectAll)
-    private val cbSma = CheckBox(txtCbSunMoonAscInSign)
-    private val cbBam = CheckBox(txtCbInHouses1Or10)
-    private val cbBco = CheckBox(txtCbAtCorners)
-    private val cbElev = CheckBox(txtCbElevated)
-    private val cbPra = CheckBox(txtCbProminent)
-    private val cbNas = CheckBox(txtCbUnaspected)
-    private val cbMax = CheckBox(txtCbMaximal)
-    private val cbPri = CheckBox(txtCbPrinciples)
+    private lateinit var cbAll : CheckBox
+    private lateinit var cbSma : CheckBox
+    private lateinit var cbBam : CheckBox
+    private lateinit var cbBco : CheckBox
+    private lateinit var cbElev : CheckBox
+    private lateinit var cbPra : CheckBox
+    private lateinit var cbNas : CheckBox
+    private lateinit var cbMax : CheckBox
+    private lateinit var cbPri : CheckBox
     // general
     private val height = 500.0
     private val width = 600.0
-    private val stage = Stage()
+    private lateinit var stage: Stage
 
     fun showDashboard() {
-
+        initialize()
+        stage = Stage()
         stage.minHeight = height
         stage.minWidth = width
         stage.initModality(Modality.APPLICATION_MODAL)
         stage.title = txtTitle
         stage.scene = Scene(createGridPane())
         stage.show()
-
     }
+
+    private fun initialize() {
+        defineButtons()
+        defineCheckBoxes()
+        defineTexts()
+    }
+
+    private fun defineButtons() {
+        btnDataFile = ButtonBuilder("dashboard.btn_datafile").setPrefWidth(100.0).setDisabled(false).setFocusTraversable(true).build()
+        btnEventFile = ButtonBuilder("dashboard.btn_eventdata").setPrefWidth(100.0).setDisabled(false).setFocusTraversable(true).build()
+        btnCharts = ButtonBuilder("dashboard.btn_charts").setPrefWidth(100.0).setDisabled(true).setFocusTraversable(false).build()
+        btnExit = ButtonBuilder("dashboard.btn_exit").setDisabled(false).setFocusTraversable(true).build()
+        btnHelp = ButtonBuilder("dashboard.btn_help").setDisabled(false).setFocusTraversable(true).build()
+        btnRun = ButtonBuilder("dashboard.btn_run").setDisabled(true).setFocusTraversable(false).build()
+        btnLanguage = ButtonBuilder("dashboard.btn_language").setPrefWidth(200.0).setDisabled(false).setFocusTraversable(true).build()
+        btnLanguage.onAction = EventHandler { onLanguage()}
+    }
+
+    private fun defineCheckBoxes() {
+        cbAll = CheckBox(Rosetta.getText("dashboard.cb_selectall"))
+        cbSma = CheckBox(Rosetta.getText("dashboard.cb_sunmoonascinsign"))
+        cbBam = CheckBox(Rosetta.getText("dashboard.cb_inhouses1or10"))
+        cbBco = CheckBox(Rosetta.getText("dashboard.cb_atcorners"))
+        cbElev = CheckBox(Rosetta.getText("dashboard.cb_elevated"))
+        cbPra = CheckBox(Rosetta.getText("dashboard.cb_prominent"))
+        cbNas = CheckBox(Rosetta.getText("dashboard.cb_unaspected"))
+        cbMax = CheckBox(Rosetta.getText("dashboard.cb_maximal"))
+        cbPri = CheckBox(Rosetta.getText("dashboard.cb_principles"))
+    }
+
+    private fun defineTexts() {
+        txtLblInfo = Rosetta.getText("dashboard.lbl_info")
+        txtLblRetrieveDataFile = Rosetta.getText("dashboard.lbl_retrievedatafile")
+        txtLblRetrieveEventFile = Rosetta.getText("dashboard.lbl_retrieveeventfile")
+        txtLblShowCharts = Rosetta.getText("dashboard.lbl_showcharts")
+        txtTitle = Rosetta.getText("dashboard.title")
+    }
+
 
     private fun createGridPane(): GridPane {
         val grid = GridPaneBuilder().setHGap(GAP).setVGap(GAP).setPrefWidth(width).setPrefHeight(height).setStyleSheet(styleSheet).build()
@@ -139,6 +162,13 @@ class Dashboard {
 
     private fun createMainButtonBar(): ButtonBar {
         return ButtonBarBuilder().setButtons(arrayOf(btnExit, btnHelp, btnRun)).build()
+    }
+
+    private fun onLanguage() {
+        stage.close()
+        Rosetta.changeLanguage()
+        showDashboard()
+
     }
 
 }
