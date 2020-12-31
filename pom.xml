@@ -33,7 +33,7 @@
         <jfoenix.version>9.0.9</jfoenix.version>
         <json-simple.version>1.1.1</json-simple.version>
         <junit.version>4.12</junit.version>
-        <kotlin.version>1.4.10</kotlin.version>
+        <kotlin.version>1.4.21</kotlin.version>
         <mack.version>2.01.00-02</mack.version>
         <maven.compiler.release>14</maven.compiler.release>
         <mockito.version>3.2.4</mockito.version>

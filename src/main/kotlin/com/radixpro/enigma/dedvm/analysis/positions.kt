@@ -45,26 +45,3 @@ class HousePosition(private val seFrontend: SeFrontend) {
 
 }
 
-/**
- * Distance from Mc in longitude.
- */
-class McDistance {
-
-    /**
-     * Find celestial object that is closest to te MC, measured alongside the ecliptic and ignoring latitude.
-     */
-    fun closestToMc(points: List<PointPosition>, longMc: Double): CelPoints {
-        var shortestDistance = 180.0
-        var distance: Double
-        var shortestPoint = CelPoints.SUN
-        for (celPoint in points) {
-            distance = Range.checkValue(celPoint.lon - longMc, 0.0, 180.0)
-            if (distance <= shortestDistance) {
-                shortestDistance = distance
-                shortestPoint = celPoint.point as CelPoints
-            }
-        }
-        return shortestPoint
-    }
-
-}

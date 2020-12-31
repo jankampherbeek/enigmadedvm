@@ -8,7 +8,6 @@ package com.radixpro.enigma.dedvm.di
 
 import com.radixpro.enigma.dedvm.analysis.AspectsForChart
 import com.radixpro.enigma.dedvm.analysis.HousePosition
-import com.radixpro.enigma.dedvm.analysis.McDistance
 import com.radixpro.enigma.dedvm.analysis.SignPosition
 import com.radixpro.enigma.dedvm.astron.ChartsCalculator
 import com.radixpro.enigma.dedvm.astron.SeFrontend
@@ -99,10 +98,6 @@ object Injector {
 
     fun injectMaxPointsHandler(): MaxPointsHandler {
         return MaxPointsHandler(injectAllChartsReader(), injectSignPosition(), injectHousePosition(), injectResultsWriter())
-    }
-
-    fun injectMcDistance(): McDistance {
-        return McDistance()
     }
 
     fun injectPrincipleHandler(): PrincipleHandler {

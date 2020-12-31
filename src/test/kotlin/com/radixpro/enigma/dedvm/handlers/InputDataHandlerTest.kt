@@ -6,21 +6,11 @@
 
 package com.radixpro.enigma.dedvm.handlers
 
-import java.io.File.separator as SEPARATOR
-import com.radixpro.enigma.dedvm.astron.ChartsCalculator
-import com.radixpro.enigma.dedvm.core.Chart
-import com.radixpro.enigma.dedvm.core.ChartInputData
-import com.radixpro.enigma.dedvm.core.DateTimeParts
-import com.radixpro.enigma.dedvm.core.Location
 import com.radixpro.enigma.dedvm.di.Injector
-import com.radixpro.enigma.dedvm.persistency.ControlDataCreator
-import com.radixpro.enigma.dedvm.persistency.CsvInputDataReader
-import com.radixpro.enigma.dedvm.persistency.JsonWriter
-import io.mockk.every
-import io.mockk.mockk
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.io.File.separator as SEPARATOR
 
 internal class InputDataHandlerTest {
 

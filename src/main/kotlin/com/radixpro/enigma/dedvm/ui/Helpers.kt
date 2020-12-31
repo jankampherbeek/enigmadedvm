@@ -21,7 +21,7 @@ const val styleSheet = "css/enigma.css"
 /**
  * Creates a Label, based on the Builder pattern.
  */
-class LabelBuilder() {
+class LabelBuilder {
     private var text = ""
     private var prefWidth = 0.0
     private var prefHeight = 0.0
@@ -51,7 +51,7 @@ class LabelBuilder() {
     }
 
     fun build(): Label {
-        val lblText: String = if (!text.isEmpty()) text else ""
+        val lblText: String = if (text.isNotEmpty()) text else ""
         val label = Label(lblText)
         if (prefWidth > 0.0) label.prefWidth = prefWidth
         if (prefHeight > 0.0) label.prefHeight = prefHeight
@@ -131,11 +131,6 @@ class VBoxBuilder {
         return this
     }
 
-    fun setStyle(style: String?): VBoxBuilder {
-        this.style = style
-        return this
-    }
-
     fun build(): VBox {
         val vBox = VBox()
         vBox.stylesheets.add(styleSheet)
@@ -150,40 +145,6 @@ class VBoxBuilder {
 
 
 /**
- * Creates a HBox, based on the Builder pattern.
- */
-class HBoxBuilder {
-    private var prefWidth = 0.0
-    private var prefHeight = 0.0
-    private var children: Array<Node>? = null
-
-    fun setPrefWidth(prefWidth: Double): HBoxBuilder {
-        this.prefWidth = prefWidth
-        return this
-    }
-
-    fun setPrefHeight(prefHeight: Double): HBoxBuilder {
-        this.prefHeight = prefHeight
-        return this
-    }
-
-
-    fun setChildren(children: Array<Node>?): HBoxBuilder {
-        this.children = children
-        return this
-    }
-
-    fun build(): HBox {
-        val hBox = HBox()
-        if (prefWidth > 0.0) hBox.prefWidth = prefWidth
-        if (prefHeight > 0.0) hBox.prefHeight = prefHeight
-        if (null != children && children!!.isNotEmpty()) hBox.children.addAll(children!!)
-        return hBox
-    }
-}
-
-
-/**
  * Creates a Button, based on the Builder pattern.
  */
 class ButtonBuilder(rbKey:String) {
@@ -191,11 +152,6 @@ class ButtonBuilder(rbKey:String) {
     private var disabled = false
     private var focusTraversable = false
     private var prefWidth = 0.0
-
-    fun setText(text: String): ButtonBuilder {
-        this.text = text
-        return this
-    }
 
     fun setPrefWidth(width: Double): ButtonBuilder {
         this.prefWidth = width
@@ -241,11 +197,6 @@ class GridPaneBuilder {
 
     fun setPrefWidth(prefWidth: Double): GridPaneBuilder {
         this.prefWidth = prefWidth
-        return this
-    }
-
-    fun setPadding(padding: Double): GridPaneBuilder {
-        this.padding = padding
         return this
     }
 

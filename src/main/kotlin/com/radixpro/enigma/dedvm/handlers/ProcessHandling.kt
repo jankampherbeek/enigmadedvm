@@ -681,7 +681,7 @@ class PrincipleHandler(
             10 -> CelPoints.SATURN
             11 -> CelPoints.URANUS
             12 -> CelPoints.NEPTUNE
-            else -> throw IllegalArgumentException("Received ${signOnCusp.toString()} as index for a zodiac sign, while only 1..12 are supported.")
+            else -> throw IllegalArgumentException("Received $signOnCusp as index for a zodiac sign, while only 1..12 are supported.")
         }
     }
 
@@ -709,7 +709,7 @@ class PrincipleHandler(
             11 -> return PrinciplePlayers(11, CelPoints.URANUS, false)
             12 -> return PrinciplePlayers(12, CelPoints.NEPTUNE, false)
         }
-        throw IllegalArgumentException("Received ${priIndex.toString()} as index for a Principle, while only 1..12 are supported.")
+        throw IllegalArgumentException("Received $priIndex as index for a Principle, while only 1..12 are supported.")
     }
 
 

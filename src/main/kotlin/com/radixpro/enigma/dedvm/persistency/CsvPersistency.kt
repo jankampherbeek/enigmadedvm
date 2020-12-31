@@ -35,22 +35,6 @@ class CsvLinesReader {
 
 }
 
-/**
- * Writes lines to a csv file.
- */
-class CsvWriter {
-    fun write2File(pathFilename: String, lines: List<String>) {
-        val file = File(pathFilename)
-        file.writeText("")     // overwrites existing content
-        for (line: String in lines) {
-            file.appendText(line)
-            file.appendText("\n")
-        }
-    }
-
-
-}
-
 
 /**
  * Processes input data as used for the calculation of a chart. Converts the original csv lines into a list of ChartInputData.

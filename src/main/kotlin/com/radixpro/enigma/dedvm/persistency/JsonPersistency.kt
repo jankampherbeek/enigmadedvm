@@ -12,15 +12,14 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.radixpro.enigma.dedvm.core.AllCharts
 import com.radixpro.enigma.dedvm.core.Chart
 import com.radixpro.enigma.dedvm.exceptions.SaveException
-import org.json.simple.JSONArray
 import org.json.simple.JSONObject
 import org.json.simple.parser.JSONParser
 import org.json.simple.parser.ParseException
 import java.io.File
-import java.io.File.separator as SEPARATOR
 import java.io.FileReader
 import java.io.IOException
 import java.time.LocalDateTime
+import java.io.File.separator as SEPARATOR
 
 /**
  * Reader for Json files.

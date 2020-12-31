@@ -9,9 +9,8 @@ package com.radixpro.enigma.dedvm.astron
 import com.radixpro.enigma.dedvm.core.DateTimeParts
 import com.radixpro.enigma.dedvm.core.Location
 import io.kotest.matchers.doubles.plusOrMinus
-import org.junit.jupiter.api.Test
 import io.kotest.matchers.shouldBe
-import org.junit.Before
+import org.junit.jupiter.api.Test
 
 internal class SeFrontendTest {
 

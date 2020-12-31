@@ -49,26 +49,26 @@ enum class EmptyPoints(override val id: Int, override val nameTxt: String): Poin
 /**
  * Supported aspects.
  */
-enum class Aspects(val degrees: Double, val orbForLights: Double, val orb: Double, val nameTxt: String) {
-    CONJUNCTION(0.0, 8.0, 6.0, "Conjunction"),
-    OPPOSITION(180.0, 8.0, 6.0,"Opposition"),
-    TRIGON(120.0, 8.0, 6.0,"Trigon"),
-    SQUARE(90.0, 8.0, 6.0,"Square"),
-    SEXTILE(60.0, 6.0, 4.0, "Sextile"),
-    INCONJUNCT(150.0, 3.5, 3.0, "Inconjunct")
+enum class Aspects(val degrees: Double, val orbForLights: Double, val orb: Double) {
+    CONJUNCTION(0.0, 8.0, 6.0),
+    OPPOSITION(180.0, 8.0, 6.0),
+    TRIGON(120.0, 8.0, 6.0),
+    SQUARE(90.0, 8.0, 6.0),
+    SEXTILE(60.0, 6.0, 4.0),
+    INCONJUNCT(150.0, 3.5, 3.0)
 }
 
-enum class Signs(val index: Int, val nameTxt:String, val abbr: String, val strong: Points, val weak: Points, val exalt: Points, val fall: Points) {
-    ARIES(1, "Aries", "AR", CelPoints.MARS, CelPoints.VENUS,  CelPoints.SUN, CelPoints.SATURN),
-    TAURUS(2,"Taurus", "TA", CelPoints.VENUS, CelPoints.MARS, CelPoints.MOON, EmptyPoints.EXISTS_NOT),
-    GEMINI(3, "Gemini", "GE", CelPoints.MERCURY, CelPoints.JUPITER, EmptyPoints.EXISTS_NOT, EmptyPoints.EXISTS_NOT),
-    CANCER(4, "Cancer", "CN", CelPoints.MOON, CelPoints.SATURN, CelPoints.JUPITER, CelPoints.MARS),
-    LEO(5, "Leo", "LE", CelPoints.SUN, CelPoints.URANUS, EmptyPoints.EXISTS_NOT, EmptyPoints.EXISTS_NOT),
-    VIRGO(6, "Virgo", "VI", CelPoints.MERCURY, CelPoints.NEPTUNE, CelPoints.MERCURY, CelPoints.VENUS),
-    LIBRA(7, "Libra", "LI", CelPoints.VENUS, CelPoints.MARS, CelPoints.SATURN, CelPoints.SUN),
-    SCORPIO(8, "Scorpio", "SC", CelPoints.PLUTO, CelPoints.VENUS, EmptyPoints.EXISTS_NOT, CelPoints.MOON),
-    SAGITTARIUS(9, "Sagittarius", "SA", CelPoints.JUPITER, CelPoints.MERCURY, EmptyPoints.EXISTS_NOT, EmptyPoints.EXISTS_NOT),
-    CAPRICORN(10, "Capricorn", "CP", CelPoints.SATURN, CelPoints.MOON, EmptyPoints.EXISTS_NOT, CelPoints.JUPITER),
-    AQUARIUS(11, "Aquarius", "AQ", CelPoints.URANUS, CelPoints.SUN, EmptyPoints.EXISTS_NOT, EmptyPoints.EXISTS_NOT),
-    PISCES(12, "Pisces", "PI", CelPoints.NEPTUNE, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MERCURY)
+enum class Signs(val index: Int, val abbr: String, val strong: Points, val weak: Points, val fall: Points) {
+    ARIES(1, "AR", CelPoints.MARS, CelPoints.VENUS, CelPoints.SATURN),
+    TAURUS(2, "TA", CelPoints.VENUS, CelPoints.MARS, EmptyPoints.EXISTS_NOT),
+    GEMINI(3, "GE", CelPoints.MERCURY, CelPoints.JUPITER, EmptyPoints.EXISTS_NOT),
+    CANCER(4, "CN", CelPoints.MOON, CelPoints.SATURN, CelPoints.MARS),
+    LEO(5, "LE", CelPoints.SUN, CelPoints.URANUS, EmptyPoints.EXISTS_NOT),
+    VIRGO(6, "VI", CelPoints.MERCURY, CelPoints.NEPTUNE, CelPoints.VENUS),
+    LIBRA(7, "LI", CelPoints.VENUS, CelPoints.MARS, CelPoints.SUN),
+    SCORPIO(8, "SC", CelPoints.PLUTO, CelPoints.VENUS, CelPoints.MOON),
+    SAGITTARIUS(9, "SA", CelPoints.JUPITER, CelPoints.MERCURY, EmptyPoints.EXISTS_NOT),
+    CAPRICORN(10, "CP", CelPoints.SATURN, CelPoints.MOON, CelPoints.JUPITER),
+    AQUARIUS(11, "AQ", CelPoints.URANUS, CelPoints.SUN, EmptyPoints.EXISTS_NOT),
+    PISCES(12, "PI", CelPoints.NEPTUNE, CelPoints.MERCURY, CelPoints.MERCURY)
 }
