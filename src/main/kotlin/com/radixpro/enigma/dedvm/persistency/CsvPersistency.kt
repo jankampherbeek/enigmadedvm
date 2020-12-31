@@ -27,6 +27,12 @@ class CsvLinesReader {
         val reader = CSVReaderHeaderAware(FileReader(fileName))
         return reader.readAll()
     }
+
+    fun readLinesFromCsv(inputDataFile: File): List<Array<String>>  {
+        val reader = CSVReaderHeaderAware(FileReader(inputDataFile))
+        return reader.readAll()
+    }
+
 }
 
 /**
@@ -60,6 +66,15 @@ class CsvInputDataReader(private val linesReader: CsvLinesReader) {
         return allInputData
     }
 
+    fun readInputData(inputDataFile: File): List<ChartInputData> {
+        val allInputData: MutableList<ChartInputData> = ArrayList()
+        val lines = linesReader.readLinesFromCsv(inputDataFile)
+        for (line in lines) {
+            if (!line.contains(null) && 9 == line.size) allInputData.add(readSingleLine(line))
+        }
+        return allInputData
+    }
+
     private fun readSingleLine(line: Array<String>): ChartInputData {
         try {
             val id: Int = line[0].trim { it <= ' ' }.toInt()
@@ -84,7 +99,7 @@ class CsvInputDataReader(private val linesReader: CsvLinesReader) {
         val timeTxtDefaultSeconds = "$timeTxt:00"
         val timeParts = timeTxtDefaultSeconds.split(":")
         var dstValue = 0.0
-        if (dst == "Y") dstValue = 1.0
+        if (dst.toUpperCase() == "Y") dstValue = 1.0
         val combinedOffsetUt = offset + dstValue
         return DateTimeParts(dateParts[0].toInt(), dateParts[1].toInt(), dateParts[2].toInt(),
             timeParts[0].toInt(), timeParts[1].toInt(), timeParts[2].toInt(), combinedOffsetUt)

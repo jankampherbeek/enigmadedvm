@@ -25,8 +25,8 @@ fun checkForCuspOrb(lon: Double, speed: Double, house: Int, cusp: Double): Int {
     var newHouse = house
     val signForLon = SignPosition().idOfSign(lon)
     val signForCusp = SignPosition().idOfSign(cusp)
-    val diff =  Range.checkValue(abs(house - lon), 0.0, 360.0)
-    val corner = house == 1 || house == 4 || house == 7 || house == 10
+    val diff =  Range.checkValue(abs(cusp - lon), 0.0, 360.0)
+    val corner = house == 12 || house == 3 || house == 6 || house == 9
     val close = (diff < 3.0) || (diff < 4.0 && corner)
     if (speed > 0 && signForLon == signForCusp && close) newHouse++
     if (newHouse > 12) newHouse = 1
@@ -141,8 +141,10 @@ class BodiesInHouseHandler(
             val details: MutableList<Int> = ArrayList()
               for (point in supportedBodies) {
                   val pointPos = findPointInChart(point, chart)
-                    var house =  housePosition.idOfHouse(pointPos.lon, chart.jdUt, flags, chart.location)
-                    house = checkForCuspOrb(pointPos.lon, pointPos.speed, house, chart.cusps[house-1])
+                  var house =  housePosition.idOfHouse(pointPos.lon, chart.jdUt, flags, chart.location)
+                  var nextCusp = house     // array cusps starts with 0
+                  if (nextCusp > 11) nextCusp = 0
+                    house = checkForCuspOrb(pointPos.lon, pointPos.speed, house, chart.cusps[nextCusp])
                     if (cusps.contains(house)) details.add(1) else details.add(0)
               }
             chartCounts.add(ChartCount(chart.id, chart.name, details.toList()))
@@ -618,8 +620,7 @@ class PrincipleHandler(
             for (lonPointToCheck in chart.pointPositions) {
                 val priValues = mutableListOf(0, 0, 0, 0, 0, 0)
                 // check planet in own sign and set priValues[0] to 1 if this is the case
-                if (checkInOwnSign(lonPointToCheck)) priValues[0] = 1
-
+                if (checkInSignOfPrinciple(lonPointToCheck, index)) priValues[0] = 1
                 if (players.point != lonPointToCheck.point && checkAspect(lonPlayer, lonPointToCheck)) priValues[1] = 1
                 if (checkHouse(chart, lonPointToCheck.lon, lonPointToCheck.speed) == index) priValues[2] = 1
                 if (ruler != lonPointToCheck.point && checkAspect(lonRuler, lonPointToCheck)) priValues[3] = 1
@@ -652,11 +653,9 @@ class PrincipleHandler(
         return PrincipleComplete(index, totalsPerBody.toList(), chartDetails)
     }
 
-    private fun checkInOwnSign(pointToCheck: PointPosition): Boolean {
+    private fun checkInSignOfPrinciple(pointToCheck: PointPosition, principleId: Int): Boolean {
         val signIndex = signPosition.idOfSign(pointToCheck.lon)
-        var signRuler: Points = EmptyPoints.EXISTS_NOT
-        for (sign in Signs.values()) if (signIndex == sign.index) signRuler = sign.strong
-        return signRuler == pointToCheck.point
+        return signIndex == principleId
     }
 
     private fun checkAspect(pos1: PointPosition, pos2: PointPosition): Boolean {

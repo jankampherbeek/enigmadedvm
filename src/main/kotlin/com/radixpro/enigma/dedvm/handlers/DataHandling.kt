@@ -10,7 +10,7 @@ import com.radixpro.enigma.dedvm.astron.ChartsCalculator
 import com.radixpro.enigma.dedvm.persistency.ChartsWriter
 import com.radixpro.enigma.dedvm.persistency.ControlDataCreator
 import com.radixpro.enigma.dedvm.persistency.CsvInputDataReader
-import com.radixpro.enigma.dedvm.persistency.JsonWriter
+import java.io.File
 import java.io.File.separator as SEPARATOR
 
 class InputDataHandler(
@@ -21,30 +21,25 @@ class InputDataHandler(
 ) {
 
     fun handleData(fileAndPath: String) {
+        val fileNameForData = ".${SEPARATOR}data${SEPARATOR}calculatedcharts.json"
+        val fileNameForCtrlData = ".${SEPARATOR}data${SEPARATOR}controlcharts.json"
         val inputDataRecords = csvInputDataReader.readInputData(fileAndPath)
         val calculatedCharts = chartsCalculator.processInputData(inputDataRecords)
-        val fileNameData = defineNameForData(fileAndPath)
-        val fullPathNameData = ".${SEPARATOR}testdata${SEPARATOR}${fileNameData}"
-        chartsWriter.writeCharts(calculatedCharts, fileNameData)
+        chartsWriter.writeCharts(calculatedCharts, fileNameForData)
         val controlDataRecords = controlDataCreator.createControlData(inputDataRecords)
         val calculatedControlCharts = chartsCalculator.processInputData(controlDataRecords)
-        val fileNameControlData = defineNameForControlData(fileAndPath)
-        val fullPathControlData = ".${SEPARATOR}testdata${SEPARATOR}${fileNameControlData}"
-        chartsWriter.writeCharts(calculatedControlCharts, fileNameControlData)
+        chartsWriter.writeCharts(calculatedControlCharts, fileNameForCtrlData)
     }
 
-    private fun defineNameForData(dataFileName: String): String {
-        val position1 = dataFileName.lastIndexOf(SEPARATOR)
-        val position2 = dataFileName.lastIndexOf(".csv")
-        val name = dataFileName.substring(position1+1, position2)
-        return "${name}_calculatedCharts.json"
-    }
-
-    private fun defineNameForControlData(dataFileName: String): String {
-        val position1 = dataFileName.lastIndexOf(SEPARATOR)
-        val position2 = dataFileName.lastIndexOf(".csv")
-        val name = dataFileName.substring(position1+1, position2)
-        return "${name}_controlCharts.json"
+    fun handleData(inputDataFile: File) {
+        val fileNameForData = ".${SEPARATOR}data${SEPARATOR}calculatedcharts.json"
+        val fileNameForCtrlData = ".${SEPARATOR}data${SEPARATOR}controlcharts.json"
+        val inputDataRecords = csvInputDataReader.readInputData(inputDataFile)
+        val calculatedCharts = chartsCalculator.processInputData(inputDataRecords)
+        chartsWriter.writeCharts(calculatedCharts, fileNameForData)
+        val controlDataRecords = controlDataCreator.createControlData(inputDataRecords)
+        val calculatedControlCharts = chartsCalculator.processInputData(controlDataRecords)
+        chartsWriter.writeCharts(calculatedControlCharts, fileNameForCtrlData)
     }
 
 }

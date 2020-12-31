@@ -63,7 +63,7 @@ object Injector {
     }
 
     fun injectDashboard(): Dashboard {
-        return Dashboard()
+        return Dashboard(injectInputDataHandler())
     }
 
     fun injectElevationHandler(): ElevationHandler {

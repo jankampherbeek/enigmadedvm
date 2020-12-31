@@ -66,12 +66,12 @@ class ChartsWriter(private val jsonWriter: JsonWriter) {
 
     fun writeCharts(calculatedCharts: List<Chart>, name: String) {
         val allCharts = AllCharts(name, LocalDateTime.now().toString(), calculatedCharts)
-        jsonWriter.write2File(createPathFileName(name), allCharts, true)
+        jsonWriter.write2File(name, allCharts, true)
     }
 
-    private fun createPathFileName(name: String): String {
-        return ".${SEPARATOR}testdata${SEPARATOR}${name}"
-    }
+//    private fun createPathFileName(name: String): String {
+//        return ".${SEPARATOR}testdata${SEPARATOR}${name}"
+//    }
 }
 
 

@@ -6,7 +6,10 @@
 
 package com.radixpro.enigma.dedvm.ui
 
+import com.radixpro.enigma.dedvm.handlers.InputDataHandler
 import com.radixpro.enigma.dedvm.ui.UiDictionary.GAP
+import javafx.beans.value.ChangeListener
+import javafx.beans.value.ObservableValue
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Scene
@@ -18,10 +21,12 @@ import javafx.scene.image.ImageView
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.Pane
 import javafx.scene.text.TextAlignment
+import javafx.stage.FileChooser
 import javafx.stage.Modality
 import javafx.stage.Stage
+import java.io.File
 
-class Dashboard {
+class Dashboard(val inputDataHandler: InputDataHandler) {
     // texts
     private lateinit var txtLblInfo : String
     private lateinit var txtLblRetrieveDataFile: String
@@ -37,7 +42,6 @@ class Dashboard {
     private lateinit var btnRun : Button
     private lateinit var btnLanguage  : Button
     // checkboxes
-    private lateinit var cbAll : CheckBox
     private lateinit var cbSma : CheckBox
     private lateinit var cbBam : CheckBox
     private lateinit var cbBco : CheckBox
@@ -50,6 +54,8 @@ class Dashboard {
     private val height = 500.0
     private val width = 600.0
     private lateinit var stage: Stage
+    private val fileNameData = ".${File.separator}data${File.separator}calculatedcharts.json"
+    private val fileNameCtrlData = ".${File.separator}data${File.separator}controlcharts.json"
 
     fun showDashboard() {
         initialize()
@@ -66,21 +72,23 @@ class Dashboard {
         defineButtons()
         defineCheckBoxes()
         defineTexts()
+        checkStatus()
     }
 
     private fun defineButtons() {
         btnDataFile = ButtonBuilder("dashboard.btn_datafile").setPrefWidth(100.0).setDisabled(false).setFocusTraversable(true).build()
-        btnEventFile = ButtonBuilder("dashboard.btn_eventdata").setPrefWidth(100.0).setDisabled(false).setFocusTraversable(true).build()
+        btnEventFile = ButtonBuilder("dashboard.btn_eventdata").setPrefWidth(100.0).setDisabled(true).setFocusTraversable(false).build()
         btnCharts = ButtonBuilder("dashboard.btn_charts").setPrefWidth(100.0).setDisabled(true).setFocusTraversable(false).build()
         btnExit = ButtonBuilder("dashboard.btn_exit").setDisabled(false).setFocusTraversable(true).build()
         btnHelp = ButtonBuilder("dashboard.btn_help").setDisabled(false).setFocusTraversable(true).build()
         btnRun = ButtonBuilder("dashboard.btn_run").setDisabled(true).setFocusTraversable(false).build()
         btnLanguage = ButtonBuilder("dashboard.btn_language").setPrefWidth(200.0).setDisabled(false).setFocusTraversable(true).build()
         btnLanguage.onAction = EventHandler { onLanguage()}
+        btnDataFile.onAction = EventHandler { onDataFile()}
     }
 
     private fun defineCheckBoxes() {
-        cbAll = CheckBox(Rosetta.getText("dashboard.cb_selectall"))
+
         cbSma = CheckBox(Rosetta.getText("dashboard.cb_sunmoonascinsign"))
         cbBam = CheckBox(Rosetta.getText("dashboard.cb_inhouses1or10"))
         cbBco = CheckBox(Rosetta.getText("dashboard.cb_atcorners"))
@@ -89,6 +97,7 @@ class Dashboard {
         cbNas = CheckBox(Rosetta.getText("dashboard.cb_unaspected"))
         cbMax = CheckBox(Rosetta.getText("dashboard.cb_maximal"))
         cbPri = CheckBox(Rosetta.getText("dashboard.cb_principles"))
+
     }
 
     private fun defineTexts() {
@@ -97,6 +106,26 @@ class Dashboard {
         txtLblRetrieveEventFile = Rosetta.getText("dashboard.lbl_retrieveeventfile")
         txtLblShowCharts = Rosetta.getText("dashboard.lbl_showcharts")
         txtTitle = Rosetta.getText("dashboard.title")
+    }
+
+    private fun checkStatus() {
+        val dataFile = File(fileNameData)
+        val ctrlDataFile = File(fileNameCtrlData)
+        if (dataFile.exists() && ctrlDataFile.exists()) {
+            btnDataFile.isDisable = true
+            btnDataFile.isFocusTraversable = false
+            btnRun.isDisable = false
+            btnRun.isFocusTraversable = true
+            btnCharts.isDisable = false
+            btnCharts.isFocusTraversable = true
+        } else {
+            btnDataFile.isDisable = false
+            btnDataFile.isFocusTraversable = true
+            btnRun.isDisable = true
+            btnRun.isFocusTraversable = false
+            btnCharts.isDisable = true
+            btnCharts.isFocusTraversable = true
+        }
     }
 
 
@@ -112,7 +141,6 @@ class Dashboard {
         grid.add(btnDataFile, 2, 1, 1, 1)
         grid.add(btnEventFile, 2, 2, 1, 1)
         grid.add(btnCharts, 2, 3, 1, 1)
-        grid.add(cbAll, 1, 4, 2, 1)
         grid.add(cbSma, 1, 5, 2, 1)
         grid.add(cbBam, 1, 6, 2, 1)
         grid.add(cbBco, 1, 7, 2, 1)
@@ -163,6 +191,16 @@ class Dashboard {
     private fun createMainButtonBar(): ButtonBar {
         return ButtonBarBuilder().setButtons(arrayOf(btnExit, btnHelp, btnRun)).build()
     }
+
+    private fun onDataFile() {
+        val dataFile = FileChooser().showOpenDialog(stage)
+        if (null != dataFile) {
+            inputDataHandler.handleData(dataFile)
+            checkStatus()
+        }
+    }
+
+
 
     private fun onLanguage() {
         stage.close()
