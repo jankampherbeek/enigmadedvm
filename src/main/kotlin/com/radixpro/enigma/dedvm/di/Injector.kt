@@ -15,6 +15,7 @@ import com.radixpro.enigma.dedvm.astron.SeFrontend
 import com.radixpro.enigma.dedvm.handlers.*
 import com.radixpro.enigma.dedvm.persistency.*
 import com.radixpro.enigma.dedvm.ui.Dashboard
+import com.radixpro.enigma.dedvm.ui.Feedback
 
 object Injector {
 
@@ -63,11 +64,17 @@ object Injector {
     }
 
     fun injectDashboard(): Dashboard {
-        return Dashboard(injectInputDataHandler())
+        return Dashboard(injectInputDataHandler(), injectSMAInSignHandler(), injectBodiesInHouseHandler(), injectBodiesAtCornersHandler(),
+            injectElevationHandler(), injectProminentAspectsHandler(), injectUnaspectedPointsHandler(), injectMaxPointsHandler(), injectPrincipleHandler(),
+            injectFeedback())
     }
 
     fun injectElevationHandler(): ElevationHandler {
         return ElevationHandler(injectAllChartsReader(), injectResultsWriter())
+    }
+
+    fun injectFeedback(): Feedback {
+        return Feedback()
     }
 
     fun injectHousePosition(): HousePosition {

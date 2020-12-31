@@ -6,10 +6,8 @@
 
 package com.radixpro.enigma.dedvm.ui
 
-import com.radixpro.enigma.dedvm.handlers.InputDataHandler
+import com.radixpro.enigma.dedvm.handlers.*
 import com.radixpro.enigma.dedvm.ui.UiDictionary.GAP
-import javafx.beans.value.ChangeListener
-import javafx.beans.value.ObservableValue
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Scene
@@ -26,30 +24,44 @@ import javafx.stage.Modality
 import javafx.stage.Stage
 import java.io.File
 
-class Dashboard(val inputDataHandler: InputDataHandler) {
+class Dashboard(
+    private val inputDataHandler: InputDataHandler,
+    private val smaInSignHandler: SMAInSignHandler,
+    private val bodiesInHouseHandler: BodiesInHouseHandler,
+    private val bodiesAtCornersHandler: BodiesAtCornersHandler,
+    private val elevationHandler: ElevationHandler,
+    private val prominentAspectsHandler: ProminentAspectsHandler,
+    private val unaspectedPointsHandler: UnaspectedPointsHandler,
+    private val maxPointsHandler: MaxPointsHandler,
+    private val principleHandler: PrincipleHandler,
+    private val feedback: Feedback
+) {
     // texts
-    private lateinit var txtLblInfo : String
+    private lateinit var txtLblInfo: String
     private lateinit var txtLblRetrieveDataFile: String
-    private lateinit var txtLblRetrieveEventFile : String
-    private lateinit var txtLblShowCharts : String
-    private lateinit var txtTitle : String
+    private lateinit var txtLblRetrieveEventFile: String
+    private lateinit var txtLblShowCharts: String
+    private lateinit var txtTitle: String
+
     // buttons
-    private lateinit var btnDataFile : Button
-    private lateinit var btnEventFile : Button
-    private lateinit var btnCharts : Button
-    private lateinit var btnExit  : Button
-    private lateinit var btnHelp  : Button
-    private lateinit var btnRun : Button
-    private lateinit var btnLanguage  : Button
+    private lateinit var btnDataFile: Button
+    private lateinit var btnEventFile: Button
+    private lateinit var btnCharts: Button
+    private lateinit var btnExit: Button
+    private lateinit var btnHelp: Button
+    private lateinit var btnRun: Button
+    private lateinit var btnLanguage: Button
+
     // checkboxes
-    private lateinit var cbSma : CheckBox
-    private lateinit var cbBam : CheckBox
-    private lateinit var cbBco : CheckBox
-    private lateinit var cbElev : CheckBox
-    private lateinit var cbPra : CheckBox
-    private lateinit var cbNas : CheckBox
-    private lateinit var cbMax : CheckBox
-    private lateinit var cbPri : CheckBox
+    private lateinit var cbSma: CheckBox
+    private lateinit var cbBam: CheckBox
+    private lateinit var cbBco: CheckBox
+    private lateinit var cbElev: CheckBox
+    private lateinit var cbPra: CheckBox
+    private lateinit var cbNas: CheckBox
+    private lateinit var cbMax: CheckBox
+    private lateinit var cbPri: CheckBox
+
     // general
     private val height = 500.0
     private val width = 600.0
@@ -83,8 +95,9 @@ class Dashboard(val inputDataHandler: InputDataHandler) {
         btnHelp = ButtonBuilder("dashboard.btn_help").setDisabled(false).setFocusTraversable(true).build()
         btnRun = ButtonBuilder("dashboard.btn_run").setDisabled(true).setFocusTraversable(false).build()
         btnLanguage = ButtonBuilder("dashboard.btn_language").setPrefWidth(200.0).setDisabled(false).setFocusTraversable(true).build()
-        btnLanguage.onAction = EventHandler { onLanguage()}
-        btnDataFile.onAction = EventHandler { onDataFile()}
+        btnLanguage.onAction = EventHandler { onLanguage() }
+        btnDataFile.onAction = EventHandler { onDataFile() }
+        btnRun.onAction = EventHandler { onPerformTests() }
     }
 
     private fun defineCheckBoxes() {
@@ -132,12 +145,12 @@ class Dashboard(val inputDataHandler: InputDataHandler) {
     private fun createGridPane(): GridPane {
         val grid = GridPaneBuilder().setHGap(GAP).setVGap(GAP).setPrefWidth(width).setPrefHeight(height).setStyleSheet(styleSheet).build()
         grid.add(createTitlePane(), 0, 0, 3, 1)
-        grid.add(createImagePane(),0, 1, 1, 3)
-        grid.add(createGenInfoPane(),0, 4, 1, 8)
+        grid.add(createImagePane(), 0, 1, 1, 3)
+        grid.add(createGenInfoPane(), 0, 4, 1, 8)
         grid.add(createLanguagePane(), 0, 13, 1, 1)
-        grid.add(createSingleLinePane(txtLblRetrieveDataFile),1, 1, 1, 1)
-        grid.add(createSingleLinePane(txtLblRetrieveEventFile),1, 2, 1, 1)
-        grid.add(createSingleLinePane(txtLblShowCharts),1, 3, 1, 1)
+        grid.add(createSingleLinePane(txtLblRetrieveDataFile), 1, 1, 1, 1)
+        grid.add(createSingleLinePane(txtLblRetrieveEventFile), 1, 2, 1, 1)
+        grid.add(createSingleLinePane(txtLblShowCharts), 1, 3, 1, 1)
         grid.add(btnDataFile, 2, 1, 1, 1)
         grid.add(btnEventFile, 2, 2, 1, 1)
         grid.add(btnCharts, 2, 3, 1, 1)
@@ -192,6 +205,10 @@ class Dashboard(val inputDataHandler: InputDataHandler) {
         return ButtonBarBuilder().setButtons(arrayOf(btnExit, btnHelp, btnRun)).build()
     }
 
+    private fun showFeedback(msg: String) {
+        feedback.show(msg)
+    }
+
     private fun onDataFile() {
         val dataFile = FileChooser().showOpenDialog(stage)
         if (null != dataFile) {
@@ -200,7 +217,23 @@ class Dashboard(val inputDataHandler: InputDataHandler) {
         }
     }
 
-
+    private fun onPerformTests() {
+        try {
+            if (cbSma.isSelected) smaInSignHandler.processCharts()
+            if (cbBam.isSelected) bodiesInHouseHandler.processChartsAscMc()
+            if (cbBco.isSelected) bodiesAtCornersHandler.processCharts()
+            if (cbElev.isSelected) elevationHandler.processCharts()
+            if (cbMax.isSelected) maxPointsHandler.processCharts()
+            if (cbNas.isSelected) unaspectedPointsHandler.processCharts()
+            if (cbPra.isSelected) prominentAspectsHandler.processCharts()
+            if (cbPri.isSelected) principleHandler.processCharts()
+            if (cbSma.isSelected || cbBam.isSelected || cbBco.isSelected || cbElev.isSelected || cbMax.isSelected || cbNas.isSelected || cbPra.isSelected ||
+                    cbPri.isSelected) showFeedback(Rosetta.getText("dashboard.msg_results"))
+            else showFeedback(Rosetta.getText("dashboard.msg_noselection"))
+        } catch (e: Exception) {
+            showFeedback(Rosetta.getText("dashboard.msg_error"))
+        }
+    }
 
     private fun onLanguage() {
         stage.close()

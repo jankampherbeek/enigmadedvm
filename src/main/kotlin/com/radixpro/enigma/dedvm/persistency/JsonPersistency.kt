@@ -68,10 +68,6 @@ class ChartsWriter(private val jsonWriter: JsonWriter) {
         val allCharts = AllCharts(name, LocalDateTime.now().toString(), calculatedCharts)
         jsonWriter.write2File(name, allCharts, true)
     }
-
-//    private fun createPathFileName(name: String): String {
-//        return ".${SEPARATOR}testdata${SEPARATOR}${name}"
-//    }
 }
 
 
@@ -79,7 +75,7 @@ class AllChartsReader(private val jsonReader: JsonReader, private val mapper: Ch
 
     fun readAllCharts(fileName: String): AllCharts {
         // todo define path
-        val pathAndName = ".${SEPARATOR}testdata${SEPARATOR}${fileName}"
+        val pathAndName = ".${SEPARATOR}data${SEPARATOR}${fileName}"
         val file = File(pathAndName)
         val json = jsonReader.readObjectFromFile(file)
         return mapper.jsonToAllCharts(json)
@@ -89,7 +85,7 @@ class AllChartsReader(private val jsonReader: JsonReader, private val mapper: Ch
 class ResultsWriter(private val jsonWriter: JsonWriter) {
 
     fun writeResults(fileName: String, object2Write: Any) {
-        val pathAndName = ".${SEPARATOR}testdata${SEPARATOR}${fileName}"
+        val pathAndName = ".${SEPARATOR}data${SEPARATOR}${fileName}"
         val file = File(pathAndName)
         jsonWriter.write2File(pathAndName, object2Write, true)
     }
