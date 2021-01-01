@@ -39,13 +39,11 @@ class Dashboard(
     // texts
     private lateinit var txtLblInfo: String
     private lateinit var txtLblRetrieveDataFile: String
-    private lateinit var txtLblRetrieveEventFile: String
     private lateinit var txtLblShowCharts: String
     private lateinit var txtTitle: String
 
     // buttons
     private lateinit var btnDataFile: Button
-    private lateinit var btnEventFile: Button
     private lateinit var btnCharts: Button
     private lateinit var btnExit: Button
     private lateinit var btnHelp: Button
@@ -89,7 +87,6 @@ class Dashboard(
 
     private fun defineButtons() {
         btnDataFile = ButtonBuilder("dashboard.btn_datafile").setPrefWidth(100.0).setDisabled(false).setFocusTraversable(true).build()
-        btnEventFile = ButtonBuilder("dashboard.btn_eventdata").setPrefWidth(100.0).setDisabled(true).setFocusTraversable(false).build()
         btnCharts = ButtonBuilder("dashboard.btn_charts").setPrefWidth(100.0).setDisabled(true).setFocusTraversable(false).build()
         btnExit = ButtonBuilder("dashboard.btn_exit").setDisabled(false).setFocusTraversable(true).build()
         btnHelp = ButtonBuilder("dashboard.btn_help").setDisabled(false).setFocusTraversable(true).build()
@@ -116,7 +113,6 @@ class Dashboard(
     private fun defineTexts() {
         txtLblInfo = Rosetta.getText("dashboard.lbl_info")
         txtLblRetrieveDataFile = Rosetta.getText("dashboard.lbl_retrievedatafile")
-        txtLblRetrieveEventFile = Rosetta.getText("dashboard.lbl_retrieveeventfile")
         txtLblShowCharts = Rosetta.getText("dashboard.lbl_showcharts")
         txtTitle = Rosetta.getText("dashboard.title")
     }
@@ -149,11 +145,10 @@ class Dashboard(
         grid.add(createGenInfoPane(), 0, 4, 1, 8)
         grid.add(createLanguagePane(), 0, 13, 1, 1)
         grid.add(createSingleLinePane(txtLblRetrieveDataFile), 1, 1, 1, 1)
-        grid.add(createSingleLinePane(txtLblRetrieveEventFile), 1, 2, 1, 1)
-        grid.add(createSingleLinePane(txtLblShowCharts), 1, 3, 1, 1)
+        grid.add(createSingleLinePane(txtLblShowCharts), 1, 2, 1, 1)
+        grid.add(LabelBuilder().setText(Rosetta.getText("dashboard.lbl_availabletests")).build(),1, 3, 1, 1)
         grid.add(btnDataFile, 2, 1, 1, 1)
-        grid.add(btnEventFile, 2, 2, 1, 1)
-        grid.add(btnCharts, 2, 3, 1, 1)
+        grid.add(btnCharts, 2, 2, 1, 1)
         grid.add(cbSma, 1, 5, 2, 1)
         grid.add(cbBam, 1, 6, 2, 1)
         grid.add(cbBco, 1, 7, 2, 1)
@@ -212,7 +207,12 @@ class Dashboard(
     private fun onDataFile() {
         val dataFile = FileChooser().showOpenDialog(stage)
         if (null != dataFile) {
-            inputDataHandler.handleData(dataFile)
+            try {
+                inputDataHandler.handleData(dataFile)
+                showFeedback(Rosetta.getText("dashboard.msg_dataimported"))
+            } catch(e: Exception) {
+                showFeedback(Rosetta.getText("dashboard.msg_error"))
+            }
             checkStatus()
         }
     }
