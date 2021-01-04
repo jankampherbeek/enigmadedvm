@@ -224,7 +224,9 @@ class BodiesAtCornersHandler(private val allChartsReader: AllChartsReader, priva
 
     private fun withinOrb(lon1: Double, lon2: Double, orb: Double): Boolean {
         val diff = (max(lon1, lon2) - min(lon1, lon2))
-        return Range.checkValue(diff, 0.0, 360.0) <= orb
+        val signLon1 = SignPosition().idOfSign(lon1)
+        val signLon2 = SignPosition().idOfSign(lon2)
+        return (Range.checkValue(diff, 0.0, 360.0) <= orb) && signLon1 == signLon2
     }
 
     private fun defineTotals(detailCount: List<ChartCount>): BodiesInRange {
@@ -287,7 +289,7 @@ class ElevationHandler(private val allChartsReader: AllChartsReader, private val
                     }
                 }
             }
-            elevatedPoints.add(MinMaxPositionsPerChart(chart.id, chart.name, pointWithShortestDistance as CelPoints, shortestDistance))
+            if (shortestDistance <= 60.0) elevatedPoints.add(MinMaxPositionsPerChart(chart.id, chart.name, pointWithShortestDistance as CelPoints, shortestDistance))
         }
         return elevatedPoints.toList()
     }
@@ -384,6 +386,7 @@ class ProminentAspectsHandler(
             for (i in 0..10) if (praAspects[i] == maxCount) totals[i]++
 
             chartCounts.add(ChartCount(chart.id, chart.name, totals))
+
         }
         return chartCounts.toList()
     }

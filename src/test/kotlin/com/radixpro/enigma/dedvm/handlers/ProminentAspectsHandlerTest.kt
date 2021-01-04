@@ -14,7 +14,7 @@ internal class ProminentAspectsHandlerTest {
     private val handler = Injector.injectProminentAspectsHandler()
 
     @Test
-    fun `Defining prominency based on aspects should notgieve any errors`() {
+    fun `Defining prominency based on aspects should not give any errors`() {
         handler.processCharts()
     }
 }

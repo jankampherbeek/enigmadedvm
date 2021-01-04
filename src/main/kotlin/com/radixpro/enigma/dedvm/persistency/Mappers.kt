@@ -84,7 +84,7 @@ class ChartMapper {
 
     private fun createCusps(positions: JSONArray): List<Double> {
         val positionsToConstruct: MutableList<Double> = ArrayList()
-        for (i in 1 .. 12) {
+        for (i in 0 .. 12) {
             positionsToConstruct.add(positions[i] as Double)
         }
         return positionsToConstruct.toList()

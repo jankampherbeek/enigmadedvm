@@ -7,6 +7,8 @@
 package com.radixpro.enigma.dedvm.handlers
 
 import com.radixpro.enigma.dedvm.astron.ChartsCalculator
+import com.radixpro.enigma.dedvm.core.AllCharts
+import com.radixpro.enigma.dedvm.persistency.AllChartsReader
 import com.radixpro.enigma.dedvm.persistency.ChartsWriter
 import com.radixpro.enigma.dedvm.persistency.ControlDataCreator
 import com.radixpro.enigma.dedvm.persistency.CsvInputDataReader

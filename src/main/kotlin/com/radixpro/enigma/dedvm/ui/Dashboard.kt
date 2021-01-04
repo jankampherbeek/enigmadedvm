@@ -8,6 +8,7 @@ package com.radixpro.enigma.dedvm.ui
 
 import com.radixpro.enigma.dedvm.handlers.*
 import com.radixpro.enigma.dedvm.ui.UiDictionary.GAP
+import javafx.application.Platform
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Scene
@@ -39,12 +40,10 @@ class Dashboard(
     // texts
     private lateinit var txtLblInfo: String
     private lateinit var txtLblRetrieveDataFile: String
-    private lateinit var txtLblShowCharts: String
     private lateinit var txtTitle: String
 
     // buttons
     private lateinit var btnDataFile: Button
-    private lateinit var btnCharts: Button
     private lateinit var btnExit: Button
     private lateinit var btnHelp: Button
     private lateinit var btnRun: Button
@@ -87,7 +86,6 @@ class Dashboard(
 
     private fun defineButtons() {
         btnDataFile = ButtonBuilder("dashboard.btn_datafile").setPrefWidth(100.0).setDisabled(false).setFocusTraversable(true).build()
-        btnCharts = ButtonBuilder("dashboard.btn_charts").setPrefWidth(100.0).setDisabled(true).setFocusTraversable(false).build()
         btnExit = ButtonBuilder("dashboard.btn_exit").setDisabled(false).setFocusTraversable(true).build()
         btnHelp = ButtonBuilder("dashboard.btn_help").setDisabled(false).setFocusTraversable(true).build()
         btnRun = ButtonBuilder("dashboard.btn_run").setDisabled(true).setFocusTraversable(false).build()
@@ -95,6 +93,7 @@ class Dashboard(
         btnLanguage.onAction = EventHandler { onLanguage() }
         btnDataFile.onAction = EventHandler { onDataFile() }
         btnRun.onAction = EventHandler { onPerformTests() }
+        btnExit.onAction = EventHandler { onExit() }
     }
 
     private fun defineCheckBoxes() {
@@ -113,7 +112,6 @@ class Dashboard(
     private fun defineTexts() {
         txtLblInfo = Rosetta.getText("dashboard.lbl_info")
         txtLblRetrieveDataFile = Rosetta.getText("dashboard.lbl_retrievedatafile")
-        txtLblShowCharts = Rosetta.getText("dashboard.lbl_showcharts")
         txtTitle = Rosetta.getText("dashboard.title")
     }
 
@@ -125,15 +123,11 @@ class Dashboard(
             btnDataFile.isFocusTraversable = false
             btnRun.isDisable = false
             btnRun.isFocusTraversable = true
-            btnCharts.isDisable = false
-            btnCharts.isFocusTraversable = true
         } else {
             btnDataFile.isDisable = false
             btnDataFile.isFocusTraversable = true
             btnRun.isDisable = true
             btnRun.isFocusTraversable = false
-            btnCharts.isDisable = true
-            btnCharts.isFocusTraversable = true
         }
     }
 
@@ -145,10 +139,8 @@ class Dashboard(
         grid.add(createGenInfoPane(), 0, 4, 1, 8)
         grid.add(createLanguagePane(), 0, 13, 1, 1)
         grid.add(createSingleLinePane(txtLblRetrieveDataFile), 1, 1, 1, 1)
-        grid.add(createSingleLinePane(txtLblShowCharts), 1, 2, 1, 1)
         grid.add(LabelBuilder().setText(Rosetta.getText("dashboard.lbl_availabletests")).build(),1, 3, 1, 1)
         grid.add(btnDataFile, 2, 1, 1, 1)
-        grid.add(btnCharts, 2, 2, 1, 1)
         grid.add(cbSma, 1, 5, 2, 1)
         grid.add(cbBam, 1, 6, 2, 1)
         grid.add(cbBco, 1, 7, 2, 1)
@@ -239,7 +231,10 @@ class Dashboard(
         stage.close()
         Rosetta.changeLanguage()
         showDashboard()
+    }
 
+    private fun onExit() {
+        Platform.exit()
     }
 
 }

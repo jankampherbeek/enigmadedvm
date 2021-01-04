@@ -20,8 +20,8 @@ class AspectsForChart {
         val mc = PointPosition(MundanePoints.MC, chart.cusps[10], 0.0)
         val asc = PointPosition(MundanePoints.ASC, chart.cusps[1], 0.0)
         val celPoints = chart.pointPositions
-        for (i in celPoints.indices) {
-            for (j in i + 1 until celPoints.size) {
+        for (i in 0..12) {
+            for (j in (i + 1)..12) {
                 actualAspects.addAll(checkForAspect(celPoints[i], celPoints[j]))
             }
             actualAspects.addAll(checkForAspect(celPoints[i], mc))
