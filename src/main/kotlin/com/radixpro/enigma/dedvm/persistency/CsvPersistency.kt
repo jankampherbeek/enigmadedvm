@@ -11,6 +11,7 @@ import com.radixpro.enigma.dedvm.core.ChartInputData
 import com.radixpro.enigma.dedvm.core.DateTimeParts
 import com.radixpro.enigma.dedvm.core.Location
 import com.radixpro.enigma.dedvm.exceptions.InputDataException
+import org.apache.log4j.Logger
 import java.io.File
 import java.io.FileReader
 import java.lang.Exception
@@ -41,6 +42,8 @@ class CsvLinesReader {
  */
 class CsvInputDataReader(private val linesReader: CsvLinesReader) {
 
+    private val log: Logger = Logger.getLogger(CsvInputDataReader::class.java)
+
     fun readInputData(fileName: String): List<ChartInputData> {
         val allInputData: MutableList<ChartInputData> = ArrayList()
         val lines = linesReader.readLinesFromCsv(fileName)
@@ -60,6 +63,7 @@ class CsvInputDataReader(private val linesReader: CsvLinesReader) {
     }
 
     private fun readSingleLine(line: Array<String>): ChartInputData {
+        var errors = false;
         try {
             val id: Int = line[0].trim { it <= ' ' }.toInt()
             val name: String = line[1].trim { it <= ' ' }
@@ -71,9 +75,13 @@ class CsvInputDataReader(private val linesReader: CsvLinesReader) {
             val offset: Double = line[7].trim { it <= ' ' }.toDouble()
             val dst: String = line[8].trim { it <= ' ' }
             val dateTime = createDateTime(dateTxt, timeTxt, offset, dst)
+            if (dateTime.year < 1800 || dateTime.year > 2400) errors = true
             val location = createLocation(lonTxt, latTxt)
+            if (location.geoLat <= -90.0 || location.geoLat >= 90.0 || location.geoLon < -180.0 || location.geoLon > 180.0) errors = true
+            if (errors) throw RuntimeException()
             return ChartInputData(id, name, dateTime, location)
         } catch (e: Exception) {
+            log.error("Error when parsing line : " + line.contentToString())
             throw InputDataException("Error when parsing line : " + line.contentToString())
         }
     }

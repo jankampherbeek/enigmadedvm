@@ -7,6 +7,7 @@
 package com.radixpro.enigma.dedvm.ui
 
 import com.radixpro.enigma.dedvm.handlers.*
+import com.radixpro.enigma.dedvm.persistency.CsvInputDataReader
 import com.radixpro.enigma.dedvm.ui.UiDictionary.GAP
 import javafx.application.Platform
 import javafx.event.EventHandler
@@ -23,6 +24,7 @@ import javafx.scene.text.TextAlignment
 import javafx.stage.FileChooser
 import javafx.stage.Modality
 import javafx.stage.Stage
+import org.apache.log4j.Logger
 import java.io.File
 
 class Dashboard(
@@ -37,6 +39,7 @@ class Dashboard(
     private val principleHandler: PrincipleHandler,
     private val feedback: Feedback
 ) {
+    private val log: Logger = Logger.getLogger(Dashboard::class.java)
     // texts
     private lateinit var txtLblInfo: String
     private lateinit var txtLblRetrieveDataFile: String
@@ -67,6 +70,7 @@ class Dashboard(
     private val fileNameCtrlData = ".${File.separator}data${File.separator}controlcharts.json"
 
     fun showDashboard() {
+        log.info("EnigmaDedVM started.")
         initialize()
         stage = Stage()
         stage.minHeight = height
@@ -119,6 +123,7 @@ class Dashboard(
         val dataFile = File(fileNameData)
         val ctrlDataFile = File(fileNameCtrlData)
         if (dataFile.exists() && ctrlDataFile.exists()) {
+            log.info("Data file and controldata file do exist.")
             btnDataFile.isDisable = true
             btnDataFile.isFocusTraversable = false
             btnRun.isDisable = false
@@ -128,6 +133,7 @@ class Dashboard(
             btnDataFile.isFocusTraversable = true
             btnRun.isDisable = true
             btnRun.isFocusTraversable = false
+            log.info("No data file and/or no controldata file.")
         }
     }
 
@@ -202,8 +208,10 @@ class Dashboard(
             try {
                 inputDataHandler.handleData(dataFile)
                 showFeedback(Rosetta.getText("dashboard.msg_dataimported"))
+                log.info("Data has been imported.")
             } catch(e: Exception) {
                 showFeedback(Rosetta.getText("dashboard.msg_error"))
+                log.error("Could not import data: " + e.message)
             }
             checkStatus()
         }
@@ -234,6 +242,7 @@ class Dashboard(
     }
 
     private fun onExit() {
+        log.info("Closing EnigmaDedVM.")
         Platform.exit()
     }
 
