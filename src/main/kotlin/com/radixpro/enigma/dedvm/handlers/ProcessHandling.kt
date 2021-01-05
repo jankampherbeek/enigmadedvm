@@ -353,7 +353,7 @@ class ProminentAspectsHandler(
         val chartCounts: MutableList<ChartCount> = ArrayList()
         for (chart in allCharts.charts) {
             val praAspects = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)   // 11 positions
-            val signAscIndex = signPosition.idOfSign(chart.cusps[0])
+            val signAscIndex = signPosition.idOfSign(chart.cusps[1])
             val signAsc = Signs.values()[signAscIndex - 1]
             val rulerAsc = signAsc.strong
             val allAspects = aspectsForChart.findAspects(chart)
@@ -362,28 +362,28 @@ class ProminentAspectsHandler(
                 if (asp.point1 != CelPoints.MEAN_APOGEE && asp.point1 != CelPoints.MEAN_NODE &&
                     asp.point2 != CelPoints.MEAN_APOGEE && asp.point2 != CelPoints.MEAN_NODE
                 ) {
-
                     if ((asp.point1 == CelPoints.SUN ||
                                 asp.point1 == CelPoints.MOON ||
-                                asp.point1 == rulerAsc ||
                                 asp.point1 == MundanePoints.ASC ||
                                 asp.point1 == MundanePoints.MC
                                 ) && (supportedBodies.contains(asp.point2))
                     ) praAspects[supportedBodies.indexOf(asp.point2)]++
                     if ((asp.point2 == CelPoints.SUN ||
                                 asp.point2 == CelPoints.MOON ||
-                                asp.point2 == rulerAsc ||
                                 asp.point2 == MundanePoints.ASC ||
                                 asp.point2 == MundanePoints.MC
                                 ) && (supportedBodies.contains(asp.point1))
                     ) praAspects[supportedBodies.indexOf(asp.point1)]++
+                    // additional run for ruler asc as this can be Sun or Moon and should be counted twice if that occurs
+                    if (asp.point1 == rulerAsc  && (supportedBodies.contains(asp.point2))) praAspects[supportedBodies.indexOf(asp.point2)]++
+                    if (asp.point2 == rulerAsc  && (supportedBodies.contains(asp.point1))) praAspects[supportedBodies.indexOf(asp.point1)]++
                 }
             }
 
             var maxCount = 0
             val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)   // 11 positions
-            for (i in 0..10) if (praAspects[i] > maxCount) maxCount++
-            for (i in 0..10) if (praAspects[i] == maxCount) totals[i]++
+            for (i in 0..10) if (praAspects[i] > maxCount) maxCount = praAspects[i]
+            for (i in 0..10) if (praAspects[i] == maxCount) totals[i] = 1
 
             chartCounts.add(ChartCount(chart.id, chart.name, totals))
 

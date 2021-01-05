@@ -7,6 +7,7 @@
 package com.radixpro.enigma.dedvm.analysis
 
 import com.radixpro.enigma.dedvm.core.*
+import java.lang.RuntimeException
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -39,7 +40,7 @@ class AspectsForChart {
         for (aspect in Aspects.values()) {
             val orb = defineOrb(firstPoint.point, secondPoint.point, aspect)
             val angle = aspect.degrees
-            if ((abs(distance1 - angle) <= orb) || (abs(distance2 - angle) < orb)) found = true
+            if (((abs(distance1 - angle) <= orb) || (abs(distance2 - angle) < orb)) && !outOfSign(firstPoint.lon, secondPoint.lon, aspect)) found = true
         }
         return found
     }
@@ -55,7 +56,7 @@ class AspectsForChart {
             val angle = aspect.degrees
             val orb = defineOrb(firstPoint.point, secondPoint.point, aspect)
             val found = (abs(distance1 - angle) <= orb) || (abs(distance2 - angle) < orb)
-            if (found) foundAspects.add(ActualAspect(firstPoint.point, secondPoint.point, aspect))
+            if (found && !outOfSign(firstPoint.lon, secondPoint.lon, aspect)) foundAspects.add(ActualAspect(firstPoint.point, secondPoint.point, aspect))
         }
         return foundAspects.toList()
     }
@@ -66,6 +67,22 @@ class AspectsForChart {
     }
 
 
+    private fun outOfSign(lon1: Double, lon2: Double, aspect: Aspects): Boolean {
+        var signId1 = SignPosition().idOfSign(lon1)
+        var signId2 = SignPosition().idOfSign(lon2)
+        var diffInSigns = if (signId1 >= signId2) signId1 - signId2 else signId2 - signId1
+        if (diffInSigns > 6) diffInSigns = 12 - diffInSigns
+        when (diffInSigns) {
+            0 -> return aspect != Aspects.CONJUNCTION
+            1 -> return true    // semi sextile not supported so this can never be an aspect in signs
+            2 -> return aspect != Aspects.SEXTILE
+            3 -> return aspect != Aspects.SQUARE
+            4 -> return aspect != Aspects.TRIGON
+            5 -> return aspect != Aspects.INCONJUNCT
+            6 -> return aspect != Aspects.OPPOSITION
+        }
+        throw RuntimeException("Error when handling aspects and checking for out of sign aspects.")
+    }
 
 }
 
