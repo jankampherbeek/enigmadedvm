@@ -237,6 +237,7 @@ class Dashboard(
                     cbPri.isSelected) showFeedback(Rosetta.getText("dashboard.msg_results"))
             else showFeedback(Rosetta.getText("dashboard.msg_noselection"))
         } catch (e: Exception) {
+            log.error(e.message)
             showFeedback(Rosetta.getText("dashboard.msg_error"))
         }
     }

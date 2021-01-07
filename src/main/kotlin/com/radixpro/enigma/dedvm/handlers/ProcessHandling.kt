@@ -440,20 +440,41 @@ class UnaspectedPointsHandler(
         for (chart in allCharts.charts) {
             val nasValues = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)   // 11 positions
             val allAspects = aspectsForChart.findAspects(chart)
-            for (point in supportedBodies) {
-                if (checkAspects(point, allAspects)) nasValues[supportedBodies.indexOf(point)] = 1
+            val aspPartnersPerCelPoint = arrayListOf<List<Points>>()
+            for (point1 in supportedBodies) {
+                        aspPartnersPerCelPoint.add(checkAspects(point1, allAspects))
+            }
+            for (point1 in supportedBodies) {
+                val nrOfAspectsPoint1 = aspPartnersPerCelPoint[supportedBodies.indexOf(point1)].size
+                var noAspects = nrOfAspectsPoint1 == 0
+                if (nrOfAspectsPoint1 == 1) {       // check for duet
+                    val point2 = aspPartnersPerCelPoint[supportedBodies.indexOf(point1)][0]
+                    val nrOfAspectsPoint2 = aspPartnersPerCelPoint[supportedBodies.indexOf(point2)].size
+                    noAspects = nrOfAspectsPoint2 == 1
+                }
+                if (noAspects) nasValues[supportedBodies.indexOf(point1)] = 1
             }
             chartCounts.add(ChartCount(chart.id, chart.name, nasValues))
         }
         return chartCounts.toList()
     }
 
-    private fun checkAspects(point: Points, allAspects: List<ActualAspect>): Boolean {
-            var count = 0
-            for (asp in allAspects) {
-                if (point == asp.point1 || point == asp.point2) count++
+    private fun checkAspects(point1: Points, allAspects: List<ActualAspect>): List<Points> {
+        var count = 0
+        val aspPartners: MutableList<Points> = ArrayList()
+        for (point2 in supportedBodies) {
+            if (point1 != point2) {
+                for (asp in allAspects) {
+                    if ((point1 == asp.point1) && (point2 == asp.point2))  {
+                        aspPartners.add(point2)
+                    }
+                    if ((point2 == asp.point1) && (point1 == asp.point2)) {
+                        aspPartners.add(point2)
+                    }
+                }
             }
-            return count == 0
+        }
+        return aspPartners
     }
 
     private fun defineTotals(detailCount: List<ChartCount>): AspectCounts {
