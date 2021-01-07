@@ -1,5 +1,5 @@
-#H1 Enigma Dedicated Research 
-#H2 Research into suicide
+# Enigma Dedicated Research 
+# Research into suicide
 
 Enigma is software for astrological calculations. The versions mentioned as 'Dedicated' are built for a specific research project.
 

@@ -20,6 +20,7 @@ import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.Pane
+import javafx.scene.layout.VBox
 import javafx.scene.text.TextAlignment
 import javafx.stage.FileChooser
 import javafx.stage.Modality
@@ -77,7 +78,7 @@ class Dashboard(
         stage.minWidth = width
         stage.initModality(Modality.APPLICATION_MODAL)
         stage.title = txtTitle
-        stage.scene = Scene(createGridPane())
+        stage.scene = Scene(createVBox())
         stage.show()
     }
 
@@ -86,6 +87,10 @@ class Dashboard(
         defineCheckBoxes()
         defineTexts()
         checkStatus()
+    }
+
+    private fun createVBox(): VBox {
+        return VBoxBuilder().setPadding(GAP).setHeight(height + 2 * GAP).setWidth(width + 2 * GAP).setChildren(arrayOf(createGridPane())).build()
     }
 
     private fun defineButtons() {
@@ -98,6 +103,7 @@ class Dashboard(
         btnDataFile.onAction = EventHandler { onDataFile() }
         btnRun.onAction = EventHandler { onPerformTests() }
         btnExit.onAction = EventHandler { onExit() }
+        btnHelp.onAction = EventHandler { onHelp() }
     }
 
     private fun defineCheckBoxes() {
@@ -239,6 +245,10 @@ class Dashboard(
         stage.close()
         Rosetta.changeLanguage()
         showDashboard()
+    }
+
+    private fun onHelp() {
+       Help(Rosetta.getHelpText("help.dashboard.title"), Rosetta.getHelpText("help.dashboard.content")).showContent()
     }
 
     private fun onExit() {

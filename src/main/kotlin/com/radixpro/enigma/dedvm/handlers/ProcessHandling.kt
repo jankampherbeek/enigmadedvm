@@ -71,7 +71,7 @@ class SMAInSignHandler(
         for (chart in allCharts.charts) {
             val sunPos = signPosition.idOfSign(chart.pointPositions[0].lon)
             val moonPos = signPosition.idOfSign(chart.pointPositions[1].lon)
-            val ascPos = signPosition.idOfSign(chart.cusps[0])
+            val ascPos = signPosition.idOfSign(chart.cusps[1])
             val counts: MutableList<Int> = ArrayList()
             counts.add(sunPos)
             counts.add(moonPos)
@@ -142,8 +142,8 @@ class BodiesInHouseHandler(
               for (point in supportedBodies) {
                   val pointPos = findPointInChart(point, chart)
                   var house =  housePosition.idOfHouse(pointPos.lon, chart.jdUt, flags, chart.location)
-                  var nextCusp = house     // array cusps starts with 0
-                  if (nextCusp > 11) nextCusp = 0
+                  var nextCusp = house + 1     // array cusps starts with 0
+                  if (nextCusp > 12) nextCusp = 1
                     house = checkForCuspOrb(pointPos.lon, pointPos.speed, house, chart.cusps[nextCusp])
                     if (cusps.contains(house)) details.add(1) else details.add(0)
               }
@@ -205,10 +205,10 @@ class BodiesAtCornersHandler(private val allChartsReader: AllChartsReader, priva
         val chartCounts: MutableList<ChartCount> = ArrayList()
         for (chart in allCharts.charts) {
             val details: MutableList<Int> = ArrayList()
-            val asc = chart.cusps[0]
-            val desc = chart.cusps[6]
-            val mc = chart.cusps[9]
-            val ic = chart.cusps[3]
+            val asc = chart.cusps[1]
+            val desc = chart.cusps[7]
+            val mc = chart.cusps[10]
+            val ic = chart.cusps[4]
             for (pointPos in chart.pointPositions) {
                 val orb = if (pointPos.point == CelPoints.SUN || pointPos.point == CelPoints.MOON) 8.0 else 6.0
                 if (pointPos.point != CelPoints.MEAN_APOGEE && pointPos.point != CelPoints.MEAN_NODE) {
@@ -277,7 +277,7 @@ class ElevationHandler(private val allChartsReader: AllChartsReader, private val
         val elevatedPoints: MutableList<MinMaxPositionsPerChart> = ArrayList()
         for (chart in allCharts.charts) {
             var pointWithShortestDistance: Points = EmptyPoints.EXISTS_NOT
-            val mc = chart.cusps[9]
+            val mc = chart.cusps[10]
             var shortestDistance = 180.0
             var distance = 0.0
             for (pointPos in chart.pointPositions) {
