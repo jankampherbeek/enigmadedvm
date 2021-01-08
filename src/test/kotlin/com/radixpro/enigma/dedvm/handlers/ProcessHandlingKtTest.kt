@@ -41,7 +41,13 @@ internal class ProcessHandlingKtTest {
         checkForCuspOrb(lon, speed, house, cusp) shouldBe 1
     }
 
+    @Test
+    fun `Close position to asc shoud give correct result`() {
+        val lon = 168.293
+        val cusp = 169.526
+        val speed = 0.3402
+        val house = 12
+        checkForCuspOrb(lon, speed, house, cusp) shouldBe 1
+    }
+
 }
-
-
-//fun checkForCuspOrb(lon: Double, speed: Double, house: Int, cusp: Double): Int {

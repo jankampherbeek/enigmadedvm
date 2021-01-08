@@ -554,7 +554,9 @@ class MaxPointsHandler(
         }
         val sign = signPosition.idOfSign(lon)
         var house = housePosition.idOfHouse(lon, chart.jdUt, flags, chart.location)
-        house = checkForCuspOrb(lon, speed, house, chart.cusps[house-1])
+        var nextHouse = house+1
+        if (nextHouse == 13) nextHouse = 1
+        house = checkForCuspOrb(lon, speed, house, chart.cusps[nextHouse])
         when (point) {
             CelPoints.SUN -> {
                 if ((1 == sign || 5 == sign) && !(7 == house || 11 == house || 12 == house)) return true
@@ -689,7 +691,9 @@ class PrincipleHandler(
 
     private fun checkHouse(chart: Chart, lon: Double, speed: Double): Int {
         val house =  housePosition.idOfHouse(lon, chart.jdUt, flags, chart.location)
-        return checkForCuspOrb(lon, speed, house, chart.cusps[house-1])
+        var nextHouse = house + 1
+        if (nextHouse > 12) nextHouse = 1
+        return checkForCuspOrb(lon, speed, house, chart.cusps[nextHouse])
     }
 
     private fun defineRuler(priIndex: Int, chart: Chart): CelPoints {
