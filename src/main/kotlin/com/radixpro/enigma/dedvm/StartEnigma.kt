@@ -12,6 +12,10 @@ import javafx.stage.Stage
 
 class StartEnigma: Application() {
 
+    fun run(args: Array<String?>) {
+        launch(*args)
+    }
+
     override fun start(primaryStage: Stage) {
         Injector.injectDashboard().showDashboard()
     }
