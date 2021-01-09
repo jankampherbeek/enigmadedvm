@@ -636,22 +636,31 @@ class PrincipleHandler(
         val players = definePlayers(index)
         val chartDetails: MutableList<PrincipleChartDetails> = ArrayList()
         for (chart in allCharts.charts) {
-            val asc = PointPosition(MundanePoints.ASC, chart.cusps[0], 0.0)
-            val mc = PointPosition(MundanePoints.MC, chart.cusps[9], 0.0)
+            val aspects = aspectsForChart.findAspects(chart)
+            val asc = PointPosition(MundanePoints.ASC, chart.cusps[1], 0.0)
+            val mc = PointPosition(MundanePoints.MC, chart.cusps[10], 0.0)
             val ruler = defineRuler(index, chart)
+//            val lordCusp = defineLordCusp(asc.lon)
+            val lordCusp = defineRuler(index, chart)
+            lateinit var lordCuspPointPos : PointPosition
+
+            for (pointPos in chart.pointPositions) {
+                if (lordCusp == pointPos.point) {
+                    lordCuspPointPos = pointPos
+                }
+            }
             val lonRuler = definePointPos(ruler, chart)
             val lonPlayer = definePointPos(players.point, chart)
             val bodyDetails: MutableList<PrincipleBodyDetail> = ArrayList()
             val totalValues = mutableListOf(0, 0, 0, 0, 0, 0)
             for (lonPointToCheck in chart.pointPositions) {
                 val priValues = mutableListOf(0, 0, 0, 0, 0, 0)
-                // check planet in own sign and set priValues[0] to 1 if this is the case
                 if (checkInSignOfPrinciple(lonPointToCheck, index)) priValues[0] = 1
-                if (players.point != lonPointToCheck.point && checkAspect(lonPlayer, lonPointToCheck)) priValues[1] = 1
-                if (checkHouse(chart, lonPointToCheck.lon, lonPointToCheck.speed) == index) priValues[2] = 1
-                if (ruler != lonPointToCheck.point && checkAspect(lonRuler, lonPointToCheck)) priValues[3] = 1
-                if (players.checkMcOrAsc && index == 1 && checkAspect(asc, lonPointToCheck)) priValues[4] = 1
-                if (players.checkMcOrAsc && index == 10 && checkAspect(mc, lonPointToCheck)) priValues[4] = 1
+                if ((players.point != lonPointToCheck.point) && (checkAspect(lonPlayer, lonPointToCheck, aspects))) priValues[1] = 1
+                if (checkHouse(chart, lonPointToCheck) == index) priValues[2] = 1
+                if (ruler != lonPointToCheck.point && checkAspect(lordCuspPointPos, lonPointToCheck, aspects)) priValues[3] = 1
+                if (players.checkMcOrAsc && index == 1 && checkAspect(asc, lonPointToCheck, aspects)) priValues[4] = 1
+                if (players.checkMcOrAsc && index == 10 && checkAspect(mc, lonPointToCheck, aspects)) priValues[4] = 1
                 for (i in 0..4) priValues[5] += priValues[i]
                 for (i in 0..5) totalValues[i] += priValues[i]
                 bodyDetails.add(PrincipleBodyDetail(lonPointToCheck.point, priValues))
@@ -684,20 +693,42 @@ class PrincipleHandler(
         return signIndex == principleId
     }
 
-    private fun checkAspect(pos1: PointPosition, pos2: PointPosition): Boolean {
-        return aspectsForChart.findAnyAspect(pos1, pos2)
+    private fun checkAspect(pos1: PointPosition, pos2: PointPosition, aspects: List<ActualAspect>): Boolean {
+//        return aspectsForChart.findAnyAspect(pos1, pos2)
+        for (aspect in aspects) {
+            if ((aspect.point1 == pos1.point && aspect.point2 == pos2.point) || (aspect.point1 == pos2.point && aspect.point2 == pos1.point)) return true
+        }
+        return false
     }
 
-
-    private fun checkHouse(chart: Chart, lon: Double, speed: Double): Int {
-        val house =  housePosition.idOfHouse(lon, chart.jdUt, flags, chart.location)
-        var nextHouse = house + 1
-        if (nextHouse > 12) nextHouse = 1
-        return checkForCuspOrb(lon, speed, house, chart.cusps[nextHouse])
+    private fun checkHouse(chart: Chart, pointPos: PointPosition): Int {
+        val house =  housePosition.idOfHouse(pointPos.lon, chart.jdUt, flags, chart.location)
+        return if (pointPos.point == CelPoints.MEAN_NODE || pointPos.point == CelPoints.MEAN_APOGEE) house
+        else {
+            var nextHouse = house + 1
+            if (nextHouse > 12) nextHouse = 1
+            checkForCuspOrb(pointPos.lon, pointPos.speed, house, chart.cusps[nextHouse])
+        }
     }
+
+//    private fun defineLordCusp(lonCusp: Double): CelPoints {
+//        return when(signPosition.idOfSign(lonCusp)) {
+//            1 -> CelPoints.MARS
+//            2, 7 -> CelPoints.VENUS
+//            3, 6 -> CelPoints.MERCURY
+//            4 -> CelPoints.MOON
+//            5 -> CelPoints.SUN
+//            8 -> CelPoints.PLUTO
+//            9 -> CelPoints.JUPITER
+//            10 -> CelPoints.SATURN
+//            11 -> CelPoints.URANUS
+//            12 -> CelPoints.NEPTUNE
+//            else -> throw IllegalArgumentException("Received $lonCusp as longitude for asc, while only 0 .. < 360 are supported.")
+//        }
+//    }
 
     private fun defineRuler(priIndex: Int, chart: Chart): CelPoints {
-        val lonCusp = chart.cusps[priIndex - 1]
+        val lonCusp = chart.cusps[priIndex]
         return when (val signOnCusp = signPosition.idOfSign(lonCusp)) {
             1 -> CelPoints.MARS
             2, 7 -> CelPoints.VENUS
