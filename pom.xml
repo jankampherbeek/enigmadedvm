@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.radixpro.enigma.dedvm</groupId>
     <artifactId>mainModule</artifactId>
-    <version>0.9</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
     <pluginRepositories>
         <pluginRepository>
