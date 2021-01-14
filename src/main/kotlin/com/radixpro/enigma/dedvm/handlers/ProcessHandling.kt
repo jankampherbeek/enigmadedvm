@@ -21,6 +21,9 @@ private const val fileNameForCharts = "calculatedcharts.json"
 private const val fileNameForControlData = "controlcharts.json"
 
 
+/**
+ * Shared function, calculates the effect of a prespan when close to a cusp.
+ */
 fun checkForCuspOrb(lon: Double, speed: Double, house: Int, cusp: Double): Int {
     var newHouse = house
     val signForLon = SignPosition().idOfSign(lon)
@@ -171,6 +174,9 @@ class BodiesInHouseHandler(
 
 }
 
+/**
+ * Checks if points are positioned in corners.
+ */
 class BodiesAtCornersHandler(private val allChartsReader: AllChartsReader, private val resultsWriter: ResultsWriter) {
 
     private val fileNameForCornerData = "BCOResults.json"
@@ -316,6 +322,9 @@ class ElevationHandler(private val allChartsReader: AllChartsReader, private val
 
 }
 
+/**
+ * Checks if a point is prominently aspected.
+ */
 class ProminentAspectsHandler(
     private val allChartsReader: AllChartsReader,
     private val aspectsForChart: AspectsForChart,
@@ -403,6 +412,9 @@ class ProminentAspectsHandler(
     }
 }
 
+/**
+ * Checks is point is unaspected or part of an unaspected duet.
+ */
 class UnaspectedPointsHandler(
     private val allChartsReader: AllChartsReader,
     private val aspectsForChart: AspectsForChart,
@@ -488,7 +500,9 @@ class UnaspectedPointsHandler(
     }
 }
 
-
+/**
+ * Checks the point with maximum value, based on rulership, exaltation and position in houses.
+ */
 class MaxPointsHandler(
     private val allChartsReader: AllChartsReader,
     private val signPosition: SignPosition,
@@ -593,7 +607,9 @@ class MaxPointsHandler(
     }
 }
 
-
+/**
+ * Handles the 'principles'.
+ */
 class PrincipleHandler(
     private val allChartsReader: AllChartsReader,
     private val signPosition: SignPosition,
@@ -640,7 +656,6 @@ class PrincipleHandler(
             val asc = PointPosition(MundanePoints.ASC, chart.cusps[1], 0.0)
             val mc = PointPosition(MundanePoints.MC, chart.cusps[10], 0.0)
             val ruler = defineRuler(index, chart)
-//            val lordCusp = defineLordCusp(asc.lon)
             val lordCusp = defineRuler(index, chart)
             lateinit var lordCuspPointPos : PointPosition
 
@@ -694,7 +709,6 @@ class PrincipleHandler(
     }
 
     private fun checkAspect(pos1: PointPosition, pos2: PointPosition, aspects: List<ActualAspect>): Boolean {
-//        return aspectsForChart.findAnyAspect(pos1, pos2)
         for (aspect in aspects) {
             if ((aspect.point1 == pos1.point && aspect.point2 == pos2.point) || (aspect.point1 == pos2.point && aspect.point2 == pos1.point)) return true
         }
@@ -710,22 +724,6 @@ class PrincipleHandler(
             checkForCuspOrb(pointPos.lon, pointPos.speed, house, chart.cusps[nextHouse])
         }
     }
-
-//    private fun defineLordCusp(lonCusp: Double): CelPoints {
-//        return when(signPosition.idOfSign(lonCusp)) {
-//            1 -> CelPoints.MARS
-//            2, 7 -> CelPoints.VENUS
-//            3, 6 -> CelPoints.MERCURY
-//            4 -> CelPoints.MOON
-//            5 -> CelPoints.SUN
-//            8 -> CelPoints.PLUTO
-//            9 -> CelPoints.JUPITER
-//            10 -> CelPoints.SATURN
-//            11 -> CelPoints.URANUS
-//            12 -> CelPoints.NEPTUNE
-//            else -> throw IllegalArgumentException("Received $lonCusp as longitude for asc, while only 0 .. < 360 are supported.")
-//        }
-//    }
 
     private fun defineRuler(priIndex: Int, chart: Chart): CelPoints {
         val lonCusp = chart.cusps[priIndex]

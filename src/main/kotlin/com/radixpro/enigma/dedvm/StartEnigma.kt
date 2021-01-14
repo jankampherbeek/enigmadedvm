@@ -10,6 +10,9 @@ import com.radixpro.enigma.dedvm.di.Injector
 import javafx.application.Application
 import javafx.stage.Stage
 
+/**
+ * Starts the application.
+ */
 class StartEnigma: Application() {
 
     fun run(args: Array<String?>) {

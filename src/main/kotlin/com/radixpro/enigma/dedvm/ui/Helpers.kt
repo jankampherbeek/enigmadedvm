@@ -63,7 +63,9 @@ class LabelBuilder {
     }
 }
 
-
+/**
+ * Creates a pane, based on the builder pattern.
+ */
 class PaneBuilder {
     private var width = 0.0
     private var height = 0.0
@@ -228,6 +230,9 @@ class GridPaneBuilder {
     }
 }
 
+/**
+ * Creates a buttonbar, based on the builder pattern.
+ */
 class ButtonBarBuilder {
     private var buttons: Array<Node>? = null
     fun setButtons(buttons: Array<Node>?): ButtonBarBuilder {

@@ -69,7 +69,9 @@ class ChartsWriter(private val jsonWriter: JsonWriter) {
     }
 }
 
-
+/**
+ * Reads data for a set of calculated charts.
+ */
 class AllChartsReader(private val jsonReader: JsonReader, private val mapper: ChartMapper) {
 
     fun readAllCharts(fileName: String): AllCharts {
@@ -81,6 +83,9 @@ class AllChartsReader(private val jsonReader: JsonReader, private val mapper: Ch
     }
 }
 
+/**
+ * Writes teh results of tests to a JSON file.
+ */
 class ResultsWriter(private val jsonWriter: JsonWriter) {
 
     fun writeResults(fileName: String, object2Write: Any) {

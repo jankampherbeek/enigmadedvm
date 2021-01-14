@@ -8,6 +8,9 @@
 
 package com.radixpro.enigma.dedvm
 
+/**
+ * Helper class for starting the application.
+ */
 object App {
     @JvmStatic
     fun main(args: Array<String?>) {

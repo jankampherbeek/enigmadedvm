@@ -12,6 +12,9 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * Calculation of aspects in a radix.
+ */
 class AspectsForChart {
 
     private val fullCircle = 360.0

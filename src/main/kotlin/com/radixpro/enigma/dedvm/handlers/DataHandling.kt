@@ -15,6 +15,9 @@ import com.radixpro.enigma.dedvm.persistency.CsvInputDataReader
 import java.io.File
 import java.io.File.separator as SEPARATOR
 
+/**
+ * Handler for input data.
+ */
 class InputDataHandler(
     private val csvInputDataReader: CsvInputDataReader,
     private val chartsCalculator: ChartsCalculator,

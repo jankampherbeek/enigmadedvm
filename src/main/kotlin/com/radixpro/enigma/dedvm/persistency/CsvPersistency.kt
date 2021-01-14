@@ -19,7 +19,7 @@ import kotlin.collections.ArrayList
 
 
 /**
- * Reads content from a csv file, Structure of the content is not important.
+ * Reads content from a csv file, Structure of the content is not (yet) important.
  * Skips header line.
  */
 class CsvLinesReader {

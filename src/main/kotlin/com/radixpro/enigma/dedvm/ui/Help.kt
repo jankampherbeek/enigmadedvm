@@ -22,6 +22,9 @@ import javafx.scene.web.WebView
 import javafx.stage.Modality
 import javafx.stage.Stage
 
+/**
+ * Show a Help page.
+ */
 class Help(private val title: String, private val content: String) {
     private val widthInner = 560.0
     private val widthOuter = 572.0

@@ -6,4 +6,7 @@
 
 package com.radixpro.enigma.dedvm.exceptions
 
+/**
+ * Exception to handle failures when persisting data.
+ */
 class SaveException(message: String?) : Exception(message)

@@ -39,6 +39,9 @@ enum class MundanePoints(override val id: Int, override val nameTxt: String): Po
     ASC(101,"Ascendant")
 }
 
+/**
+ * Filler to be used if a point does not (yet) exist.
+ */
 enum class EmptyPoints(override val id: Int, override val nameTxt: String): Points {
     EXISTS_NOT(1000, "Does not exist"),
     ERROR(1001, "Result of error"),
@@ -47,7 +50,7 @@ enum class EmptyPoints(override val id: Int, override val nameTxt: String): Poin
 
 
 /**
- * Supported aspects.
+ * Supported aspects and their orbs.
  */
 enum class Aspects(val degrees: Double, val orbForLights: Double, val orb: Double) {
     CONJUNCTION(0.0, 8.0, 6.0),
@@ -58,6 +61,9 @@ enum class Aspects(val degrees: Double, val orbForLights: Double, val orb: Doubl
     INCONJUNCT(150.0, 3.5, 3.0)
 }
 
+/**
+ * Ecliptical signs and their rulers and exaltated bodies.
+ */
 enum class Signs(val index: Int, val abbr: String, val strong: Points, val weak: Points, val fall: Points) {
     ARIES(1, "AR", CelPoints.MARS, CelPoints.VENUS, CelPoints.SATURN),
     TAURUS(2, "TA", CelPoints.VENUS, CelPoints.MARS, EmptyPoints.EXISTS_NOT),

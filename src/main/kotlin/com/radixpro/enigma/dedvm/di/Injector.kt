@@ -16,6 +16,9 @@ import com.radixpro.enigma.dedvm.persistency.*
 import com.radixpro.enigma.dedvm.ui.Dashboard
 import com.radixpro.enigma.dedvm.ui.Feedback
 
+/**
+ * Handles dependency injection.
+ */
 object Injector {
 
     fun injectAllChartsReader(): AllChartsReader {

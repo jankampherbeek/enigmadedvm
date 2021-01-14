@@ -7,7 +7,6 @@
 package com.radixpro.enigma.dedvm.ui
 
 import com.radixpro.enigma.dedvm.handlers.*
-import com.radixpro.enigma.dedvm.persistency.CsvInputDataReader
 import com.radixpro.enigma.dedvm.ui.UiDictionary.GAP
 import javafx.application.Platform
 import javafx.event.EventHandler
@@ -28,6 +27,9 @@ import javafx.stage.Stage
 import org.apache.log4j.Logger
 import java.io.File
 
+/**
+ * StartScreen for the application. This is also the only screen, except for some popup's.
+ */
 class Dashboard(
     private val inputDataHandler: InputDataHandler,
     private val smaInSignHandler: SMAInSignHandler,

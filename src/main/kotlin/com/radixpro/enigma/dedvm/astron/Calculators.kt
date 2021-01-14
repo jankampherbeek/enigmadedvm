@@ -11,6 +11,9 @@ import com.radixpro.enigma.dedvm.core.Chart
 import com.radixpro.enigma.dedvm.core.ChartInputData
 import com.radixpro.enigma.dedvm.core.PointPosition
 
+/**
+ * Calculates a range of charts.
+ */
 class ChartsCalculator(private val seFrontend: SeFrontend) {
 
     fun processInputData(inputDataRecords: List<ChartInputData>): List<Chart> {

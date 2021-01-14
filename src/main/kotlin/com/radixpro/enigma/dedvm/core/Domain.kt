@@ -6,6 +6,9 @@
 
 package com.radixpro.enigma.dedvm.core
 
+/**
+ * Elements of date and time.
+ */
 data class DateTimeParts(val year: Int,
                          val month: Int,
                          val day: Int,
@@ -14,18 +17,30 @@ data class DateTimeParts(val year: Int,
                          val second: Int,
                          val offsetUt: Double)
 
+/**
+ * Geographic latitude and longitude of a location.
+ */
 data class Location(val geoLat: Double,
                     val geoLon: Double)
 
+/**
+ * Input for the calculation of a chart.
+ */
 data class ChartInputData(val id: Int,
                           val name: String,
                           val dateTimeParts: DateTimeParts,
                           val location: Location)
 
+/**
+ * Longitude and speed for a specific celestial point.
+ */
 data class PointPosition(val point: Points,
                          val lon: Double,
                          val speed: Double)
 
+/**
+ * A calculated chart. Cusps start with index 1.
+ */
 data class Chart(val id: String,
                  val name: String,
                  val location: Location,
@@ -36,10 +51,16 @@ data class Chart(val id: String,
                  val pointPositions: List<PointPosition>,
                  val cusps: List<Double>)
 
+/**
+ * Collection of charts.
+ */
 data class AllCharts(val name: String,
                      val creation: String,
                      val charts: List<Chart>)
 
+/**
+ * An aspect and the points that form the aspect.
+ */
 data class ActualAspect(val point1: Points,
                         val point2: Points,
                         val aspect: Aspects)
@@ -110,11 +131,16 @@ data class PrincipleChartDetails(val id: String,
                                  val totals: PrincipleBodyDetail,
                                  val details: List<PrincipleBodyDetail>)
 
-
+/**
+ * Full results for a specific principle.
+ */
 data class PrincipleComplete(val principleIndex: Int,
                              val totals: List<PrincipleBodyDetail>,
                              val details: List<PrincipleChartDetails>)
 
+/**
+ * House and point for a specific principle. Also an indication if MC and or Ascendant are relevant for this principle.
+ */
 data class PrinciplePlayers(val house: Int,
                             val point: CelPoints,
                             val checkMcOrAsc: Boolean)

@@ -13,6 +13,9 @@ import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
 
+/**
+ * Creates a set of controldata.
+ */
 class ControlDataCreator(private val randomizer: ListRandomizer,
                          private val controlDataCalendar: ControlDataCalendar) {
 
@@ -111,7 +114,9 @@ class ControlDataCreator(private val randomizer: ListRandomizer,
 }
 
 
-
+/**
+ * Interpreting the calendar. Helper class for the construction of controldata.
+ */
 class ControlDataCalendar {
     private val months31 = listOf(1, 3, 5, 7, 8, 10, 12)
     private val months30 = listOf(1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)

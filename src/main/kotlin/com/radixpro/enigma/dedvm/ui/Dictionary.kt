@@ -6,6 +6,9 @@
 
 package com.radixpro.enigma.dedvm.ui
 
+/**
+ * Shared values. Might contain some more values int eh future....
+ */
 object UiDictionary {
 
     val GAP = 6.0
