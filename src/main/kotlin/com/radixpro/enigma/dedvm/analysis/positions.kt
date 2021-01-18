@@ -7,10 +7,7 @@
 package com.radixpro.enigma.dedvm.analysis
 
 import com.radixpro.enigma.dedvm.astron.SeFrontend
-import com.radixpro.enigma.dedvm.core.PointPosition
-import com.radixpro.enigma.dedvm.core.CelPoints
 import com.radixpro.enigma.dedvm.core.Location
-import com.radixpro.enigma.dedvm.util.Range
 
 /**
  * Position of a specific longitude in ecliptical signs.

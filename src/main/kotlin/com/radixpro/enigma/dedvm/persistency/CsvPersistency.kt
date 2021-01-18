@@ -63,7 +63,7 @@ class CsvInputDataReader(private val linesReader: CsvLinesReader) {
     }
 
     private fun readSingleLine(line: Array<String>): ChartInputData {
-        var errors = false;
+        var errors = false
         try {
             val id: Int = line[0].trim { it <= ' ' }.toInt()
             val name: String = line[1].trim { it <= ' ' }

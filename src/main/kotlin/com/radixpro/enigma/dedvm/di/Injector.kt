@@ -21,11 +21,11 @@ import com.radixpro.enigma.dedvm.ui.Feedback
  */
 object Injector {
 
-    fun injectAllChartsReader(): AllChartsReader {
+    private fun injectAllChartsReader(): AllChartsReader {
         return AllChartsReader(injectJsonReader(), injectChartMapper())
     }
 
-    fun injectAspectsForChart(): AspectsForChart {
+    private fun injectAspectsForChart(): AspectsForChart {
         return AspectsForChart()
     }
 
@@ -37,31 +37,31 @@ object Injector {
         return BodiesInHouseHandler(injectAllChartsReader(), injectHousePosition(), injectResultsWriter())
     }
 
-    fun injectChartMapper(): ChartMapper {
+    private fun injectChartMapper(): ChartMapper {
         return ChartMapper()
     }
 
-    fun injectChartsCalculator(): ChartsCalculator {
+    private fun injectChartsCalculator(): ChartsCalculator {
         return ChartsCalculator(injectSeFrontend())
     }
 
-    fun injectChartsWriter(): ChartsWriter {
+    private fun injectChartsWriter(): ChartsWriter {
         return ChartsWriter(injectJsonWriter())
     }
 
-    fun injectControldataCalendar(): ControlDataCalendar {
+    private fun injectControldataCalendar(): ControlDataCalendar {
         return ControlDataCalendar()
     }
 
-    fun injectControlDataCreator(): ControlDataCreator {
+    private fun injectControlDataCreator(): ControlDataCreator {
         return ControlDataCreator(injectListRandomizer(), injectControldataCalendar() )
     }
 
-    fun injectCsvInputDataReader(): CsvInputDataReader {
+    private fun injectCsvInputDataReader(): CsvInputDataReader {
         return CsvInputDataReader(injectCsvLinesReader())
     }
 
-    fun injectCsvLinesReader(): CsvLinesReader {
+    private fun injectCsvLinesReader(): CsvLinesReader {
         return CsvLinesReader()
     }
 
@@ -75,11 +75,11 @@ object Injector {
         return ElevationHandler(injectAllChartsReader(), injectResultsWriter())
     }
 
-    fun injectFeedback(): Feedback {
+    private fun injectFeedback(): Feedback {
         return Feedback()
     }
 
-    fun injectHousePosition(): HousePosition {
+    private fun injectHousePosition(): HousePosition {
         return HousePosition(injectSeFrontend())
     }
 
@@ -87,15 +87,15 @@ object Injector {
         return InputDataHandler(injectCsvInputDataReader(), injectChartsCalculator(), injectControlDataCreator(), injectChartsWriter())
     }
 
-    fun injectJsonReader():JsonReader {
+    private fun injectJsonReader():JsonReader {
         return JsonReader()
     }
 
-    fun injectJsonWriter(): JsonWriter {
+    private fun injectJsonWriter(): JsonWriter {
         return JsonWriter()
     }
 
-    fun injectListRandomizer(): ListRandomizer {
+    private fun injectListRandomizer(): ListRandomizer {
         return ListRandomizer()
     }
 
@@ -112,15 +112,15 @@ object Injector {
     }
 
 
-    fun injectResultsWriter(): ResultsWriter {
+    private fun injectResultsWriter(): ResultsWriter {
         return ResultsWriter(injectJsonWriter())
     }
 
-    fun injectSeFrontend(): SeFrontend {
+    private fun injectSeFrontend(): SeFrontend {
         return SeFrontend
     }
 
-    fun injectSignPosition(): SignPosition {
+    private fun injectSignPosition(): SignPosition {
         return SignPosition()
     }
 

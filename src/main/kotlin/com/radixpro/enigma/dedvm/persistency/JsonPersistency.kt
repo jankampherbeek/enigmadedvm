@@ -75,7 +75,6 @@ class ChartsWriter(private val jsonWriter: JsonWriter) {
 class AllChartsReader(private val jsonReader: JsonReader, private val mapper: ChartMapper) {
 
     fun readAllCharts(fileName: String): AllCharts {
-        // todo define path
         val pathAndName = ".${SEPARATOR}data${SEPARATOR}${fileName}"
         val file = File(pathAndName)
         val json = jsonReader.readObjectFromFile(file)
@@ -90,7 +89,6 @@ class ResultsWriter(private val jsonWriter: JsonWriter) {
 
     fun writeResults(fileName: String, object2Write: Any) {
         val pathAndName = ".${SEPARATOR}data${SEPARATOR}${fileName}"
-        val file = File(pathAndName)
         jsonWriter.write2File(pathAndName, object2Write, true)
     }
 }

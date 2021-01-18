@@ -11,6 +11,6 @@ package com.radixpro.enigma.dedvm.ui
  */
 object UiDictionary {
 
-    val GAP = 6.0
+    const val GAP = 6.0
 }
 

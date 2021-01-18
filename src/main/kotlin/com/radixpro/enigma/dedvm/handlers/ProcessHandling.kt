@@ -159,7 +159,7 @@ class BodiesInHouseHandler(
         for (pointPos in chart.pointPositions) {
             if (point == pointPos.point) return pointPos
         }
-        throw RuntimeException("Could not find point in chart for BAM")    // TODO create specific exception
+        throw RuntimeException("Could not find point in chart for BAM")
     }
 
     private fun defineTotals(detailCount: List<ChartCount>): BodiesInRange {
@@ -287,7 +287,7 @@ class ElevationHandler(private val allChartsReader: AllChartsReader, private val
             var shortestDistance = 180.0
             var distance = 0.0
             for (pointPos in chart.pointPositions) {
-                if (pointPos.point != CelPoints.MEAN_NODE && pointPos.point != CelPoints.MEAN_APOGEE) {      // todo check which bodies to use
+                if (pointPos.point != CelPoints.MEAN_NODE && pointPos.point != CelPoints.MEAN_APOGEE) {
                     distance = abs(Range.checkValue(abs(mc - pointPos.lon), -180.0, 180.0))
                     if (distance <= shortestDistance) {
                         shortestDistance = distance
@@ -472,7 +472,6 @@ class UnaspectedPointsHandler(
     }
 
     private fun checkAspects(point1: Points, allAspects: List<ActualAspect>): List<Points> {
-        var count = 0
         val aspPartners: MutableList<Points> = ArrayList()
         for (point2 in supportedBodies) {
             if (point1 != point2) {
@@ -664,7 +663,6 @@ class PrincipleHandler(
                     lordCuspPointPos = pointPos
                 }
             }
-            val lonRuler = definePointPos(ruler, chart)
             val lonPlayer = definePointPos(players.point, chart)
             val bodyDetails: MutableList<PrincipleBodyDetail> = ArrayList()
             val totalValues = mutableListOf(0, 0, 0, 0, 0, 0)

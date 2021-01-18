@@ -71,8 +71,8 @@ class AspectsForChart {
 
 
     private fun outOfSign(lon1: Double, lon2: Double, aspect: Aspects): Boolean {
-        var signId1 = SignPosition().idOfSign(lon1)
-        var signId2 = SignPosition().idOfSign(lon2)
+        val signId1 = SignPosition().idOfSign(lon1)
+        val signId2 = SignPosition().idOfSign(lon2)
         var diffInSigns = if (signId1 >= signId2) signId1 - signId2 else signId2 - signId1
         if (diffInSigns > 6) diffInSigns = 12 - diffInSigns
         when (diffInSigns) {

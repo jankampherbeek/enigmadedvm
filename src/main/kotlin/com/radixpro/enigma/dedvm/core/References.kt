@@ -4,6 +4,8 @@
  * Please check the file copyright.txt in the root of the source for further details.
  */
 
+@file:Suppress("unused", "unused", "unused")
+
 package com.radixpro.enigma.dedvm.core
 
 interface Points{
@@ -15,20 +17,20 @@ interface Points{
 /**
  * Supported celestial points. Id is the same as seId for the Swiss Ephemeris.
  */
-enum class CelPoints(override val id: Int, val glyph: String, override val nameTxt: String): Points {
-    SUN(0, "a", "Sun"),
-    MOON(1,"b","Moon"),
-    MERCURY(2,"c","Mercury"),
-    VENUS(3,"d","Venus"),
-    MARS(4,"f","Mars"),
-    JUPITER(5,"g","Jupiter"),
-    SATURN(6,"h","Saturn"),
-    URANUS(7,"i","Uranus"),
-    NEPTUNE(8,"j","Neptune"),
-    PLUTO(9,"k","Pluto"),
-    MEAN_NODE(10,"{","Lunar Node"),
-    MEAN_APOGEE(12,",","Black Moon"),
-    CHIRON(15,"w","Cheiron")
+enum class CelPoints(override val id: Int, override val nameTxt: String): Points {
+    SUN(0, "Sun"),
+    MOON(1, "Moon"),
+    MERCURY(2, "Mercury"),
+    VENUS(3, "Venus"),
+    MARS(4, "Mars"),
+    JUPITER(5, "Jupiter"),
+    SATURN(6, "Saturn"),
+    URANUS(7, "Uranus"),
+    NEPTUNE(8, "Neptune"),
+    PLUTO(9, "Pluto"),
+    MEAN_NODE(10, "Lunar Node"),
+    MEAN_APOGEE(12, "Black Moon"),
+    CHIRON(15, "Cheiron")
 }
 
 /**
@@ -44,7 +46,6 @@ enum class MundanePoints(override val id: Int, override val nameTxt: String): Po
  */
 enum class EmptyPoints(override val id: Int, override val nameTxt: String): Points {
     EXISTS_NOT(1000, "Does not exist"),
-    ERROR(1001, "Result of error"),
     TOTAL(1002, "Placeholder for total")
 }
 
