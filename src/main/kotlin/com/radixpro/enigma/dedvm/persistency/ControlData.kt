@@ -9,6 +9,8 @@ package com.radixpro.enigma.dedvm.persistency
 import com.radixpro.enigma.dedvm.core.ChartInputData
 import com.radixpro.enigma.dedvm.core.DateTimeParts
 import com.radixpro.enigma.dedvm.core.Location
+import com.radixpro.enigma.dedvm.ui.Dashboard
+import org.apache.log4j.Logger
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
@@ -18,7 +20,7 @@ import kotlin.collections.ArrayList
  */
 class ControlDataCreator(private val randomizer: ListRandomizer,
                          private val controlDataCalendar: ControlDataCalendar) {
-
+    private val log: Logger = Logger.getLogger(ControlDataCreator::class.java)
     private var controlInputData: MutableList<ChartInputData> = ArrayList()
     private var months: MutableList<Int> = ArrayList()
     private var years: MutableList<Int> = ArrayList()
@@ -30,12 +32,21 @@ class ControlDataCreator(private val randomizer: ListRandomizer,
     private var longitudes: MutableList<Double> = ArrayList()
 
     fun createControlData(inputData: List<ChartInputData>): List<ChartInputData> {
+        log.info("Creating standard control data.")
         processInputData(inputData)
         sortDaysAndShuffleOtherItems()
         processData()
         return controlInputData.toList()
     }
 
+    fun createMultipleControlData(inputData: List<ChartInputData>, multiplicity: Int): List<List<ChartInputData>> {
+        log.info("Creating a set for multiple control data using multiplicity $multiplicity.")
+        val allSubControlData: MutableList<List<ChartInputData>> = ArrayList()
+        for(i in 0 until multiplicity) {
+            allSubControlData.add(createControlData(inputData))
+        }
+        return allSubControlData.toList()
+    }
 
     private fun processInputData(inputDataSet:  List<ChartInputData>) {
         for (chartInputData in inputDataSet) {
@@ -144,6 +155,8 @@ class ControlDataCalendar {
  * Uses the nanoseconds of the current time as seed for the randomizer.
  */
 class ListRandomizer {
+    private val log: Logger = Logger.getLogger(ListRandomizer::class.java)
+
     /**
      * Perform the randomization.
      * @param shuffleThis The list to randomize.
@@ -155,6 +168,7 @@ class ListRandomizer {
 
     private fun shuffle(shuffleThis: MutableList<*>): List<*> {
         val seed = generateSeedFromTime()
+        log.info("Will shuffle using seed : $seed")
         val random = createRandomizer(seed)
         shuffleThis.shuffle(random)
         return shuffleThis

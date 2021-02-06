@@ -47,4 +47,17 @@ class InputDataHandler(
         chartsWriter.writeCharts(calculatedControlCharts, fileNameForCtrlData)
     }
 
+    fun handleDataForMultipleSubControlGroups(inputDataFile: File, multiplicity: Int) {
+        val fileNameForData = ".${SEPARATOR}data${SEPARATOR}calculatedcharts.json"
+        val fileNamePrefixForCtrlData = ".${SEPARATOR}data${SEPARATOR}subcontrolgroups${SEPARATOR}subcontrolcharts_"
+        val inputDataRecords = csvInputDataReader.readInputData(inputDataFile)
+        val calculatedCharts = chartsCalculator.processInputData(inputDataRecords)
+        chartsWriter.writeCharts(calculatedCharts, fileNameForData)
+        val controlDataSubRecords = controlDataCreator.createMultipleControlData(inputDataRecords, multiplicity)
+        for((counter, subset) in controlDataSubRecords.withIndex()) {
+            val calculatedSubControlCharts = chartsCalculator.processInputData(subset)
+            chartsWriter.writeCharts(calculatedSubControlCharts, fileNamePrefixForCtrlData + counter)
+        }
+    }
+
 }
