@@ -23,7 +23,7 @@ internal class SMAInSignHandlerTest {
     }
 
     @Test
-    fun `Handling of procerss for SMAInSign should not cause any error`() {
-        handler.processCharts()
+    fun `Handling of process for SMAInSign should not cause any error`() {
+        handler.processCharts(1)
     }
 }

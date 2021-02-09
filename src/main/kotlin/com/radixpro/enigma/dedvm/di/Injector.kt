@@ -68,7 +68,7 @@ object Injector {
     fun injectDashboard(): Dashboard {
         return Dashboard(injectInputDataHandler(), injectSMAInSignHandler(), injectBodiesInHouseHandler(), injectBodiesAtCornersHandler(),
             injectElevationHandler(), injectProminentAspectsHandler(), injectUnaspectedPointsHandler(), injectMaxPointsHandler(), injectPrincipleHandler(),
-            injectFeedback())
+            injectFeedback(), injectPropertyReader(), injectPropertyWriter())
     }
 
     fun injectElevationHandler(): ElevationHandler {
@@ -111,6 +111,13 @@ object Injector {
         return ProminentAspectsHandler(injectAllChartsReader(), injectAspectsForChart(), injectSignPosition(), injectResultsWriter())
     }
 
+    fun injectPropertyReader(): PropertyReader {
+        return PropertyReader()
+    }
+
+    fun injectPropertyWriter(): PropertyWriter {
+        return PropertyWriter()
+    }
 
     private fun injectResultsWriter(): ResultsWriter {
         return ResultsWriter(injectJsonWriter())

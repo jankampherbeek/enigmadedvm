@@ -73,12 +73,19 @@ data class ChartCount(val id: String,
                       val counts: List<Int>)
 
 /**
- * Counts of Sun, Moon and Ascendant in signs plus totals
+ * Counts of Sun, Moon and Ascendant in signs plus totals for a chart.
  */
 data class SMAInSign(val totalsSun: List<Int>,
                      val totalsMoon: List<Int>,
                      val totalsAsc: List<Int>,
                      val countsPerChart: List<ChartCount> )
+
+/**
+ * Averages of Sun, Moon and Ascendant in signs, calculated over multiple charts/controldata.
+ */
+data class SMAInSignAverages(val totalsSun: Double,
+                             val totalsMoon: Double,
+                             val totalsAsc: Double)
 
 /**
  * Counts of bodies at specific positions.

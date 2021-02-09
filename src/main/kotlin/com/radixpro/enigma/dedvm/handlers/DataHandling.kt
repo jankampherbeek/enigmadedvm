@@ -55,8 +55,9 @@ class InputDataHandler(
         chartsWriter.writeCharts(calculatedCharts, fileNameForData)
         val controlDataSubRecords = controlDataCreator.createMultipleControlData(inputDataRecords, multiplicity)
         for((counter, subset) in controlDataSubRecords.withIndex()) {
-            val calculatedSubControlCharts = chartsCalculator.processInputData(subset)
-            chartsWriter.writeCharts(calculatedSubControlCharts, fileNamePrefixForCtrlData + counter)
+            var calculatedSubControlCharts = chartsCalculator.processInputData(subset)
+            chartsWriter.writeCharts(calculatedSubControlCharts, "$fileNamePrefixForCtrlData$counter.json")
+
         }
     }
 

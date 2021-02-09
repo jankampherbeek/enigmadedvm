@@ -11,6 +11,7 @@ import com.radixpro.enigma.dedvm.core.DateTimeParts
 import com.radixpro.enigma.dedvm.core.Location
 import com.radixpro.enigma.dedvm.ui.Dashboard
 import org.apache.log4j.Logger
+import java.security.SecureRandom
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
@@ -33,6 +34,7 @@ class ControlDataCreator(private val randomizer: ListRandomizer,
 
     fun createControlData(inputData: List<ChartInputData>): List<ChartInputData> {
         log.info("Creating standard control data.")
+        controlInputData.clear()
         processInputData(inputData)
         sortDaysAndShuffleOtherItems()
         processData()
@@ -43,12 +45,22 @@ class ControlDataCreator(private val randomizer: ListRandomizer,
         log.info("Creating a set for multiple control data using multiplicity $multiplicity.")
         val allSubControlData: MutableList<List<ChartInputData>> = ArrayList()
         for(i in 0 until multiplicity) {
-            allSubControlData.add(createControlData(inputData))
+            val controlDataForOneSet = createControlData(inputData)
+            allSubControlData.add(controlDataForOneSet)
         }
         return allSubControlData.toList()
     }
 
     private fun processInputData(inputDataSet:  List<ChartInputData>) {
+        utHours.clear()
+        utMinutes.clear()
+        utSeconds.clear()
+        years.clear()
+        months.clear()
+        days.clear()
+        latitudes.clear()
+        longitudes.clear()
+
         for (chartInputData in inputDataSet) {
             val dateTimeParts = chartInputData.dateTimeParts
             val location = chartInputData.location
@@ -87,7 +99,7 @@ class ControlDataCreator(private val randomizer: ListRandomizer,
             val utSecond = getIntFromList(utSeconds)
             val latitude = getDoubleFromList(latitudes)
             val longitude = getDoubleFromList(longitudes)
-            val location = Location(longitude, latitude)
+            val location = Location(latitude, longitude)
             val dateTimeParts = DateTimeParts(year, month, day, utHour, utMinute, utSecond, 0.0)
             val id = counter++
             val chartInputData = ChartInputData(id, "Controldata $id", dateTimeParts, location)
@@ -167,9 +179,8 @@ class ListRandomizer {
     }
 
     private fun shuffle(shuffleThis: MutableList<*>): List<*> {
-        val seed = generateSeedFromTime()
-        log.info("Will shuffle using seed : $seed")
-        val random = createRandomizer(seed)
+        val random = SecureRandom()
+        random.reseed()
         shuffleThis.shuffle(random)
         return shuffleThis
     }
@@ -183,4 +194,6 @@ class ListRandomizer {
         random.setSeed(seed)
         return random
     }
+
+
 }

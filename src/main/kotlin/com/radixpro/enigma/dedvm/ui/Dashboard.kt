@@ -7,14 +7,16 @@
 package com.radixpro.enigma.dedvm.ui
 
 import com.radixpro.enigma.dedvm.handlers.*
+import com.radixpro.enigma.dedvm.persistency.PropertyReader
+import com.radixpro.enigma.dedvm.persistency.PropertyWriter
+import com.radixpro.enigma.dedvm.ui.Rosetta.getHelpText
+import com.radixpro.enigma.dedvm.ui.Rosetta.getText
 import com.radixpro.enigma.dedvm.ui.UiDictionary.GAP
 import javafx.application.Platform
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Scene
-import javafx.scene.control.Button
-import javafx.scene.control.ButtonBar
-import javafx.scene.control.CheckBox
+import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.GridPane
@@ -27,8 +29,10 @@ import javafx.stage.Stage
 import org.apache.log4j.Logger
 import java.io.File
 
+const val ctrlGroupKey = "nrctrlgroups"
+
 /**
- * StartScreen for the application. This is also the only screen, except for some popup's.
+ * StartScreen for the application.
  */
 class Dashboard(
     private val inputDataHandler: InputDataHandler,
@@ -40,10 +44,15 @@ class Dashboard(
     private val unaspectedPointsHandler: UnaspectedPointsHandler,
     private val maxPointsHandler: MaxPointsHandler,
     private val principleHandler: PrincipleHandler,
-    private val feedback: Feedback
+    private val feedback: Feedback,
+    private val propReader: PropertyReader,
+    private val propWriter: PropertyWriter
 ) {
     private val log: Logger = Logger.getLogger(Dashboard::class.java)
+
     // texts
+    private lateinit var lblAvailableTests: Label
+    private lateinit var txtLblControlGroup: String
     private lateinit var txtLblInfo: String
     private lateinit var txtLblRetrieveDataFile: String
     private lateinit var txtTitle: String
@@ -66,6 +75,8 @@ class Dashboard(
     private lateinit var cbPri: CheckBox
 
     // general
+    private lateinit var tfNrOfCtrlGroups: TextField
+    private var nrOfCtrlGroups = 1
     private val height = 500.0
     private val width = 600.0
     private lateinit var stage: Stage
@@ -85,22 +96,38 @@ class Dashboard(
     }
 
     private fun initialize() {
+        defineProperties()
         defineButtons()
         defineCheckBoxes()
         defineTexts()
+        defineTextFields()
         checkStatus()
     }
 
     private fun createVBox(): VBox {
-        return VBoxBuilder().setPadding(GAP).setHeight(height + 2 * GAP).setWidth(width + 2 * GAP).setChildren(arrayOf(createGridPane())).build()
+        return VBoxBuilder().setPadding(GAP).setHeight(height + 2 * GAP).setWidth(width + 2 * GAP)
+            .setChildren(arrayOf(createGridPane())).build()
+    }
+
+    private fun defineProperties() {
+        val value = propReader.readProperty(ctrlGroupKey)
+        if (value.isNotEmpty()) nrOfCtrlGroups = value.toInt()
+        else {
+            nrOfCtrlGroups = 1
+            propWriter.writeProperty(ctrlGroupKey, nrOfCtrlGroups.toString())
+        }
     }
 
     private fun defineButtons() {
-        btnDataFile = ButtonBuilder("dashboard.btn_datafile").setPrefWidth(100.0).setDisabled(false).setFocusTraversable(true).build()
+        btnDataFile =
+            ButtonBuilder("dashboard.btn_datafile").setPrefWidth(100.0).setDisabled(false).setFocusTraversable(true)
+                .build()
         btnExit = ButtonBuilder("dashboard.btn_exit").setDisabled(false).setFocusTraversable(true).build()
         btnHelp = ButtonBuilder("dashboard.btn_help").setDisabled(false).setFocusTraversable(true).build()
         btnRun = ButtonBuilder("dashboard.btn_run").setDisabled(true).setFocusTraversable(false).build()
-        btnLanguage = ButtonBuilder("dashboard.btn_language").setPrefWidth(200.0).setDisabled(false).setFocusTraversable(true).build()
+        btnLanguage =
+            ButtonBuilder("dashboard.btn_language").setPrefWidth(200.0).setDisabled(false).setFocusTraversable(true)
+                .build()
         btnLanguage.onAction = EventHandler { onLanguage() }
         btnDataFile.onAction = EventHandler { onDataFile() }
         btnRun.onAction = EventHandler { onPerformTests() }
@@ -109,52 +136,76 @@ class Dashboard(
     }
 
     private fun defineCheckBoxes() {
-
-        cbSma = CheckBox(Rosetta.getText("dashboard.cb_sunmoonascinsign"))
-        cbBam = CheckBox(Rosetta.getText("dashboard.cb_inhouses1or10"))
-        cbBco = CheckBox(Rosetta.getText("dashboard.cb_atcorners"))
-        cbElev = CheckBox(Rosetta.getText("dashboard.cb_elevated"))
-        cbPra = CheckBox(Rosetta.getText("dashboard.cb_prominent"))
-        cbNas = CheckBox(Rosetta.getText("dashboard.cb_unaspected"))
-        cbMax = CheckBox(Rosetta.getText("dashboard.cb_maximal"))
-        cbPri = CheckBox(Rosetta.getText("dashboard.cb_principles"))
+        cbSma = CheckBox(getText("dashboard.cb_sunmoonascinsign"))
+        cbBam = CheckBox(getText("dashboard.cb_inhouses1or10"))
+        cbBco = CheckBox(getText("dashboard.cb_atcorners"))
+        cbElev = CheckBox(getText("dashboard.cb_elevated"))
+        cbPra = CheckBox(getText("dashboard.cb_prominent"))
+        cbNas = CheckBox(getText("dashboard.cb_unaspected"))
+        cbMax = CheckBox(getText("dashboard.cb_maximal"))
+        cbPri = CheckBox(getText("dashboard.cb_principles"))
 
     }
 
     private fun defineTexts() {
-        txtLblInfo = Rosetta.getText("dashboard.lbl_info")
-        txtLblRetrieveDataFile = Rosetta.getText("dashboard.lbl_retrievedatafile")
-        txtTitle = Rosetta.getText("dashboard.title")
+        lblAvailableTests = LabelBuilder().setText(getText("dashboard.lbl_availabletests")).build()
+        txtLblControlGroup = getText("dashboard.lbl_definecontrolgroup")
+        txtLblInfo = getText("dashboard.lbl_info")
+        txtLblRetrieveDataFile = getText("dashboard.lbl_retrievedatafile")
+        txtTitle = getText("dashboard.title")
+    }
+
+    private fun defineTextFields() {
+        tfNrOfCtrlGroups = TextField()
+        tfNrOfCtrlGroups.prefColumnCount = 4
+        tfNrOfCtrlGroups.text = nrOfCtrlGroups.toString()
     }
 
     private fun checkStatus() {
         val dataFile = File(fileNameData)
         val ctrlDataFile = File(fileNameCtrlData)
+        val tempNrOfCtrlGroups = try {
+            tfNrOfCtrlGroups.text.toInt()
+        } catch (e: Exception) {
+            -1
+        }
         if (dataFile.exists() && ctrlDataFile.exists()) {
             log.info("Data file and controldata file do exist.")
-            btnDataFile.isDisable = true
-            btnDataFile.isFocusTraversable = false
-            btnRun.isDisable = false
-            btnRun.isFocusTraversable = true
+            nrOfCtrlGroups = tempNrOfCtrlGroups
+            setNodeStatus(tfNrOfCtrlGroups, true)
+            setNodeStatus(btnDataFile, true)
+            setNodeStatus(btnRun, false)
+        } else if (tempNrOfCtrlGroups < 1) {
+            log.error("Value for number of controlgroups is invalid.")
+            setNodeStatus(tfNrOfCtrlGroups, false)
+            setNodeStatus(btnDataFile, true)
+            setNodeStatus(btnRun, true)
         } else {
-            btnDataFile.isDisable = false
-            btnDataFile.isFocusTraversable = true
-            btnRun.isDisable = true
-            btnRun.isFocusTraversable = false
             log.info("No data file and/or no controldata file.")
+            setNodeStatus(tfNrOfCtrlGroups, false)
+            setNodeStatus(btnDataFile, false)
+            setNodeStatus(btnRun, true)
         }
+    }
+
+    private fun setNodeStatus(node: Control, disabled: Boolean) {
+        node.isDisable = disabled
+        node.isFocusTraversable = !disabled
     }
 
 
     private fun createGridPane(): GridPane {
-        val grid = GridPaneBuilder().setHGap(GAP).setVGap(GAP).setPrefWidth(width).setPrefHeight(height).setStyleSheet(styleSheet).build()
+        val grid = GridPaneBuilder().setHGap(GAP).setVGap(GAP).setPrefWidth(width).setPrefHeight(height)
+            .setStyleSheet(styleSheet).build()
         grid.add(createTitlePane(), 0, 0, 3, 1)
         grid.add(createImagePane(), 0, 1, 1, 3)
         grid.add(createGenInfoPane(), 0, 4, 1, 8)
         grid.add(createLanguagePane(), 0, 13, 1, 1)
-        grid.add(createSingleLinePane(txtLblRetrieveDataFile), 1, 1, 1, 1)
-        grid.add(LabelBuilder().setText(Rosetta.getText("dashboard.lbl_availabletests")).build(),1, 3, 1, 1)
-        grid.add(btnDataFile, 2, 1, 1, 1)
+        grid.add(createSingleLinePane(txtLblControlGroup), 1, 1, 1, 1)
+        grid.add(tfNrOfCtrlGroups, 2, 1, 1, 1)
+        grid.add(createSingleLinePane(txtLblRetrieveDataFile), 1, 2, 1, 1)
+        grid.add(btnDataFile, 2, 2, 1, 1)
+        grid.add(lblAvailableTests, 1, 4, 1, 1)
         grid.add(cbSma, 1, 5, 2, 1)
         grid.add(cbBam, 1, 6, 2, 1)
         grid.add(cbBco, 1, 7, 2, 1)
@@ -168,8 +219,11 @@ class Dashboard(
     }
 
     private fun createTitlePane(): Pane {
-        val lblTitle = LabelBuilder().setText(txtTitle).setPrefWidth(width).setAlignment(Pos.CENTER).setStyleClass("titletext").build()
-        return PaneBuilder().setHeight(57.0).setWidth(width).setStyleClass("titlepane").setChildren(arrayOf(lblTitle)).build()
+        val lblTitle =
+            LabelBuilder().setText(txtTitle).setPrefWidth(width).setAlignment(Pos.CENTER).setStyleClass("titletext")
+                .build()
+        return PaneBuilder().setHeight(57.0).setWidth(width).setStyleClass("titlepane").setChildren(arrayOf(lblTitle))
+            .build()
     }
 
     private fun createImagePane(): Pane {
@@ -210,15 +264,21 @@ class Dashboard(
         feedback.show(msg)
     }
 
+    private fun saveProperty() {
+        propWriter.writeProperty(ctrlGroupKey, nrOfCtrlGroups.toString())
+    }
+
     private fun onDataFile() {
         val dataFile = FileChooser().showOpenDialog(stage)
         if (null != dataFile) {
             try {
-                inputDataHandler.handleData(dataFile)
-                showFeedback(Rosetta.getText("dashboard.msg_dataimported"))
+//                inputDataHandler.handleData(dataFile)
+                if (nrOfCtrlGroups == 1) inputDataHandler.handleData(dataFile)
+                else inputDataHandler.handleDataForMultipleSubControlGroups(dataFile, nrOfCtrlGroups)
+                showFeedback(getText("dashboard.msg_dataimported"))
                 log.info("Data has been imported.")
-            } catch(e: Exception) {
-                showFeedback(Rosetta.getText("dashboard.msg_error"))
+            } catch (e: Exception) {
+                showFeedback(getText("dashboard.msg_error"))
                 log.error("Could not import data: " + e.message)
             }
             checkStatus()
@@ -226,8 +286,9 @@ class Dashboard(
     }
 
     private fun onPerformTests() {
+        saveProperty()
         try {
-            if (cbSma.isSelected) smaInSignHandler.processCharts()
+            if (cbSma.isSelected) smaInSignHandler.processCharts(nrOfCtrlGroups)
             if (cbBam.isSelected) bodiesInHouseHandler.processChartsAscMc()
             if (cbBco.isSelected) bodiesAtCornersHandler.processCharts()
             if (cbElev.isSelected) elevationHandler.processCharts()
@@ -236,11 +297,12 @@ class Dashboard(
             if (cbPra.isSelected) prominentAspectsHandler.processCharts()
             if (cbPri.isSelected) principleHandler.processCharts()
             if (cbSma.isSelected || cbBam.isSelected || cbBco.isSelected || cbElev.isSelected || cbMax.isSelected || cbNas.isSelected || cbPra.isSelected ||
-                    cbPri.isSelected) showFeedback(Rosetta.getText("dashboard.msg_results"))
-            else showFeedback(Rosetta.getText("dashboard.msg_noselection"))
+                cbPri.isSelected
+            ) showFeedback(getText("dashboard.msg_results"))
+            else showFeedback(getText("dashboard.msg_noselection"))
         } catch (e: Exception) {
             log.error(e.message)
-            showFeedback(Rosetta.getText("dashboard.msg_error"))
+            showFeedback(getText("dashboard.msg_error"))
         }
     }
 
@@ -251,7 +313,7 @@ class Dashboard(
     }
 
     private fun onHelp() {
-       Help(Rosetta.getHelpText("help.dashboard.title"), Rosetta.getHelpText("help.dashboard.content")).showContent()
+        Help(getHelpText("help.dashboard.title"), getHelpText("help.dashboard.content")).showContent()
     }
 
     private fun onExit() {

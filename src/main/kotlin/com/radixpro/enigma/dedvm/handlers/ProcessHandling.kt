@@ -13,6 +13,7 @@ import com.radixpro.enigma.dedvm.core.*
 import com.radixpro.enigma.dedvm.persistency.AllChartsReader
 import com.radixpro.enigma.dedvm.persistency.ResultsWriter
 import com.radixpro.enigma.dedvm.util.Range
+import org.jetbrains.kotlin.konan.file.File
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -50,7 +51,7 @@ class SMAInSignHandler(
     private val fileNameForSMAData = "SMAResults.json"
     private val fileNameForSMAControlData = "SMAControlDataResults.json"
 
-    fun processCharts() {
+    fun processCharts(nrOfCtrlGroups: Int) {
         handleCharts()
         handleControlData()
     }
@@ -62,12 +63,36 @@ class SMAInSignHandler(
         resultsWriter.writeResults(fileNameForSMAData, smaInSign)
     }
 
+
     private fun handleControlData() {
         val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
         val detailCount = defineDetailsCount(allCharts)
         val smaInSign = defineTotals(detailCount)
         resultsWriter.writeResults(fileNameForSMAControlData, smaInSign)
     }
+
+    private fun handleMultiControlData(folderName: String, nrOfCtrlGroups: Int) {
+        val combinedResults : MutableList<SMAInSign> = ArrayList()
+        for (i in 0..nrOfCtrlGroups) {
+            val fileName = folderName + File.separator  + "SMAControlDataResults" + i + ".json"
+            val allCharts = allChartsReader.readAllCharts(fileName)
+            val detailCount = defineDetailsCount(allCharts)
+            val smaInSign = defineTotals(detailCount)
+            combinedResults.add(smaInSign)
+            resultsWriter.writeResults(fileName, smaInSign)
+        }
+        var totSun = 0.0
+        var totMoon = 0.0
+        var totAsc = 0.0
+        for (i in 0..nrOfCtrlGroups) {
+            totSun+= combinedResults[i].totalsSun.sum()
+            totMoon+= combinedResults[i].totalsMoon.sum()
+            totAsc+= combinedResults[i].totalsAsc.sum()
+        }
+        val smaTotals = SMAInSignAverages(totSun / nrOfCtrlGroups, totMoon / nrOfCtrlGroups, totAsc / nrOfCtrlGroups)
+        resultsWriter.writeResults(fileNameForSMAControlData, smaTotals)
+    }
+
 
     private fun defineDetailsCount(allCharts: AllCharts): List<ChartCount> {
         val chartCounts: MutableList<ChartCount> = ArrayList()
