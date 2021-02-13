@@ -169,8 +169,9 @@ class Dashboard(
         } catch (e: Exception) {
             -1
         }
-        if (dataFile.exists() && ctrlDataFile.exists()) {
-            log.info("Data file and controldata file do exist.")
+//        if (dataFile.exists() && ctrlDataFile.exists()) {
+        if (dataFile.exists()) {
+            log.info("Data file does exist.")
             nrOfCtrlGroups = tempNrOfCtrlGroups
             setNodeStatus(tfNrOfCtrlGroups, true)
             setNodeStatus(btnDataFile, true)
@@ -289,13 +290,13 @@ class Dashboard(
         saveProperty()
         try {
             if (cbSma.isSelected) smaInSignHandler.processCharts(nrOfCtrlGroups)
-            if (cbBam.isSelected) bodiesInHouseHandler.processChartsAscMc()
-            if (cbBco.isSelected) bodiesAtCornersHandler.processCharts()
-            if (cbElev.isSelected) elevationHandler.processCharts()
-            if (cbMax.isSelected) maxPointsHandler.processCharts()
-            if (cbNas.isSelected) unaspectedPointsHandler.processCharts()
-            if (cbPra.isSelected) prominentAspectsHandler.processCharts()
-            if (cbPri.isSelected) principleHandler.processCharts()
+            if (cbBam.isSelected) bodiesInHouseHandler.processChartsAscMc(nrOfCtrlGroups)
+            if (cbBco.isSelected) bodiesAtCornersHandler.processCharts(nrOfCtrlGroups)
+            if (cbElev.isSelected) elevationHandler.processCharts(nrOfCtrlGroups)
+            if (cbPra.isSelected) prominentAspectsHandler.processCharts(nrOfCtrlGroups)
+            if (cbMax.isSelected) maxPointsHandler.processCharts(nrOfCtrlGroups)
+            if (cbNas.isSelected) unaspectedPointsHandler.processCharts(nrOfCtrlGroups)
+            if (cbPri.isSelected) principleHandler.processCharts(nrOfCtrlGroups)
             if (cbSma.isSelected || cbBam.isSelected || cbBco.isSelected || cbElev.isSelected || cbMax.isSelected || cbNas.isSelected || cbPra.isSelected ||
                 cbPri.isSelected
             ) showFeedback(getText("dashboard.msg_results"))

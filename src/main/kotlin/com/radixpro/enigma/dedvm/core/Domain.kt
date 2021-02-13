@@ -83,9 +83,9 @@ data class SMAInSign(val totalsSun: List<Int>,
 /**
  * Averages of Sun, Moon and Ascendant in signs, calculated over multiple charts/controldata.
  */
-data class SMAInSignAverages(val totalsSun: Double,
-                             val totalsMoon: Double,
-                             val totalsAsc: Double)
+data class SMAInSignAverages(val totalsSun: List<Double>,
+                             val totalsMoon: List<Double>,
+                             val totalsAsc: List<Double>)
 
 /**
  * Counts of bodies at specific positions.
@@ -94,6 +94,12 @@ data class BodiesInRange(val bodySpec: List<CelPoints>,
                          val totals: List<Int>,
                          val details: List<ChartCount>)
 
+
+/**
+ * Averages of bodies at specific positions.
+ */
+data class BodiesInRangeAverages(val bodySpec: List<CelPoints>,
+                                 val averageValues: List<Double>)
 /**
  * Specification of a point with a specific maximum of minimum in a chart.
  */
@@ -110,6 +116,12 @@ data class ElevationValues(val bodySpec: List<CelPoints>,
                            val details: List<MinMaxPositionsPerChart>)
 
 /**
+ * Averages of elevated bodies.
+ */
+data class ElevationAverages(val bodySpec: List<CelPoints>,
+                             val averageValues: List<Double>)
+
+/**
  * Counts of specific aspects per celestial body.
  */
 data class AspectCounts(val bodySpec: List<CelPoints>,
@@ -117,11 +129,23 @@ data class AspectCounts(val bodySpec: List<CelPoints>,
                         val details: List<ChartCount>)
 
 /**
+ * Averages of aspects per celestial body.
+ */
+data class AspectCountAverages(val bodySpec: List<CelPoints>,
+                               val averageValues: List<Double>)
+
+/**
  * Counts of max points per celestial body.
  */
 data class MaxCounts(val bodySpec: List<CelPoints>,
                      val totals: List<Int>,
                      val details: List<ChartCount>)
+
+/**
+ * Averages for max points per celestial body.
+ */
+data class MaxCountAverages(val bodySpec: List<CelPoints>,
+                            val averageValues: List<Double>)
 
 /**
  * Counts of values for a specific body, according to principles as defined by Threes Brouwers.
@@ -151,4 +175,8 @@ data class PrincipleComplete(val principleIndex: Int,
 data class PrinciplePlayers(val house: Int,
                             val point: CelPoints,
                             val checkMcOrAsc: Boolean)
+
+data class PrincipleAverages(val bodySpec: List<Points>,
+                             val values: Array<DoubleArray>
+)
 
