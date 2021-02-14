@@ -88,18 +88,17 @@ data class SMAInSignAverages(val totalsSun: List<Double>,
                              val totalsAsc: List<Double>)
 
 /**
- * Counts of bodies at specific positions.
+ * Counts and details for several tests.
  */
-data class BodiesInRange(val bodySpec: List<CelPoints>,
+data class CountsDetails(val bodySpec: List<CelPoints>,
                          val totals: List<Int>,
                          val details: List<ChartCount>)
 
-
 /**
- * Averages of bodies at specific positions.
+ * Averages of bodies for several tests.
  */
-data class BodiesInRangeAverages(val bodySpec: List<CelPoints>,
-                                 val averageValues: List<Double>)
+data class BodiesAverages(val bodySpec: List<CelPoints>,
+                          val averageValues: List<Double>)
 /**
  * Specification of a point with a specific maximum of minimum in a chart.
  */
@@ -114,38 +113,6 @@ data class MinMaxPositionsPerChart(val id: String,
 data class ElevationValues(val bodySpec: List<CelPoints>,
                            val totals: List<Int>,
                            val details: List<MinMaxPositionsPerChart>)
-
-/**
- * Averages of elevated bodies.
- */
-data class ElevationAverages(val bodySpec: List<CelPoints>,
-                             val averageValues: List<Double>)
-
-/**
- * Counts of specific aspects per celestial body.
- */
-data class AspectCounts(val bodySpec: List<CelPoints>,
-                        val totals: List<Int>,
-                        val details: List<ChartCount>)
-
-/**
- * Averages of aspects per celestial body.
- */
-data class AspectCountAverages(val bodySpec: List<CelPoints>,
-                               val averageValues: List<Double>)
-
-/**
- * Counts of max points per celestial body.
- */
-data class MaxCounts(val bodySpec: List<CelPoints>,
-                     val totals: List<Int>,
-                     val details: List<ChartCount>)
-
-/**
- * Averages for max points per celestial body.
- */
-data class MaxCountAverages(val bodySpec: List<CelPoints>,
-                            val averageValues: List<Double>)
 
 /**
  * Counts of values for a specific body, according to principles as defined by Threes Brouwers.

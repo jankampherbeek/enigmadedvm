@@ -46,8 +46,6 @@ class SMAInSignHandler(
     private val signPosition: SignPosition,
     private val resultsWriter: ResultsWriter
 ) {
-
-
     private val fileNameForSMAData = "SMAResults.json"
     private val fileNameForSMAControlData = "SMAControlDataResults.json"
 
@@ -84,9 +82,9 @@ class SMAInSignHandler(
             combinedResults.add(smaInSign)
             resultsWriter.writeResults(fileNameResults, smaInSign)
         }
-        var totSun = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 12
-        var totMoon = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)    // 12
-        var totAsc = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 12
+        val totSun = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 12
+        val totMoon = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)    // 12
+        val totAsc = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 12
         for (i in 0 until nrOfCtrlGroups) {
             for (j in 0..11) {
                 totSun[j]+= combinedResults[i].totalsSun[j]
@@ -94,9 +92,9 @@ class SMAInSignHandler(
                 totAsc[j]+= combinedResults[i].totalsAsc[j]
             }
         }
-        var avgSun = DoubleArray(12)
-        var avgMoon = DoubleArray(12)
-        var avgAsc = DoubleArray(12)
+        val avgSun = DoubleArray(12)
+        val avgMoon = DoubleArray(12)
+        val avgAsc = DoubleArray(12)
         for (i in 0..11) {
             avgSun[i] = totSun[i].toDouble()/nrOfCtrlGroups
             avgMoon[i] = totMoon[i].toDouble()/nrOfCtrlGroups
@@ -155,29 +153,27 @@ class BodiesInHouseHandler(
 
     fun processChartsAscMc(nrOfCtrlGroups: Int) {
         val cusps = listOf(1, 10)
-        handleCharts(cusps, fileNameForAscMcData)
-        if (nrOfCtrlGroups == 1) handleControlData(cusps, fileNameForAscMcControlData)
+        handleCharts(cusps)
+        if (nrOfCtrlGroups == 1) handleControlData(cusps)
         else handleMultiControlData(nrOfCtrlGroups, cusps)
     }
 
-
-    private fun handleCharts(cusps: List<Int>, fileName: String) {
+    private fun handleCharts(cusps: List<Int>) {
         val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
         val detailCount = defineDetailsCount(allCharts, cusps)
         val bodiesInRange = defineTotals(detailCount)
-        resultsWriter.writeResults(fileName, bodiesInRange)
+        resultsWriter.writeResults(fileNameForAscMcData, bodiesInRange)
     }
 
-
-    private fun handleControlData(cusps: List<Int>, fileName: String) {
+    private fun handleControlData(cusps: List<Int>) {
         val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
         val detailCount = defineDetailsCount(allCharts, cusps)
         val bodiesInRange = defineTotals(detailCount)
-        resultsWriter.writeResults(fileName, bodiesInRange)
+        resultsWriter.writeResults(fileNameForAscMcData, bodiesInRange)
     }
 
     private fun handleMultiControlData(nrOfCtrlGroups: Int, cusps: List<Int>) {
-        val combinedResults : MutableList<BodiesInRange> = ArrayList()
+        val combinedResults : MutableList<CountsDetails> = ArrayList()
         val fileNameTotals = "totalBAMCtrlResults.json"
         for (i in 0 until nrOfCtrlGroups) {
             val fileNameCtrlGroup = "subcontrolgroups" + File.separator  + "subcontrolcharts_" + i + ".json"
@@ -188,17 +184,17 @@ class BodiesInHouseHandler(
             combinedResults.add(pointInMcAsc)
             resultsWriter.writeResults(fileNameResults, pointInMcAsc)
         }
-        var totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
+        val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
         for (i in 0 until nrOfCtrlGroups) {
             for (j in supportedBodies.indices) {
                 totals[j] += combinedResults[i].totals[j]
             }
         }
-        var averages = DoubleArray(supportedBodies.size)
+        val averages = DoubleArray(supportedBodies.size)
         for (i in supportedBodies.indices) {
             averages[i] = totals[i].toDouble() / nrOfCtrlGroups
         }
-        val birAverages = BodiesInRangeAverages(supportedBodies, averages.toList())
+        val birAverages = BodiesAverages(supportedBodies, averages.toList())
         resultsWriter.writeResults(fileNameTotals, birAverages)
     }
 
@@ -227,14 +223,14 @@ class BodiesInHouseHandler(
         throw RuntimeException("Could not find point in chart for BAM")
     }
 
-    private fun defineTotals(detailCount: List<ChartCount>): BodiesInRange {
+    private fun defineTotals(detailCount: List<ChartCount>): CountsDetails {
         val totalsForSigns = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         for (chartCount in detailCount) {
             for (i in 0..10) {
                 totalsForSigns[i] += chartCount.counts[i]
             }
         }
-        return BodiesInRange(supportedBodies, totalsForSigns.toList(), detailCount)
+        return CountsDetails(supportedBodies, totalsForSigns.toList(), detailCount)
     }
 
 }
@@ -255,13 +251,13 @@ class BodiesAtCornersHandler(private val allChartsReader: AllChartsReader, priva
         val cusps = listOf(1, 4, 7, 10)
         handleCharts(cusps, fileNameForCornerData)
         if (nrOfCtrlGroups == 1) handleControlData(cusps, fileNameForCornerControlData)
-        else (handleMultiControlData(nrOfCtrlGroups, cusps))
+        else (handleMultiControlData(nrOfCtrlGroups))
 
     }
 
     private fun handleCharts(cusps: List<Int>, fileName: String) {
         val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
-        val detailCount = defineDetailsCount(allCharts, cusps)
+        val detailCount = defineDetailsCount(allCharts)
         val bodiesInRange = defineTotals(detailCount)
         resultsWriter.writeResults(fileName, bodiesInRange)
     }
@@ -269,38 +265,38 @@ class BodiesAtCornersHandler(private val allChartsReader: AllChartsReader, priva
 
     private fun handleControlData(cusps: List<Int>, fileName: String) {
         val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
-        val detailCount = defineDetailsCount(allCharts, cusps)
+        val detailCount = defineDetailsCount(allCharts)
         val bodiesInRange = defineTotals(detailCount)
         resultsWriter.writeResults(fileName, bodiesInRange)
     }
 
-    private fun handleMultiControlData(nrOfCtrlGroups: Int, cusps: List<Int>) {
-        val combinedResults : MutableList<BodiesInRange> = ArrayList()
+    private fun handleMultiControlData(nrOfCtrlGroups: Int) {
+        val combinedResults : MutableList<CountsDetails> = ArrayList()
         val fileNameTotals = "totalBCOCtrlResults.json"
         for (i in 0 until nrOfCtrlGroups) {
             val fileNameCtrlGroup = "subcontrolgroups" + File.separator  + "subcontrolcharts_" + i + ".json"
             val fileNameResults = "subcontrolgroups" + File.separator  +"subBCOCtrlResults_" + i + ".json"
             val allCharts = allChartsReader.readAllCharts(fileNameCtrlGroup)
-            val detailCount = defineDetailsCount(allCharts, cusps)
+            val detailCount = defineDetailsCount(allCharts)
             val pointAtCorner = defineTotals(detailCount)
             combinedResults.add(pointAtCorner)
             resultsWriter.writeResults(fileNameResults, pointAtCorner)
         }
-        var totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
+        val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
         for (i in 0 until nrOfCtrlGroups) {
             for (j in supportedBodies.indices) {
                 totals[j] += combinedResults[i].totals[j]
             }
         }
-        var averages = DoubleArray(supportedBodies.size)
+        val averages = DoubleArray(supportedBodies.size)
         for (i in supportedBodies.indices) {
             averages[i] = totals[i].toDouble() / nrOfCtrlGroups
         }
-        val birAverages = BodiesInRangeAverages(supportedBodies, averages.toList())
+        val birAverages = BodiesAverages(supportedBodies, averages.toList())
         resultsWriter.writeResults(fileNameTotals, birAverages)
     }
 
-    private fun defineDetailsCount(allCharts: AllCharts, cusps: List<Int>): List<ChartCount> {
+    private fun defineDetailsCount(allCharts: AllCharts): List<ChartCount> {
         val chartCounts: MutableList<ChartCount> = ArrayList()
         for (chart in allCharts.charts) {
             val details: MutableList<Int> = ArrayList()
@@ -328,14 +324,14 @@ class BodiesAtCornersHandler(private val allChartsReader: AllChartsReader, priva
         return (Range.checkValue(diff, 0.0, 360.0) <= orb) && signLon1 == signLon2
     }
 
-    private fun defineTotals(detailCount: List<ChartCount>): BodiesInRange {
+    private fun defineTotals(detailCount: List<ChartCount>): CountsDetails {
         val totalsForBodies = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11 positions
         for (chartCount in detailCount) {
             for (i in 0..10) {
                 totalsForBodies[i] += chartCount.counts[i]
             }
         }
-        return BodiesInRange(supportedBodies, totalsForBodies.toList(), detailCount)
+        return CountsDetails(supportedBodies, totalsForBodies.toList(), detailCount)
     }
 
 }
@@ -385,17 +381,17 @@ class ElevationHandler(private val allChartsReader: AllChartsReader, private val
             resultsWriter.writeResults(fileNameResults, elevated)
         }
 
-        var totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
+        val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
         for (i in 0 until nrOfCtrlGroups) {
             for (j in supportedBodies.indices) {
                 totals[j] += combinedResults[i].totals[j]
             }
         }
-        var averages = DoubleArray(supportedBodies.size)
+        val averages = DoubleArray(supportedBodies.size)
         for (i in supportedBodies.indices) {
             averages[i] = totals[i].toDouble() / nrOfCtrlGroups
         }
-        val elevAverages = ElevationAverages(supportedBodies, averages.toList())
+        val elevAverages = BodiesAverages(supportedBodies, averages.toList())
         resultsWriter.writeResults(fileNameTotals, elevAverages)
     }
 
@@ -406,7 +402,7 @@ class ElevationHandler(private val allChartsReader: AllChartsReader, private val
             var pointWithShortestDistance: Points = EmptyPoints.EXISTS_NOT
             val mc = chart.cusps[10]
             var shortestDistance = 180.0
-            var distance = 0.0
+            var distance: Double
             for (pointPos in chart.pointPositions) {
                 if (pointPos.point != CelPoints.MEAN_NODE && pointPos.point != CelPoints.MEAN_APOGEE) {
                     distance = abs(Range.checkValue(abs(mc - pointPos.lon), -180.0, 180.0))
@@ -481,7 +477,7 @@ class ProminentAspectsHandler(
     }
 
     private fun handleMultiControlData(nrOfCtrlGroups: Int) {
-        val combinedResults : MutableList<AspectCounts> = ArrayList()
+        val combinedResults : MutableList<CountsDetails> = ArrayList()
         val fileNameTotals = "totalPRACtrlResults.json"
         for (i in 0 until nrOfCtrlGroups) {
             val fileNameCtrlGroup = "subcontrolgroups" + File.separator  + "subcontrolcharts_" + i + ".json"
@@ -493,17 +489,17 @@ class ProminentAspectsHandler(
             resultsWriter.writeResults(fileNameResults, aspCounts)
         }
 
-        var totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
+        val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
         for (i in 0 until nrOfCtrlGroups) {
             for (j in supportedBodies.indices) {
                 totals[j] += combinedResults[i].totals[j]
             }
         }
-        var averages = DoubleArray(supportedBodies.size)
+        val averages = DoubleArray(supportedBodies.size)
         for (i in supportedBodies.indices) {
             averages[i] = totals[i].toDouble() / nrOfCtrlGroups
         }
-        val aspCountAverages = AspectCountAverages(supportedBodies, averages.toList())
+        val aspCountAverages = BodiesAverages(supportedBodies, averages.toList())
         resultsWriter.writeResults(fileNameTotals, aspCountAverages)
     }
 
@@ -551,14 +547,14 @@ class ProminentAspectsHandler(
     }
 
 
-    private fun defineTotals(detailCount: List<ChartCount>): AspectCounts {
+    private fun defineTotals(detailCount: List<ChartCount>): CountsDetails {
         val totalsForPra = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         for (chartCount in detailCount) {
             for (i in 0..10) {
                 totalsForPra[i] += chartCount.counts[i]
             }
         }
-        return AspectCounts(supportedBodies, totalsForPra.toList(), detailCount)
+        return CountsDetails(supportedBodies, totalsForPra.toList(), detailCount)
     }
 }
 
@@ -584,7 +580,7 @@ class UnaspectedPointsHandler(
     }
 
     private fun handleMultiControlData(nrOfCtrlGroups: Int) {
-        val combinedResults : MutableList<AspectCounts> = ArrayList()
+        val combinedResults : MutableList<CountsDetails> = ArrayList()
         val fileNameTotals = "totalNASCtrlResults.json"
         for (i in 0 until nrOfCtrlGroups) {
             val fileNameCtrlGroup = "subcontrolgroups" + File.separator  + "subcontrolcharts_" + i + ".json"
@@ -596,18 +592,18 @@ class UnaspectedPointsHandler(
             resultsWriter.writeResults(fileNameResults, aspCounts)
         }
 
-        var totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
+        val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
         for (i in 0 until nrOfCtrlGroups) {
             for (j in supportedBodies.indices) {
                 totals[j] += combinedResults[i].totals[j]
             }
         }
 
-        var averages = DoubleArray(supportedBodies.size)
+        val averages = DoubleArray(supportedBodies.size)
         for (i in supportedBodies.indices) {
             averages[i] = totals[i].toDouble() / nrOfCtrlGroups
         }
-        val nasAverages = AspectCountAverages(supportedBodies, averages.toList())
+        val nasAverages = BodiesAverages(supportedBodies, averages.toList())
         resultsWriter.writeResults(fileNameTotals, nasAverages)
     }
 
@@ -667,14 +663,14 @@ class UnaspectedPointsHandler(
         return aspPartners
     }
 
-    private fun defineTotals(detailCount: List<ChartCount>): AspectCounts {
+    private fun defineTotals(detailCount: List<ChartCount>): CountsDetails {
         val totalsForPra = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         for (chartCount in detailCount) {
             for (i in 0..10) {
                 totalsForPra[i] += chartCount.counts[i]
             }
         }
-        return AspectCounts(supportedBodies, totalsForPra.toList(), detailCount)
+        return CountsDetails(supportedBodies, totalsForPra.toList(), detailCount)
     }
 }
 
@@ -716,7 +712,7 @@ class MaxPointsHandler(
     }
 
     private fun handleMultiControlData(nrOfCtrlGroups: Int) {
-        val combinedResults : MutableList<MaxCounts> = ArrayList()
+        val combinedResults : MutableList<CountsDetails> = ArrayList()
         val fileNameTotals = "totalMAXCtrlResults.json"
         for (i in 0 until nrOfCtrlGroups) {
             val fileNameCtrlGroup = "subcontrolgroups" + File.separator  + "subcontrolcharts_" + i + ".json"
@@ -728,18 +724,18 @@ class MaxPointsHandler(
             resultsWriter.writeResults(fileNameResults, maxCounts)
         }
 
-        var totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
+        val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
         for (i in 0 until nrOfCtrlGroups) {
             for (j in supportedBodies.indices) {
                 totals[j] += combinedResults[i].totals[j]
             }
         }
 
-        var averages = DoubleArray(supportedBodies.size)
+        val averages = DoubleArray(supportedBodies.size)
         for (i in supportedBodies.indices) {
             averages[i] = totals[i].toDouble() / nrOfCtrlGroups
         }
-        val maxAverages = MaxCountAverages(supportedBodies, averages.toList())
+        val maxAverages = BodiesAverages(supportedBodies, averages.toList())
         resultsWriter.writeResults(fileNameTotals, maxAverages)
     }
 
@@ -755,14 +751,14 @@ class MaxPointsHandler(
         return chartCounts.toList()
     }
 
-    private fun defineTotals(detailCount: List<ChartCount>): MaxCounts {
+    private fun defineTotals(detailCount: List<ChartCount>): CountsDetails {
         val totalsForMax = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 10 positions
         for (chartCount in detailCount) {
             for (i in 0..9) {
                 totalsForMax[i] += chartCount.counts[i]
             }
         }
-        return MaxCounts(supportedBodies, totalsForMax.toList(), detailCount)
+        return CountsDetails(supportedBodies, totalsForMax.toList(), detailCount)
     }
 
     private fun isMax(point: CelPoints, chart: Chart): Boolean {
@@ -808,6 +804,7 @@ class MaxPointsHandler(
             CelPoints.PLUTO -> {
                 if ((1 == sign || 8 == sign) && !(2 == house || 7 == house)) return true
             }
+            else -> return false
         }
         return false
     }
@@ -866,7 +863,7 @@ class PrincipleHandler(
             resultsWriter.writeResults(fileNameResults, priTotals)
         }
 
-        var totals = Array(nrOfCtrlGroups) { IntArray(5) }
+        val totals = Array(nrOfCtrlGroups) { IntArray(5) }
         for (i in 0 until nrOfCtrlGroups) {
             for (j in supportedBodies.indices) {
                 for (k in 0 until 5) {
@@ -875,7 +872,7 @@ class PrincipleHandler(
             }
         }
 
-        var averages = Array(supportedBodies.size) {DoubleArray(5)}
+        val averages = Array(supportedBodies.size) {DoubleArray(5)}
         for (i in supportedBodies.indices) {
             for (j in 0 until 5) {
                 averages[i][j] = totals[i][j].toDouble() / nrOfCtrlGroups
