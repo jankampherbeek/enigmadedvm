@@ -15,6 +15,6 @@ internal class PrincipleHandlerTest {
 
     @Test
     fun `Processing all principles should not lead to any error`() {
-        handler.processCharts()
+        handler.processCharts(1)
     }
 }

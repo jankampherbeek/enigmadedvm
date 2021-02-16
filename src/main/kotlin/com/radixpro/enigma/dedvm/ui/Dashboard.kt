@@ -290,7 +290,7 @@ class Dashboard(
         saveProperty()
         try {
             if (cbSma.isSelected) smaInSignHandler.processCharts(nrOfCtrlGroups)
-            if (cbBam.isSelected) bodiesInHouseHandler.processChartsAscMc(nrOfCtrlGroups)
+            if (cbBam.isSelected) bodiesInHouseHandler.processCharts(nrOfCtrlGroups)
             if (cbBco.isSelected) bodiesAtCornersHandler.processCharts(nrOfCtrlGroups)
             if (cbElev.isSelected) elevationHandler.processCharts(nrOfCtrlGroups)
             if (cbPra.isSelected) prominentAspectsHandler.processCharts(nrOfCtrlGroups)

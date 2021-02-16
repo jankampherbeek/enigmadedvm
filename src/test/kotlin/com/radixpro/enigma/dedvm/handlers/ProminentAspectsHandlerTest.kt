@@ -15,6 +15,6 @@ internal class ProminentAspectsHandlerTest {
 
     @Test
     fun `Defining prominency based on aspects should not give any errors`() {
-        handler.processCharts()
+        handler.processCharts(1)
     }
 }

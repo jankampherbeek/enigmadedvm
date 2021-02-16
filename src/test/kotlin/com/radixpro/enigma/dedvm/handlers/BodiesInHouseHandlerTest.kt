@@ -15,7 +15,7 @@ internal class BodiesInHouseHandlerTest {
 
     @Test
     fun `Checking for occurrences in houses 1 and 10 should run without errors`() {
-        handler.processChartsAscMc()
+        handler.processCharts(1)
     }
 
 }

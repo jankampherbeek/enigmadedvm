@@ -17,10 +17,32 @@ import java.io.File
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import com.radixpro.enigma.dedvm.core.CountsDetails as CountsDetails
 
-private const val fileNameForCharts = "calculatedcharts.json"
+private const val fileNameCharts = "calculatedcharts.json"
+private const val fileNamePostfixResults = "_results.json"
+private const val fileNamePrefixSCCharts = "subcontrolcharts_"
+private const val fileNameCenterSCGResults = "_subctrlresults_"
+private const val fileNamePostfixSCGTotals = "_ctrltotals.json"
+private const val scgFolder = "subcontrolgroups"
+private const val extension = ".json"
+private const val flags = 0 or 2 or 256           // 2 = SwissEph, 256 = speed
+private val standardSupportedBodies = listOf(
+    CelPoints.SUN,
+    CelPoints.MOON,
+    CelPoints.MERCURY,
+    CelPoints.VENUS,
+    CelPoints.MARS,
+    CelPoints.JUPITER,
+    CelPoints.SATURN,
+    CelPoints.URANUS,
+    CelPoints.NEPTUNE,
+    CelPoints.PLUTO,
+    CelPoints.CHIRON
+)
+
+// TODO check the nemes hereafter
 private const val fileNameForControlData = "controlcharts.json"
-
 
 /**
  * Shared function, calculates the effect of a prespan when close to a cusp.
@@ -29,7 +51,7 @@ fun checkForCuspOrb(lon: Double, speed: Double, house: Int, cusp: Double): Int {
     var newHouse = house
     val signForLon = SignPosition().idOfSign(lon)
     val signForCusp = SignPosition().idOfSign(cusp)
-    val diff =  Range.checkValue(abs(cusp - lon), 0.0, 360.0)
+    val diff = Range.checkValue(abs(cusp - lon), 0.0, 360.0)
     val corner = house == 12 || house == 3 || house == 6 || house == 9
     val close = (diff < 3.0) || (diff < 4.0 && corner)
     if (speed > 0 && signForLon == signForCusp && close) newHouse++
@@ -38,73 +60,89 @@ fun checkForCuspOrb(lon: Double, speed: Double, house: Int, cusp: Double): Int {
 }
 
 
+abstract class ProcessHandler() {
+
+    protected abstract val allChartsReader: AllChartsReader
+    protected abstract val resultsWriter: ResultsWriter
+    protected abstract val testName: String
+
+    fun processCharts(nrOfCtrlGroups: Int) {
+        handleCharts()
+        handleMultiControlData(nrOfCtrlGroups)
+    }
+
+    private fun handleCharts() {
+        val allCharts = allChartsReader.readAllCharts(fileNameCharts)
+        val detailCount = defineDetailsCount(allCharts)
+        val totals = defineTotals(detailCount)
+        resultsWriter.writeResults(testName + fileNamePostfixResults, totals)
+    }
+
+    protected fun createSubCtrlResults(nrOfCtrlGroups: Int): List<ICounts> {
+        val combinedResults: MutableList<ICounts> = ArrayList()
+        for (i in 0 until nrOfCtrlGroups) {
+            val allCharts = readAllChartsForCtrlGroup(i)
+            val detailCount = defineDetailsCount(allCharts)
+            val totals = defineTotals(detailCount)
+            combinedResults.add(totals)
+            writeResultsForCtrlGroup(i, totals)
+        }
+        return combinedResults
+    }
+
+    private fun readAllChartsForCtrlGroup(index: Int): AllCharts {
+        val fileNameCtrlGroup = scgFolder + File.separator + fileNamePrefixSCCharts + index + extension
+        return allChartsReader.readAllCharts(fileNameCtrlGroup)
+    }
+
+    private fun writeResultsForCtrlGroup(index: Int, totals: ICounts) {
+        val fileNameCtrlResults = scgFolder + File.separator + testName + fileNameCenterSCGResults + index + extension
+        resultsWriter.writeResults(fileNameCtrlResults, totals)
+    }
+
+    abstract fun handleMultiControlData(nrOfCtrlGroups: Int)
+    abstract fun defineDetailsCount(allCharts: AllCharts): List<INamedChart>
+    abstract fun defineTotals(detailCount: List<INamedChart>): ICounts
+
+}
+
+
 /**
  * Counts the numer of occurrences of Sun, Moon and Ascendant in signs.
  */
 class SMAInSignHandler(
-    private val allChartsReader: AllChartsReader,
+    override val allChartsReader: AllChartsReader,
     private val signPosition: SignPosition,
-    private val resultsWriter: ResultsWriter
-) {
-    private val fileNameForSMAData = "SMAResults.json"
-    private val fileNameForSMAControlData = "SMAControlDataResults.json"
+    override val resultsWriter: ResultsWriter
+) : ProcessHandler() {
 
-    fun processCharts(nrOfCtrlGroups: Int) {
-        handleCharts()
-        if (nrOfCtrlGroups == 1) handleControlData() else {
-            handleMultiControlData(nrOfCtrlGroups)
-        }
-    }
+    override val testName = "SMA"
 
-    private fun handleCharts() {
-        val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
-        val detailCount = defineDetailsCount(allCharts)
-        val smaInSign = defineTotals(detailCount)
-        resultsWriter.writeResults(fileNameForSMAData, smaInSign)
-    }
-
-    private fun handleControlData() {
-        val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
-        val detailCount = defineDetailsCount(allCharts)
-        val smaInSign = defineTotals(detailCount)
-        resultsWriter.writeResults(fileNameForSMAControlData, smaInSign)
-    }
-
-    private fun handleMultiControlData(nrOfCtrlGroups: Int) {
-        val combinedResults : MutableList<SMAInSign> = ArrayList()
-        val fileNameTotals = "totalSMACtrlResults.json"
-        for (i in 0 until nrOfCtrlGroups) {
-            val fileNameCtrlGroup = "subcontrolgroups" + File.separator  + "subcontrolcharts_" + i + ".json"
-            val fileNameResults = "subcontrolgroups" + File.separator  +"subSMACtrlResults_" + i + ".json"
-            val allCharts = allChartsReader.readAllCharts(fileNameCtrlGroup)
-            val detailCount = defineDetailsCount(allCharts)
-            val smaInSign = defineTotals(detailCount)
-            combinedResults.add(smaInSign)
-            resultsWriter.writeResults(fileNameResults, smaInSign)
-        }
+    override fun handleMultiControlData(nrOfCtrlGroups: Int) {
+        val combinedResults = createSubCtrlResults(nrOfCtrlGroups) as List<SMAInSign>
         val totSun = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 12
         val totMoon = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)    // 12
         val totAsc = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 12
         for (i in 0 until nrOfCtrlGroups) {
             for (j in 0..11) {
-                totSun[j]+= combinedResults[i].totalsSun[j]
-                totMoon[j]+= combinedResults[i].totalsMoon[j]
-                totAsc[j]+= combinedResults[i].totalsAsc[j]
+                totSun[j] += combinedResults[i].totalsSun[j]
+                totMoon[j] += combinedResults[i].totalsMoon[j]
+                totAsc[j] += combinedResults[i].totalsAsc[j]
             }
         }
         val avgSun = DoubleArray(12)
         val avgMoon = DoubleArray(12)
         val avgAsc = DoubleArray(12)
         for (i in 0..11) {
-            avgSun[i] = totSun[i].toDouble()/nrOfCtrlGroups
-            avgMoon[i] = totMoon[i].toDouble()/nrOfCtrlGroups
-            avgAsc[i] = totAsc[i].toDouble()/nrOfCtrlGroups
+            avgSun[i] = totSun[i].toDouble() / nrOfCtrlGroups
+            avgMoon[i] = totMoon[i].toDouble() / nrOfCtrlGroups
+            avgAsc[i] = totAsc[i].toDouble() / nrOfCtrlGroups
         }
-        val smaTotals = SMAInSignAverages(avgSun.toList(), avgMoon.toList(), avgAsc.toList())
-        resultsWriter.writeResults(fileNameTotals, smaTotals)
+        val totals = SMAInSignAverages(avgSun.toList(), avgMoon.toList(), avgAsc.toList())
+        resultsWriter.writeResults(testName + fileNamePostfixSCGTotals, totals)
     }
 
-    private fun defineDetailsCount(allCharts: AllCharts): List<ChartCount> {
+    override fun defineDetailsCount(allCharts: AllCharts): List<ChartCount> {
         val chartCounts: MutableList<ChartCount> = ArrayList()
         for (chart in allCharts.charts) {
             val sunPos = signPosition.idOfSign(chart.pointPositions[0].lon)
@@ -120,117 +158,77 @@ class SMAInSignHandler(
         return chartCounts.toList()
     }
 
-    private fun defineTotals(detailCount: List<ChartCount>): SMAInSign {
+    override fun defineTotals(detailCount: List<INamedChart>): SMAInSign {
         val totalsSun = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         val totalsMoon = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         val totalsAsc = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-        for (chartCount in detailCount) {
+        for (chartCount in detailCount as List<ChartCount>) {
             totalsSun[chartCount.counts[0] - 1]++
             totalsMoon[chartCount.counts[1] - 1]++
             totalsAsc[chartCount.counts[2] - 1]++
         }
         return SMAInSign(totalsSun, totalsMoon, totalsAsc, detailCount)
     }
-
 }
 
 /**
  * Counts the occurrence of Sun .. Pluto and Cheiron in specific houses.
  */
 class BodiesInHouseHandler(
-    private val allChartsReader: AllChartsReader,
+    override val allChartsReader: AllChartsReader,
     private val housePosition: HousePosition,
-    private val resultsWriter: ResultsWriter
-) {
+    override val resultsWriter: ResultsWriter) : ProcessHandler() {
+    private val cusps = listOf(1, 10)
+    override val testName = "BAM"
 
-    private val fileNameForAscMcData = "BAMResults.json"
-    private val fileNameForAscMcControlData = "BAMControlDataResults.json"
-    private val flags = 0 or 2 or 256           // 2 = SwissEph, 256 = speed
-    private val supportedBodies = listOf(
-        CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
-        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON
-    )
-
-    fun processChartsAscMc(nrOfCtrlGroups: Int) {
-        val cusps = listOf(1, 10)
-        handleCharts(cusps)
-        if (nrOfCtrlGroups == 1) handleControlData(cusps)
-        else handleMultiControlData(nrOfCtrlGroups, cusps)
-    }
-
-    private fun handleCharts(cusps: List<Int>) {
-        val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
-        val detailCount = defineDetailsCount(allCharts, cusps)
-        val bodiesInRange = defineTotals(detailCount)
-        resultsWriter.writeResults(fileNameForAscMcData, bodiesInRange)
-    }
-
-    private fun handleControlData(cusps: List<Int>) {
-        val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
-        val detailCount = defineDetailsCount(allCharts, cusps)
-        val bodiesInRange = defineTotals(detailCount)
-        resultsWriter.writeResults(fileNameForAscMcData, bodiesInRange)
-    }
-
-    private fun handleMultiControlData(nrOfCtrlGroups: Int, cusps: List<Int>) {
-        val combinedResults : MutableList<CountsDetails> = ArrayList()
-        val fileNameTotals = "totalBAMCtrlResults.json"
+    override fun handleMultiControlData(nrOfCtrlGroups: Int) {
+        val combinedResults = createSubCtrlResults(nrOfCtrlGroups) as List<CountsDetails>
+        val totalList = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
         for (i in 0 until nrOfCtrlGroups) {
-            val fileNameCtrlGroup = "subcontrolgroups" + File.separator  + "subcontrolcharts_" + i + ".json"
-            val fileNameResults = "subcontrolgroups" + File.separator  +"subBAMCtrlResults_" + i + ".json"
-            val allCharts = allChartsReader.readAllCharts(fileNameCtrlGroup)
-            val detailCount = defineDetailsCount(allCharts, cusps)
-            val pointInMcAsc = defineTotals(detailCount)
-            combinedResults.add(pointInMcAsc)
-            resultsWriter.writeResults(fileNameResults, pointInMcAsc)
-        }
-        val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
-        for (i in 0 until nrOfCtrlGroups) {
-            for (j in supportedBodies.indices) {
-                totals[j] += combinedResults[i].totals[j]
+            for (j in standardSupportedBodies.indices) {
+                totalList[j] += combinedResults[i].totals[j]
             }
         }
-        val averages = DoubleArray(supportedBodies.size)
-        for (i in supportedBodies.indices) {
-            averages[i] = totals[i].toDouble() / nrOfCtrlGroups
+        val averages = DoubleArray(standardSupportedBodies.size)
+        for (i in standardSupportedBodies.indices) {
+            averages[i] = totalList[i].toDouble() / nrOfCtrlGroups
         }
-        val birAverages = BodiesAverages(supportedBodies, averages.toList())
-        resultsWriter.writeResults(fileNameTotals, birAverages)
+        val totals = BodiesAverages(standardSupportedBodies, averages.toList())
+        resultsWriter.writeResults(testName + fileNamePostfixSCGTotals, totals)
     }
 
-
-    private fun defineDetailsCount(allCharts: AllCharts, cusps: List<Int>): List<ChartCount> {
+    override fun defineDetailsCount(allCharts: AllCharts): List<ChartCount> {
         val chartCounts: MutableList<ChartCount> = ArrayList()
         for (chart in allCharts.charts) {
             val details: MutableList<Int> = ArrayList()
-              for (point in supportedBodies) {
-                  val pointPos = findPointInChart(point, chart)
-                  var house =  housePosition.idOfHouse(pointPos.lon, chart.jdUt, flags, chart.location)
-                  var nextCusp = house + 1     // array cusps starts with 0
-                  if (nextCusp > 12) nextCusp = 1
-                    house = checkForCuspOrb(pointPos.lon, pointPos.speed, house, chart.cusps[nextCusp])
-                    if (cusps.contains(house)) details.add(1) else details.add(0)
-              }
+            for (point in standardSupportedBodies) {
+                val pointPos = findPointInChart(point, chart)
+                var house = housePosition.idOfHouse(pointPos.lon, chart.jdUt, flags, chart.location)
+                var nextCusp = house + 1     // array cusps starts with 0
+                if (nextCusp > 12) nextCusp = 1
+                house = checkForCuspOrb(pointPos.lon, pointPos.speed, house, chart.cusps[nextCusp])
+                if (cusps.contains(house)) details.add(1) else details.add(0)
+            }
             chartCounts.add(ChartCount(chart.id, chart.name, details.toList()))
         }
         return chartCounts.toList()
     }
 
-    private fun findPointInChart(point: Points, chart: Chart):PointPosition {
+    private fun findPointInChart(point: Points, chart: Chart): PointPosition {
         for (pointPos in chart.pointPositions) {
             if (point == pointPos.point) return pointPos
         }
         throw RuntimeException("Could not find point in chart for BAM")
     }
 
-    private fun defineTotals(detailCount: List<ChartCount>): CountsDetails {
+    override fun defineTotals(detailCount: List<INamedChart>): CountsDetails {
         val totalsForSigns = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-        for (chartCount in detailCount) {
+        for (chartCount in detailCount as List<ChartCount>) {
             for (i in 0..10) {
                 totalsForSigns[i] += chartCount.counts[i]
             }
         }
-        return CountsDetails(supportedBodies, totalsForSigns.toList(), detailCount)
+        return CountsDetails(standardSupportedBodies, totalsForSigns.toList(), detailCount)
     }
 
 }
@@ -238,65 +236,28 @@ class BodiesInHouseHandler(
 /**
  * Checks if points are positioned in corners.
  */
-class BodiesAtCornersHandler(private val allChartsReader: AllChartsReader, private val resultsWriter: ResultsWriter) {
+class BodiesAtCornersHandler(override val allChartsReader: AllChartsReader,
+                             override val resultsWriter: ResultsWriter): ProcessHandler() {
 
-    private val fileNameForCornerData = "BCOResults.json"
-    private val fileNameForCornerControlData = "BCOControlDataResults.json"
-    private val supportedBodies = listOf(
-        CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
-        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON
-    )
+    override val testName = "BCO"
 
-    fun processCharts(nrOfCtrlGroups: Int) {
-        val cusps = listOf(1, 4, 7, 10)
-        handleCharts(cusps, fileNameForCornerData)
-        if (nrOfCtrlGroups == 1) handleControlData(cusps, fileNameForCornerControlData)
-        else (handleMultiControlData(nrOfCtrlGroups))
-
-    }
-
-    private fun handleCharts(cusps: List<Int>, fileName: String) {
-        val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
-        val detailCount = defineDetailsCount(allCharts)
-        val bodiesInRange = defineTotals(detailCount)
-        resultsWriter.writeResults(fileName, bodiesInRange)
-    }
-
-
-    private fun handleControlData(cusps: List<Int>, fileName: String) {
-        val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
-        val detailCount = defineDetailsCount(allCharts)
-        val bodiesInRange = defineTotals(detailCount)
-        resultsWriter.writeResults(fileName, bodiesInRange)
-    }
-
-    private fun handleMultiControlData(nrOfCtrlGroups: Int) {
-        val combinedResults : MutableList<CountsDetails> = ArrayList()
-        val fileNameTotals = "totalBCOCtrlResults.json"
+    override fun handleMultiControlData(nrOfCtrlGroups: Int) {
+        val combinedResults = createSubCtrlResults(nrOfCtrlGroups) as List<CountsDetails>
+        val totalList = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
         for (i in 0 until nrOfCtrlGroups) {
-            val fileNameCtrlGroup = "subcontrolgroups" + File.separator  + "subcontrolcharts_" + i + ".json"
-            val fileNameResults = "subcontrolgroups" + File.separator  +"subBCOCtrlResults_" + i + ".json"
-            val allCharts = allChartsReader.readAllCharts(fileNameCtrlGroup)
-            val detailCount = defineDetailsCount(allCharts)
-            val pointAtCorner = defineTotals(detailCount)
-            combinedResults.add(pointAtCorner)
-            resultsWriter.writeResults(fileNameResults, pointAtCorner)
-        }
-        val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
-        for (i in 0 until nrOfCtrlGroups) {
-            for (j in supportedBodies.indices) {
-                totals[j] += combinedResults[i].totals[j]
+            for (j in standardSupportedBodies.indices) {
+                totalList[j] += combinedResults[i].totals[j]
             }
         }
-        val averages = DoubleArray(supportedBodies.size)
-        for (i in supportedBodies.indices) {
-            averages[i] = totals[i].toDouble() / nrOfCtrlGroups
+        val averages = DoubleArray(standardSupportedBodies.size)
+        for (i in standardSupportedBodies.indices) {
+            averages[i] = totalList[i].toDouble() / nrOfCtrlGroups
         }
-        val birAverages = BodiesAverages(supportedBodies, averages.toList())
-        resultsWriter.writeResults(fileNameTotals, birAverages)
+        val totals = BodiesAverages(standardSupportedBodies, averages.toList())
+        resultsWriter.writeResults(testName + fileNamePostfixSCGTotals, totals)
     }
 
-    private fun defineDetailsCount(allCharts: AllCharts): List<ChartCount> {
+    override fun defineDetailsCount(allCharts: AllCharts): List<INamedChart> {
         val chartCounts: MutableList<ChartCount> = ArrayList()
         for (chart in allCharts.charts) {
             val details: MutableList<Int> = ArrayList()
@@ -324,14 +285,14 @@ class BodiesAtCornersHandler(private val allChartsReader: AllChartsReader, priva
         return (Range.checkValue(diff, 0.0, 360.0) <= orb) && signLon1 == signLon2
     }
 
-    private fun defineTotals(detailCount: List<ChartCount>): CountsDetails {
+    override fun defineTotals(detailCount: List<INamedChart>): CountsDetails {
         val totalsForBodies = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11 positions
-        for (chartCount in detailCount) {
+        for (chartCount in detailCount as List<ChartCount>) {
             for (i in 0..10) {
                 totalsForBodies[i] += chartCount.counts[i]
             }
         }
-        return CountsDetails(supportedBodies, totalsForBodies.toList(), detailCount)
+        return CountsDetails(standardSupportedBodies, totalsForBodies.toList(), detailCount)
     }
 
 }
@@ -340,63 +301,28 @@ class BodiesAtCornersHandler(private val allChartsReader: AllChartsReader, priva
 /**
  * Checks for the celestial body that is closest to the MC, mesured in longitude.
  */
-class ElevationHandler(private val allChartsReader: AllChartsReader, private val resultsWriter: ResultsWriter) {
+class ElevationHandler(override val allChartsReader: AllChartsReader,
+                       override val resultsWriter: ResultsWriter): ProcessHandler() {
 
-    private val fileNameForELEVData = "ELEVResults.json"
-    private val fileNameForELEVControlData = "ELEVControlDataResults.json"
-    private val supportedBodies = listOf(
-        CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
-        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON
-    )
+    override val testName = "ELEV"
 
-    fun processCharts(nrOfCtrlGroups: Int) {
-        handleCharts()
-        if (nrOfCtrlGroups == 1) handleControlData() else handleMultiControlData(nrOfCtrlGroups)
-    }
-
-    private fun handleCharts() {
-        val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
-        val details = defineDetails(allCharts)
-        val smaInSign = defineTotals(details)
-        resultsWriter.writeResults(fileNameForELEVData, smaInSign)
-    }
-
-    private fun handleControlData() {
-        val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
-        val details = defineDetails(allCharts)
-        val elevated = defineTotals(details)
-        resultsWriter.writeResults(fileNameForELEVControlData, elevated)
-    }
-
-    private fun handleMultiControlData(nrOfCtrlGroups: Int) {
-        val combinedResults : MutableList<ElevationValues> = ArrayList()
-        val fileNameTotals = "totalELEVCtrlResults.json"
+    override fun handleMultiControlData(nrOfCtrlGroups: Int) {
+        val combinedResults = createSubCtrlResults(nrOfCtrlGroups) as List<ElevationValues>
+        val totalList = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
         for (i in 0 until nrOfCtrlGroups) {
-            val fileNameCtrlGroup = "subcontrolgroups" + File.separator  + "subcontrolcharts_" + i + ".json"
-            val fileNameResults = "subcontrolgroups" + File.separator  +"subELEVCtrlResults_" + i + ".json"
-            val allCharts = allChartsReader.readAllCharts(fileNameCtrlGroup)
-            val details = defineDetails(allCharts)
-            val elevated = defineTotals(details)
-            combinedResults.add(elevated)
-            resultsWriter.writeResults(fileNameResults, elevated)
-        }
-
-        val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
-        for (i in 0 until nrOfCtrlGroups) {
-            for (j in supportedBodies.indices) {
-                totals[j] += combinedResults[i].totals[j]
+            for (j in standardSupportedBodies.indices) {
+                totalList[j] += combinedResults[i].totals[j]
             }
         }
-        val averages = DoubleArray(supportedBodies.size)
-        for (i in supportedBodies.indices) {
-            averages[i] = totals[i].toDouble() / nrOfCtrlGroups
+        val totals = DoubleArray(standardSupportedBodies.size)
+        for (i in standardSupportedBodies.indices) {
+            totals[i] = totalList[i].toDouble() / nrOfCtrlGroups
         }
-        val elevAverages = BodiesAverages(supportedBodies, averages.toList())
-        resultsWriter.writeResults(fileNameTotals, elevAverages)
+        val elevAverages = BodiesAverages(standardSupportedBodies, totals.toList())
+        resultsWriter.writeResults(testName + fileNamePostfixSCGTotals, elevAverages)
     }
 
-
-    private fun defineDetails(allCharts: AllCharts): List<MinMaxPositionsPerChart> {
+    override fun defineDetailsCount(allCharts: AllCharts): List<INamedChart> {
         val elevatedPoints: MutableList<MinMaxPositionsPerChart> = ArrayList()
         for (chart in allCharts.charts) {
             var pointWithShortestDistance: Points = EmptyPoints.EXISTS_NOT
@@ -412,14 +338,21 @@ class ElevationHandler(private val allChartsReader: AllChartsReader, private val
                     }
                 }
             }
-            if (shortestDistance <= 60.0) elevatedPoints.add(MinMaxPositionsPerChart(chart.id, chart.name, pointWithShortestDistance as CelPoints, shortestDistance))
+            if (shortestDistance <= 60.0) elevatedPoints.add(
+                MinMaxPositionsPerChart(
+                    chart.id,
+                    chart.name,
+                    pointWithShortestDistance as CelPoints,
+                    shortestDistance
+                )
+            )
         }
         return elevatedPoints.toList()
     }
 
-    private fun defineTotals(details: List<MinMaxPositionsPerChart>): ElevationValues {
+    override fun defineTotals(details: List<INamedChart>): ElevationValues {
         val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)       // 11 positions
-        for (mmPos in details) {
+        for (mmPos in details as List<MinMaxPositionsPerChart>) {
             when (mmPos.point) {
                 CelPoints.SUN -> totals[0]++
                 CelPoints.MOON -> totals[1]++
@@ -434,77 +367,39 @@ class ElevationHandler(private val allChartsReader: AllChartsReader, private val
                 CelPoints.CHIRON -> totals[10]++
             }
         }
-        return ElevationValues(supportedBodies, totals, details)
+        return ElevationValues(standardSupportedBodies, totals, details)
     }
-
 }
 
 /**
  * Checks if a point is prominently aspected.
  */
 class ProminentAspectsHandler(
-    private val allChartsReader: AllChartsReader,
+    override val allChartsReader: AllChartsReader,
     private val aspectsForChart: AspectsForChart,
     private val signPosition: SignPosition,
-    private val resultsWriter: ResultsWriter
-) {
+    override val resultsWriter: ResultsWriter): ProcessHandler() {
 
-    private val fileNameForPRAData = "PRAResults.json"
-    private val fileNameForPRAControlData = "PRAControlDataResults.json"
-    private val supportedBodies = listOf(
-        CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
-        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON
-    )
+    override val testName = "PRA"
 
-    fun processCharts(nrOfCtrlGroups: Int) {
-        handleCharts()
-        if (nrOfCtrlGroups == 1) handleControlData() else handleMultiControlData(nrOfCtrlGroups)
-    }
-
-
-    private fun handleCharts() {
-        val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
-        val details = defineDetails(allCharts)
-        val praCounts = defineTotals(details)
-        resultsWriter.writeResults(fileNameForPRAData, praCounts)
-    }
-
-    private fun handleControlData() {
-        val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
-        val details = defineDetails(allCharts)
-        val praCounts = defineTotals(details)
-        resultsWriter.writeResults(fileNameForPRAControlData, praCounts)
-    }
-
-    private fun handleMultiControlData(nrOfCtrlGroups: Int) {
-        val combinedResults : MutableList<CountsDetails> = ArrayList()
-        val fileNameTotals = "totalPRACtrlResults.json"
+    override fun handleMultiControlData(nrOfCtrlGroups: Int) {
+        val combinedResults = createSubCtrlResults(nrOfCtrlGroups) as List<CountsDetails>
+        val totalsList = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
         for (i in 0 until nrOfCtrlGroups) {
-            val fileNameCtrlGroup = "subcontrolgroups" + File.separator  + "subcontrolcharts_" + i + ".json"
-            val fileNameResults = "subcontrolgroups" + File.separator  +"subPRACtrlResults_" + i + ".json"
-            val allCharts = allChartsReader.readAllCharts(fileNameCtrlGroup)
-            val details = defineDetails(allCharts)
-            val aspCounts = defineTotals(details)
-            combinedResults.add(aspCounts)
-            resultsWriter.writeResults(fileNameResults, aspCounts)
-        }
-
-        val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
-        for (i in 0 until nrOfCtrlGroups) {
-            for (j in supportedBodies.indices) {
-                totals[j] += combinedResults[i].totals[j]
+            for (j in standardSupportedBodies.indices) {
+                totalsList[j] += combinedResults[i].totals[j]
             }
         }
-        val averages = DoubleArray(supportedBodies.size)
-        for (i in supportedBodies.indices) {
-            averages[i] = totals[i].toDouble() / nrOfCtrlGroups
+        val averages = DoubleArray(standardSupportedBodies.size)
+        for (i in standardSupportedBodies.indices) {
+            averages[i] = totalsList[i].toDouble() / nrOfCtrlGroups
         }
-        val aspCountAverages = BodiesAverages(supportedBodies, averages.toList())
-        resultsWriter.writeResults(fileNameTotals, aspCountAverages)
+        val totals = BodiesAverages(standardSupportedBodies, averages.toList())
+        resultsWriter.writeResults(testName + fileNamePostfixSCGTotals, totals)
     }
 
 
-    private fun defineDetails(allCharts: AllCharts): List<ChartCount> {
+    override fun defineDetailsCount(allCharts: AllCharts): List<INamedChart> {
         val chartCounts: MutableList<ChartCount> = ArrayList()
         for (chart in allCharts.charts) {
             val praAspects = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)   // 11 positions
@@ -521,17 +416,21 @@ class ProminentAspectsHandler(
                                 asp.point1 == CelPoints.MOON ||
                                 asp.point1 == MundanePoints.ASC ||
                                 asp.point1 == MundanePoints.MC
-                                ) && (supportedBodies.contains(asp.point2))
-                    ) praAspects[supportedBodies.indexOf(asp.point2)]++
+                                ) && (standardSupportedBodies.contains(asp.point2))
+                    ) praAspects[standardSupportedBodies.indexOf(asp.point2)]++
                     if ((asp.point2 == CelPoints.SUN ||
                                 asp.point2 == CelPoints.MOON ||
                                 asp.point2 == MundanePoints.ASC ||
                                 asp.point2 == MundanePoints.MC
-                                ) && (supportedBodies.contains(asp.point1))
-                    ) praAspects[supportedBodies.indexOf(asp.point1)]++
+                                ) && (standardSupportedBodies.contains(asp.point1))
+                    ) praAspects[standardSupportedBodies.indexOf(asp.point1)]++
                     // additional run for ruler asc as this can be Sun or Moon and should be counted twice if that occurs
-                    if (asp.point1 == rulerAsc  && (supportedBodies.contains(asp.point2))) praAspects[supportedBodies.indexOf(asp.point2)]++
-                    if (asp.point2 == rulerAsc  && (supportedBodies.contains(asp.point1))) praAspects[supportedBodies.indexOf(asp.point1)]++
+                    if (asp.point1 == rulerAsc && (standardSupportedBodies.contains(asp.point2))) praAspects[standardSupportedBodies.indexOf(
+                        asp.point2
+                    )]++
+                    if (asp.point2 == rulerAsc && (standardSupportedBodies.contains(asp.point1))) praAspects[standardSupportedBodies.indexOf(
+                        asp.point1
+                    )]++
                 }
             }
 
@@ -539,22 +438,19 @@ class ProminentAspectsHandler(
             val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)   // 11 positions
             for (i in 0..10) if (praAspects[i] > maxCount) maxCount = praAspects[i]
             for (i in 0..10) if (praAspects[i] == maxCount) totals[i] = 1
-
             chartCounts.add(ChartCount(chart.id, chart.name, totals))
-
         }
         return chartCounts.toList()
     }
 
-
-    private fun defineTotals(detailCount: List<ChartCount>): CountsDetails {
+    override fun defineTotals(detailCount: List<INamedChart>): CountsDetails {
         val totalsForPra = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-        for (chartCount in detailCount) {
+        for (chartCount in detailCount as List<ChartCount>) {
             for (i in 0..10) {
                 totalsForPra[i] += chartCount.counts[i]
             }
         }
-        return CountsDetails(supportedBodies, totalsForPra.toList(), detailCount)
+        return CountsDetails(standardSupportedBodies, totalsForPra.toList(), detailCount)
     }
 }
 
@@ -562,84 +458,46 @@ class ProminentAspectsHandler(
  * Checks is point is unaspected or part of an unaspected duet.
  */
 class UnaspectedPointsHandler(
-    private val allChartsReader: AllChartsReader,
+    override val allChartsReader: AllChartsReader,
     private val aspectsForChart: AspectsForChart,
-    private val resultsWriter: ResultsWriter
-) {
+    override val resultsWriter: ResultsWriter): ProcessHandler() {
 
-    private val fileNameForNASData = "NASResults.json"
-    private val fileNameForNASControlData = "NASControlDataResults.json"
-    private val supportedBodies = listOf(
-        CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
-        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON
-    )
+    override val testName = "NAS"
 
-    fun processCharts(nrOfCtrlGroups: Int) {
-        handleCharts()
-        if (nrOfCtrlGroups == 1) handleControlData() else handleMultiControlData(nrOfCtrlGroups)
-    }
-
-    private fun handleMultiControlData(nrOfCtrlGroups: Int) {
-        val combinedResults : MutableList<CountsDetails> = ArrayList()
-        val fileNameTotals = "totalNASCtrlResults.json"
+    override fun handleMultiControlData(nrOfCtrlGroups: Int) {
+        val combinedResults = createSubCtrlResults(nrOfCtrlGroups) as List<CountsDetails>
+        val totalList = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
         for (i in 0 until nrOfCtrlGroups) {
-            val fileNameCtrlGroup = "subcontrolgroups" + File.separator  + "subcontrolcharts_" + i + ".json"
-            val fileNameResults = "subcontrolgroups" + File.separator  +"subNASCtrlResults_" + i + ".json"
-            val allCharts = allChartsReader.readAllCharts(fileNameCtrlGroup)
-            val details = defineDetails(allCharts)
-            val aspCounts = defineTotals(details)
-            combinedResults.add(aspCounts)
-            resultsWriter.writeResults(fileNameResults, aspCounts)
-        }
-
-        val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
-        for (i in 0 until nrOfCtrlGroups) {
-            for (j in supportedBodies.indices) {
-                totals[j] += combinedResults[i].totals[j]
+            for (j in standardSupportedBodies.indices) {
+                totalList[j] += combinedResults[i].totals[j]
             }
         }
-
-        val averages = DoubleArray(supportedBodies.size)
-        for (i in supportedBodies.indices) {
-            averages[i] = totals[i].toDouble() / nrOfCtrlGroups
+        val averages = DoubleArray(standardSupportedBodies.size)
+        for (i in standardSupportedBodies.indices) {
+            averages[i] = totalList[i].toDouble() / nrOfCtrlGroups
         }
-        val nasAverages = BodiesAverages(supportedBodies, averages.toList())
-        resultsWriter.writeResults(fileNameTotals, nasAverages)
+        val totals = BodiesAverages(standardSupportedBodies, averages.toList())
+        resultsWriter.writeResults(testName + fileNamePostfixSCGTotals, totals)
     }
 
-
-    private fun handleCharts() {
-        val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
-        val details = defineDetails(allCharts)
-        val praCounts = defineTotals(details)
-        resultsWriter.writeResults(fileNameForNASData, praCounts)
-    }
-
-    private fun handleControlData() {
-        val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
-        val details = defineDetails(allCharts)
-        val praCounts = defineTotals(details)
-        resultsWriter.writeResults(fileNameForNASControlData, praCounts)
-    }
-
-    private fun defineDetails(allCharts: AllCharts): List<ChartCount> {
+    override fun defineDetailsCount(allCharts: AllCharts): List<ChartCount> {
         val chartCounts: MutableList<ChartCount> = ArrayList()
         for (chart in allCharts.charts) {
             val nasValues = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)   // 11 positions
             val allAspects = aspectsForChart.findAspects(chart)
             val aspPartnersPerCelPoint = arrayListOf<List<Points>>()
-            for (point1 in supportedBodies) {
-                        aspPartnersPerCelPoint.add(checkAspects(point1, allAspects))
+            for (point1 in standardSupportedBodies) {
+                aspPartnersPerCelPoint.add(checkAspects(point1, allAspects))
             }
-            for (point1 in supportedBodies) {
-                val nrOfAspectsPoint1 = aspPartnersPerCelPoint[supportedBodies.indexOf(point1)].size
+            for (point1 in standardSupportedBodies) {
+                val nrOfAspectsPoint1 = aspPartnersPerCelPoint[standardSupportedBodies.indexOf(point1)].size
                 var noAspects = nrOfAspectsPoint1 == 0
                 if (nrOfAspectsPoint1 == 1) {       // check for duet
-                    val point2 = aspPartnersPerCelPoint[supportedBodies.indexOf(point1)][0]
-                    val nrOfAspectsPoint2 = aspPartnersPerCelPoint[supportedBodies.indexOf(point2)].size
+                    val point2 = aspPartnersPerCelPoint[standardSupportedBodies.indexOf(point1)][0]
+                    val nrOfAspectsPoint2 = aspPartnersPerCelPoint[standardSupportedBodies.indexOf(point2)].size
                     noAspects = nrOfAspectsPoint2 == 1
                 }
-                if (noAspects) nasValues[supportedBodies.indexOf(point1)] = 1
+                if (noAspects) nasValues[standardSupportedBodies.indexOf(point1)] = 1
             }
             chartCounts.add(ChartCount(chart.id, chart.name, nasValues))
         }
@@ -648,10 +506,10 @@ class UnaspectedPointsHandler(
 
     private fun checkAspects(point1: Points, allAspects: List<ActualAspect>): List<Points> {
         val aspPartners: MutableList<Points> = ArrayList()
-        for (point2 in supportedBodies) {
+        for (point2 in standardSupportedBodies) {
             if (point1 != point2) {
                 for (asp in allAspects) {
-                    if ((point1 == asp.point1) && (point2 == asp.point2))  {
+                    if ((point1 == asp.point1) && (point2 == asp.point2)) {
                         aspPartners.add(point2)
                     }
                     if ((point2 == asp.point1) && (point1 == asp.point2)) {
@@ -663,14 +521,14 @@ class UnaspectedPointsHandler(
         return aspPartners
     }
 
-    private fun defineTotals(detailCount: List<ChartCount>): CountsDetails {
+    override fun defineTotals(detailCount: List<INamedChart>): CountsDetails {
         val totalsForPra = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-        for (chartCount in detailCount) {
+        for (chartCount in detailCount as List<ChartCount>) {
             for (i in 0..10) {
                 totalsForPra[i] += chartCount.counts[i]
             }
         }
-        return CountsDetails(supportedBodies, totalsForPra.toList(), detailCount)
+        return CountsDetails(standardSupportedBodies, totalsForPra.toList(), detailCount)
     }
 }
 
@@ -678,68 +536,36 @@ class UnaspectedPointsHandler(
  * Checks the point with maximum value, based on rulership, exaltation and position in houses.
  */
 class MaxPointsHandler(
-    private val allChartsReader: AllChartsReader,
+    override val allChartsReader: AllChartsReader,
     private val signPosition: SignPosition,
     private val housePosition: HousePosition,
-    private val resultsWriter: ResultsWriter
-) {
+    override val resultsWriter: ResultsWriter): ProcessHandler() {
 
-    private val fileNameForMAXData = "MAXResults.json"
-    private val fileNameForMAXControlData = "MAXControlDataResults.json"
+    override val testName = "MAX"
+
     private val supportedBodies = listOf(
         CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
         CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO
     )
-    private val flags = 0 or 2 or 256           // 2 = SwissEph, 256 = speed
 
-    fun processCharts(nrOfCtrlGroups: Int) {
-        handleCharts()
-        if (nrOfCtrlGroups == 1) handleControlData() else handleMultiControlData(nrOfCtrlGroups)
-    }
 
-    private fun handleCharts() {
-        val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
-        val details = defineDetails(allCharts)
-        val maxCounts = defineTotals(details)
-        resultsWriter.writeResults(fileNameForMAXData, maxCounts)
-    }
-
-    private fun handleControlData() {
-        val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
-        val details = defineDetails(allCharts)
-        val maxCounts = defineTotals(details)
-        resultsWriter.writeResults(fileNameForMAXControlData, maxCounts)
-    }
-
-    private fun handleMultiControlData(nrOfCtrlGroups: Int) {
-        val combinedResults : MutableList<CountsDetails> = ArrayList()
-        val fileNameTotals = "totalMAXCtrlResults.json"
-        for (i in 0 until nrOfCtrlGroups) {
-            val fileNameCtrlGroup = "subcontrolgroups" + File.separator  + "subcontrolcharts_" + i + ".json"
-            val fileNameResults = "subcontrolgroups" + File.separator  +"subMAXCtrlResults_" + i + ".json"
-            val allCharts = allChartsReader.readAllCharts(fileNameCtrlGroup)
-            val details = defineDetails(allCharts)
-            val maxCounts = defineTotals(details)
-            combinedResults.add(maxCounts)
-            resultsWriter.writeResults(fileNameResults, maxCounts)
-        }
-
-        val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
+    override fun handleMultiControlData(nrOfCtrlGroups: Int) {
+        val combinedResults = createSubCtrlResults(nrOfCtrlGroups) as List<CountsDetails>
+        val totalList = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 11
         for (i in 0 until nrOfCtrlGroups) {
             for (j in supportedBodies.indices) {
-                totals[j] += combinedResults[i].totals[j]
+                totalList[j] += combinedResults[i].totals[j]
             }
         }
-
         val averages = DoubleArray(supportedBodies.size)
         for (i in supportedBodies.indices) {
-            averages[i] = totals[i].toDouble() / nrOfCtrlGroups
+            averages[i] = totalList[i].toDouble() / nrOfCtrlGroups
         }
-        val maxAverages = BodiesAverages(supportedBodies, averages.toList())
-        resultsWriter.writeResults(fileNameTotals, maxAverages)
+        val totals = BodiesAverages(supportedBodies, averages.toList())
+        resultsWriter.writeResults(testName + fileNamePostfixSCGTotals, totals)
     }
 
-    private fun defineDetails(allCharts: AllCharts): List<ChartCount> {
+    override fun defineDetailsCount(allCharts: AllCharts): List<ChartCount> {
         val chartCounts: MutableList<ChartCount> = ArrayList()
         for (chart in allCharts.charts) {
             val maxValues = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)   // 10 positions
@@ -751,9 +577,9 @@ class MaxPointsHandler(
         return chartCounts.toList()
     }
 
-    private fun defineTotals(detailCount: List<ChartCount>): CountsDetails {
+    override fun defineTotals(detailCount: List<INamedChart>): CountsDetails {
         val totalsForMax = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)     // 10 positions
-        for (chartCount in detailCount) {
+        for (chartCount in detailCount as List<ChartCount>) {
             for (i in 0..9) {
                 totalsForMax[i] += chartCount.counts[i]
             }
@@ -770,7 +596,7 @@ class MaxPointsHandler(
         }
         val sign = signPosition.idOfSign(lon)
         var house = housePosition.idOfHouse(lon, chart.jdUt, flags, chart.location)
-        var nextHouse = house+1
+        var nextHouse = house + 1
         if (nextHouse == 13) nextHouse = 1
         house = checkForCuspOrb(lon, speed, house, chart.cusps[nextHouse])
         when (point) {
@@ -823,8 +649,19 @@ class PrincipleHandler(
     private val fileNamePrefixForPRIData = "PRIResults_"
     private val fileNamePrefixForPRIControlData = "PRIControlDataResults_"
     private val supportedBodies = listOf(
-        CelPoints.SUN, CelPoints.MOON, CelPoints.MERCURY, CelPoints.VENUS, CelPoints.MARS, CelPoints.JUPITER,
-        CelPoints.SATURN, CelPoints.URANUS, CelPoints.NEPTUNE, CelPoints.PLUTO, CelPoints.CHIRON, CelPoints.MEAN_NODE, CelPoints.MEAN_APOGEE
+        CelPoints.SUN,
+        CelPoints.MOON,
+        CelPoints.MERCURY,
+        CelPoints.VENUS,
+        CelPoints.MARS,
+        CelPoints.JUPITER,
+        CelPoints.SATURN,
+        CelPoints.URANUS,
+        CelPoints.NEPTUNE,
+        CelPoints.PLUTO,
+        CelPoints.CHIRON,
+        CelPoints.MEAN_NODE,
+        CelPoints.MEAN_APOGEE
     )
     private val flags = 0 or 2 or 256           // 2 = SwissEph, 256 = speed
 
@@ -836,7 +673,7 @@ class PrincipleHandler(
     }
 
     private fun handleCharts(index: Int) {
-        val allCharts = allChartsReader.readAllCharts(fileNameForCharts)
+        val allCharts = allChartsReader.readAllCharts(fileNameCharts)
         val details = defineDetails(index, allCharts)
         val principleComplete = defineTotals(index, details)
         resultsWriter.writeResults("$fileNamePrefixForPRIData$index.json", principleComplete)
@@ -851,11 +688,11 @@ class PrincipleHandler(
 
 
     private fun handleMultiControlData(nrOfCtrlGroups: Int, index: Int) {
-        val combinedResults : MutableList<PrincipleComplete> = ArrayList()
+        val combinedResults: MutableList<PrincipleComplete> = ArrayList()
         val fileNameTotals = "totalPRICtrlResults$index.json"
         for (i in 0 until nrOfCtrlGroups) {
-            val fileNameCtrlGroup = "subcontrolgroups" + File.separator  + "subcontrolcharts_" + i + ".json"
-            val fileNameResults = "subcontrolgroups" + File.separator  +"subPRICtrl${index}Results_" + i + ".json"
+            val fileNameCtrlGroup = "subcontrolgroups" + File.separator + "subcontrolcharts_" + i + ".json"
+            val fileNameResults = "subcontrolgroups" + File.separator + "subPRICtrl${index}Results_" + i + ".json"
             val allCharts = allChartsReader.readAllCharts(fileNameCtrlGroup)
             val details = defineDetails(index, allCharts)
             val priTotals = defineTotals(index, details)
@@ -867,12 +704,12 @@ class PrincipleHandler(
         for (i in 0 until nrOfCtrlGroups) {
             for (j in supportedBodies.indices) {
                 for (k in 0 until 5) {
-                    totals[j][k]+= combinedResults[i].totals[j].values[k]
+                    totals[j][k] += combinedResults[i].totals[j].values[k]
                 }
             }
         }
 
-        val averages = Array(supportedBodies.size) {DoubleArray(5)}
+        val averages = Array(supportedBodies.size) { DoubleArray(5) }
         for (i in supportedBodies.indices) {
             for (j in 0 until 5) {
                 averages[i][j] = totals[i][j].toDouble() / nrOfCtrlGroups
@@ -883,7 +720,7 @@ class PrincipleHandler(
         resultsWriter.writeResults(fileNameTotals, priAverages)
     }
 
-    private fun defineDetails(index: Int, allCharts: AllCharts): List<PrincipleChartDetails > {
+    private fun defineDetails(index: Int, allCharts: AllCharts): List<PrincipleChartDetails> {
 
         val descr = "Planet in own sign - asp/planet - in house - asp/lord - asp asc/mc (if appl.) - total"
         val players = definePlayers(index)
@@ -894,7 +731,7 @@ class PrincipleHandler(
             val mc = PointPosition(MundanePoints.MC, chart.cusps[10], 0.0)
             val ruler = defineRuler(index, chart)
             val lordCusp = defineRuler(index, chart)
-            lateinit var lordCuspPointPos : PointPosition
+            lateinit var lordCuspPointPos: PointPosition
 
             for (pointPos in chart.pointPositions) {
                 if (lordCusp == pointPos.point) {
@@ -907,9 +744,19 @@ class PrincipleHandler(
             for (lonPointToCheck in chart.pointPositions) {
                 val priValues = mutableListOf(0, 0, 0, 0, 0, 0)
                 if (checkInSignOfPrinciple(lonPointToCheck, index)) priValues[0] = 1
-                if ((players.point != lonPointToCheck.point) && (checkAspect(lonPlayer, lonPointToCheck, aspects))) priValues[1] = 1
+                if ((players.point != lonPointToCheck.point) && (checkAspect(
+                        lonPlayer,
+                        lonPointToCheck,
+                        aspects
+                    ))
+                ) priValues[1] = 1
                 if (checkHouse(chart, lonPointToCheck) == index) priValues[2] = 1
-                if (ruler != lonPointToCheck.point && checkAspect(lordCuspPointPos, lonPointToCheck, aspects)) priValues[3] = 1
+                if (ruler != lonPointToCheck.point && checkAspect(
+                        lordCuspPointPos,
+                        lonPointToCheck,
+                        aspects
+                    )
+                ) priValues[3] = 1
                 if (players.checkMcOrAsc && index == 1 && checkAspect(asc, lonPointToCheck, aspects)) priValues[4] = 1
                 if (players.checkMcOrAsc && index == 10 && checkAspect(mc, lonPointToCheck, aspects)) priValues[4] = 1
                 for (i in 0..4) priValues[5] += priValues[i]
@@ -952,7 +799,7 @@ class PrincipleHandler(
     }
 
     private fun checkHouse(chart: Chart, pointPos: PointPosition): Int {
-        val house =  housePosition.idOfHouse(pointPos.lon, chart.jdUt, flags, chart.location)
+        val house = housePosition.idOfHouse(pointPos.lon, chart.jdUt, flags, chart.location)
         return if (pointPos.point == CelPoints.MEAN_NODE || pointPos.point == CelPoints.MEAN_APOGEE) house
         else {
             var nextHouse = house + 1

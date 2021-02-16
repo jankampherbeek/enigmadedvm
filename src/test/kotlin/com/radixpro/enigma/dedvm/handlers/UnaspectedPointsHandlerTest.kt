@@ -15,6 +15,6 @@ internal class UnaspectedPointsHandlerTest {
 
     @Test
     fun `Defining unaspected points should function without errors`() {
-        handler.processCharts()
+        handler.processCharts(1)
     }
 }

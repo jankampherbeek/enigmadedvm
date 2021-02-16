@@ -15,6 +15,6 @@ internal class MaxPointsHandlerTest {
 
     @Test
     fun `Defining max points should not cause anyn error`() {
-        handler.processCharts()
+        handler.processCharts(1)
     }
 }

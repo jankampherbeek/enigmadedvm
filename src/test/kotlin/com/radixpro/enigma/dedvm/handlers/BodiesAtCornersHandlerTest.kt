@@ -15,6 +15,6 @@ internal class BodiesAtCornersHandlerTest {
 
     @Test
     fun `Calculating bodies at corners should not cause any errors`() {
-        handler.processCharts()
+        handler.processCharts(1)
     }
 }

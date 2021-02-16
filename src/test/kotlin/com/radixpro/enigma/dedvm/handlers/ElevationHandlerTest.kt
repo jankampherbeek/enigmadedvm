@@ -15,6 +15,6 @@ internal class ElevationHandlerTest {
 
     @Test
     fun `Finding elevations should cause no errors`() {
-        handler.processCharts()
+        handler.processCharts(1)
     }
 }

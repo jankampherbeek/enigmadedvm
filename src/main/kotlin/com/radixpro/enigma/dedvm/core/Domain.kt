@@ -6,6 +6,13 @@
 
 package com.radixpro.enigma.dedvm.core
 
+interface ICounts
+
+interface INamedChart {
+    val id: String
+    val name: String
+}
+
 /**
  * Elements of date and time.
  */
@@ -68,9 +75,9 @@ data class ActualAspect(val point1: Points,
 /**
  * Identification of a chart and a list of counted values.
  */
-data class ChartCount(val id: String,
-                      val name: String,
-                      val counts: List<Int>)
+data class ChartCount(override val id: String,
+                      override val name: String,
+                      val counts: List<Int>): INamedChart
 
 /**
  * Counts of Sun, Moon and Ascendant in signs plus totals for a chart.
@@ -78,7 +85,7 @@ data class ChartCount(val id: String,
 data class SMAInSign(val totalsSun: List<Int>,
                      val totalsMoon: List<Int>,
                      val totalsAsc: List<Int>,
-                     val countsPerChart: List<ChartCount> )
+                     val countsPerChart: List<ChartCount> ) : ICounts
 
 /**
  * Averages of Sun, Moon and Ascendant in signs, calculated over multiple charts/controldata.
@@ -92,7 +99,7 @@ data class SMAInSignAverages(val totalsSun: List<Double>,
  */
 data class CountsDetails(val bodySpec: List<CelPoints>,
                          val totals: List<Int>,
-                         val details: List<ChartCount>)
+                         val details: List<ChartCount>): ICounts
 
 /**
  * Averages of bodies for several tests.
@@ -100,19 +107,19 @@ data class CountsDetails(val bodySpec: List<CelPoints>,
 data class BodiesAverages(val bodySpec: List<CelPoints>,
                           val averageValues: List<Double>)
 /**
- * Specification of a point with a specific maximum of minimum in a chart.
+ * Specification of a point with a specific maximum or minimum in a chart.
  */
-data class MinMaxPositionsPerChart(val id: String,
-                                   val name: String,
+data class MinMaxPositionsPerChart(override val id: String,
+                                   override val name: String,
                                    val point: CelPoints,
-                                   val distance: Double)
+                                   val distance: Double): INamedChart
 
 /**
  * Counts of bodies that are closest to the MC, measured in longitude.
  */
 data class ElevationValues(val bodySpec: List<CelPoints>,
                            val totals: List<Int>,
-                           val details: List<MinMaxPositionsPerChart>)
+                           val details: List<MinMaxPositionsPerChart>): ICounts
 
 /**
  * Counts of values for a specific body, according to principles as defined by Threes Brouwers.
