@@ -646,8 +646,12 @@ class PrincipleHandler(
     private val aspectsForChart: AspectsForChart,
     private val resultsWriter: ResultsWriter
 ) {
-    private val fileNamePrefixForPRIData = "PRIResults_"
-    private val fileNamePrefixForPRIControlData = "PRIControlDataResults_"
+//    private val fileNamePrefixForPRIData = "PRIResults_"
+//    private val fileNamePrefixForPRIControlData = "PRIControlDataResults_"
+
+
+    private val testName = "PRI"
+
     private val supportedBodies = listOf(
         CelPoints.SUN,
         CelPoints.MOON,
@@ -663,12 +667,12 @@ class PrincipleHandler(
         CelPoints.MEAN_NODE,
         CelPoints.MEAN_APOGEE
     )
-    private val flags = 0 or 2 or 256           // 2 = SwissEph, 256 = speed
+//    private val flags = 0 or 2 or 256           // 2 = SwissEph, 256 = speed
 
     fun processCharts(nrOfCtrlGroups: Int) {
         for (i in 1..12) {
             handleCharts(i)
-            if (nrOfCtrlGroups == 1) handleControlData(i) else handleMultiControlData(nrOfCtrlGroups, i)
+            handleMultiControlData(nrOfCtrlGroups, i)
         }
     }
 
@@ -676,23 +680,47 @@ class PrincipleHandler(
         val allCharts = allChartsReader.readAllCharts(fileNameCharts)
         val details = defineDetails(index, allCharts)
         val principleComplete = defineTotals(index, details)
-        resultsWriter.writeResults("$fileNamePrefixForPRIData$index.json", principleComplete)
+        resultsWriter.writeResults(testName + "_" + index + fileNamePostfixResults, principleComplete)
     }
+//
+//    private fun handleControlData(index: Int) {
+//        val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
+//        val details = defineDetails(index, allCharts)
+//        val principleComplete = defineTotals(index, details)
+//        resultsWriter.writeResults( testName + "_" + index + fileNamePostfixResults, principleComplete)
+//    }
 
-    private fun handleControlData(index: Int) {
-        val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
-        val details = defineDetails(index, allCharts)
-        val principleComplete = defineTotals(index, details)
-        resultsWriter.writeResults("$fileNamePrefixForPRIControlData$index.json", principleComplete)
-    }
 
+    //    protected fun createSubCtrlResults(nrOfCtrlGroups: Int): List<ICounts> {
+    //        val combinedResults: MutableList<ICounts> = ArrayList()
+    //        for (i in 0 until nrOfCtrlGroups) {
+    //            val allCharts = readAllChartsForCtrlGroup(i)
+    //            val detailCount = defineDetailsCount(allCharts)
+    //            val totals = defineTotals(detailCount)
+    //            combinedResults.add(totals)
+    //            writeResultsForCtrlGroup(i, totals)
+    //        }
+    //        return combinedResults
+    //    }
+    //
+    //    private fun readAllChartsForCtrlGroup(index: Int): AllCharts {
+    //        val fileNameCtrlGroup = scgFolder + File.separator + fileNamePrefixSCCharts + index + extension
+    //        return allChartsReader.readAllCharts(fileNameCtrlGroup)
+    //    }
+    //
+    //    private fun writeResultsForCtrlGroup(index: Int, totals: ICounts) {
+    //        val fileNameCtrlResults = scgFolder + File.separator + testName + fileNameCenterSCGResults + index + extension
+    //        resultsWriter.writeResults(fileNameCtrlResults, totals)
+    //    }
 
     private fun handleMultiControlData(nrOfCtrlGroups: Int, index: Int) {
         val combinedResults: MutableList<PrincipleComplete> = ArrayList()
-        val fileNameTotals = "totalPRICtrlResults$index.json"
+//        val fileNameTotals = "totalPRICtrlResults$index.json"
         for (i in 0 until nrOfCtrlGroups) {
-            val fileNameCtrlGroup = "subcontrolgroups" + File.separator + "subcontrolcharts_" + i + ".json"
-            val fileNameResults = "subcontrolgroups" + File.separator + "subPRICtrl${index}Results_" + i + ".json"
+//            val fileNameCtrlGroup = "subcontrolgroups" + File.separator + "subcontrolcharts_" + i + ".json"
+            val fileNameCtrlGroup = scgFolder + File.separator + fileNamePrefixSCCharts + i + extension
+//            val fileNameResults = "subcontrolgroups" + File.separator + "subPRICtrl${index}Results_" + i + ".json"
+            val fileNameResults = scgFolder + File.separator + testName + "_" + index + "_" +  fileNameCenterSCGResults + i + extension
             val allCharts = allChartsReader.readAllCharts(fileNameCtrlGroup)
             val details = defineDetails(index, allCharts)
             val priTotals = defineTotals(index, details)
@@ -700,7 +728,8 @@ class PrincipleHandler(
             resultsWriter.writeResults(fileNameResults, priTotals)
         }
 
-        val totals = Array(nrOfCtrlGroups) { IntArray(5) }
+//        val totals = Array(nrOfCtrlGroups) { IntArray(5) }   // TODO 3-d array: nrOfCtrlGroups/supportedBodies/factor k
+        val totals = Array(supportedBodies.size) {IntArray(5)}
         for (i in 0 until nrOfCtrlGroups) {
             for (j in supportedBodies.indices) {
                 for (k in 0 until 5) {
@@ -710,14 +739,16 @@ class PrincipleHandler(
         }
 
         val averages = Array(supportedBodies.size) { DoubleArray(5) }
-        for (i in supportedBodies.indices) {
-            for (j in 0 until 5) {
-                averages[i][j] = totals[i][j].toDouble() / nrOfCtrlGroups
+        for (i in 0 until nrOfCtrlGroups) {
+            for (j in supportedBodies.indices) {
+                for (k in 0 until 5) {
+                    averages[j][k] = totals[j][k].toDouble() / nrOfCtrlGroups
+                }
             }
 
         }
         val priAverages = PrincipleAverages(supportedBodies, averages)
-        resultsWriter.writeResults(fileNameTotals, priAverages)
+        resultsWriter.writeResults(testName + "_" + index + "_" +fileNamePostfixSCGTotals, priAverages)
     }
 
     private fun defineDetails(index: Int, allCharts: AllCharts): List<PrincipleChartDetails> {
