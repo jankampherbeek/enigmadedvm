@@ -4,6 +4,8 @@
  * Please check the file copyright.txt in the root of the source for further details.
  */
 
+@file:Suppress("UNCHECKED_CAST")
+
 package com.radixpro.enigma.dedvm.handlers
 
 import com.radixpro.enigma.dedvm.analysis.AspectsForChart
@@ -41,9 +43,6 @@ private val standardSupportedBodies = listOf(
     CelPoints.CHIRON
 )
 
-// TODO check the nemes hereafter
-private const val fileNameForControlData = "controlcharts.json"
-
 /**
  * Shared function, calculates the effect of a prespan when close to a cusp.
  */
@@ -60,7 +59,7 @@ fun checkForCuspOrb(lon: Double, speed: Double, house: Int, cusp: Double): Int {
 }
 
 
-abstract class ProcessHandler() {
+abstract class ProcessHandler {
 
     protected abstract val allChartsReader: AllChartsReader
     protected abstract val resultsWriter: ResultsWriter
@@ -113,8 +112,7 @@ abstract class ProcessHandler() {
 class SMAInSignHandler(
     override val allChartsReader: AllChartsReader,
     private val signPosition: SignPosition,
-    override val resultsWriter: ResultsWriter
-) : ProcessHandler() {
+    override val resultsWriter: ResultsWriter): ProcessHandler() {
 
     override val testName = "SMA"
 
@@ -178,6 +176,7 @@ class BodiesInHouseHandler(
     override val allChartsReader: AllChartsReader,
     private val housePosition: HousePosition,
     override val resultsWriter: ResultsWriter) : ProcessHandler() {
+
     private val cusps = listOf(1, 10)
     override val testName = "BAM"
 
@@ -237,7 +236,7 @@ class BodiesInHouseHandler(
  * Checks if points are positioned in corners.
  */
 class BodiesAtCornersHandler(override val allChartsReader: AllChartsReader,
-                             override val resultsWriter: ResultsWriter): ProcessHandler() {
+                             override val resultsWriter: ResultsWriter) : ProcessHandler() {
 
     override val testName = "BCO"
 
@@ -302,7 +301,7 @@ class BodiesAtCornersHandler(override val allChartsReader: AllChartsReader,
  * Checks for the celestial body that is closest to the MC, mesured in longitude.
  */
 class ElevationHandler(override val allChartsReader: AllChartsReader,
-                       override val resultsWriter: ResultsWriter): ProcessHandler() {
+                       override val resultsWriter: ResultsWriter) : ProcessHandler() {
 
     override val testName = "ELEV"
 
@@ -350,9 +349,9 @@ class ElevationHandler(override val allChartsReader: AllChartsReader,
         return elevatedPoints.toList()
     }
 
-    override fun defineTotals(details: List<INamedChart>): ElevationValues {
+    override fun defineTotals(detailCount: List<INamedChart>): ElevationValues {
         val totals = mutableListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)       // 11 positions
-        for (mmPos in details as List<MinMaxPositionsPerChart>) {
+        for (mmPos in detailCount as List<MinMaxPositionsPerChart>) {
             when (mmPos.point) {
                 CelPoints.SUN -> totals[0]++
                 CelPoints.MOON -> totals[1]++
@@ -365,9 +364,10 @@ class ElevationHandler(override val allChartsReader: AllChartsReader,
                 CelPoints.NEPTUNE -> totals[8]++
                 CelPoints.PLUTO -> totals[9]++
                 CelPoints.CHIRON -> totals[10]++
+                else -> {}
             }
         }
-        return ElevationValues(standardSupportedBodies, totals, details)
+        return ElevationValues(standardSupportedBodies, totals, detailCount)
     }
 }
 
@@ -378,7 +378,7 @@ class ProminentAspectsHandler(
     override val allChartsReader: AllChartsReader,
     private val aspectsForChart: AspectsForChart,
     private val signPosition: SignPosition,
-    override val resultsWriter: ResultsWriter): ProcessHandler() {
+    override val resultsWriter: ResultsWriter) : ProcessHandler() {
 
     override val testName = "PRA"
 
@@ -460,7 +460,7 @@ class ProminentAspectsHandler(
 class UnaspectedPointsHandler(
     override val allChartsReader: AllChartsReader,
     private val aspectsForChart: AspectsForChart,
-    override val resultsWriter: ResultsWriter): ProcessHandler() {
+    override val resultsWriter: ResultsWriter) : ProcessHandler() {
 
     override val testName = "NAS"
 
@@ -539,7 +539,7 @@ class MaxPointsHandler(
     override val allChartsReader: AllChartsReader,
     private val signPosition: SignPosition,
     private val housePosition: HousePosition,
-    override val resultsWriter: ResultsWriter): ProcessHandler() {
+    override val resultsWriter: ResultsWriter) : ProcessHandler() {
 
     override val testName = "MAX"
 
@@ -644,11 +644,7 @@ class PrincipleHandler(
     private val signPosition: SignPosition,
     private val housePosition: HousePosition,
     private val aspectsForChart: AspectsForChart,
-    private val resultsWriter: ResultsWriter
-) {
-//    private val fileNamePrefixForPRIData = "PRIResults_"
-//    private val fileNamePrefixForPRIControlData = "PRIControlDataResults_"
-
+    private val resultsWriter: ResultsWriter) {
 
     private val testName = "PRI"
 
@@ -667,7 +663,6 @@ class PrincipleHandler(
         CelPoints.MEAN_NODE,
         CelPoints.MEAN_APOGEE
     )
-//    private val flags = 0 or 2 or 256           // 2 = SwissEph, 256 = speed
 
     fun processCharts(nrOfCtrlGroups: Int) {
         for (i in 1..12) {
@@ -682,44 +677,11 @@ class PrincipleHandler(
         val principleComplete = defineTotals(index, details)
         resultsWriter.writeResults(testName + "_" + index + fileNamePostfixResults, principleComplete)
     }
-//
-//    private fun handleControlData(index: Int) {
-//        val allCharts = allChartsReader.readAllCharts(fileNameForControlData)
-//        val details = defineDetails(index, allCharts)
-//        val principleComplete = defineTotals(index, details)
-//        resultsWriter.writeResults( testName + "_" + index + fileNamePostfixResults, principleComplete)
-//    }
-
-
-    //    protected fun createSubCtrlResults(nrOfCtrlGroups: Int): List<ICounts> {
-    //        val combinedResults: MutableList<ICounts> = ArrayList()
-    //        for (i in 0 until nrOfCtrlGroups) {
-    //            val allCharts = readAllChartsForCtrlGroup(i)
-    //            val detailCount = defineDetailsCount(allCharts)
-    //            val totals = defineTotals(detailCount)
-    //            combinedResults.add(totals)
-    //            writeResultsForCtrlGroup(i, totals)
-    //        }
-    //        return combinedResults
-    //    }
-    //
-    //    private fun readAllChartsForCtrlGroup(index: Int): AllCharts {
-    //        val fileNameCtrlGroup = scgFolder + File.separator + fileNamePrefixSCCharts + index + extension
-    //        return allChartsReader.readAllCharts(fileNameCtrlGroup)
-    //    }
-    //
-    //    private fun writeResultsForCtrlGroup(index: Int, totals: ICounts) {
-    //        val fileNameCtrlResults = scgFolder + File.separator + testName + fileNameCenterSCGResults + index + extension
-    //        resultsWriter.writeResults(fileNameCtrlResults, totals)
-    //    }
 
     private fun handleMultiControlData(nrOfCtrlGroups: Int, index: Int) {
         val combinedResults: MutableList<PrincipleComplete> = ArrayList()
-//        val fileNameTotals = "totalPRICtrlResults$index.json"
         for (i in 0 until nrOfCtrlGroups) {
-//            val fileNameCtrlGroup = "subcontrolgroups" + File.separator + "subcontrolcharts_" + i + ".json"
             val fileNameCtrlGroup = scgFolder + File.separator + fileNamePrefixSCCharts + i + extension
-//            val fileNameResults = "subcontrolgroups" + File.separator + "subPRICtrl${index}Results_" + i + ".json"
             val fileNameResults = scgFolder + File.separator + testName + "_" + index + "_" +  fileNameCenterSCGResults + i + extension
             val allCharts = allChartsReader.readAllCharts(fileNameCtrlGroup)
             val details = defineDetails(index, allCharts)
@@ -727,8 +689,6 @@ class PrincipleHandler(
             combinedResults.add(priTotals)
             resultsWriter.writeResults(fileNameResults, priTotals)
         }
-
-//        val totals = Array(nrOfCtrlGroups) { IntArray(5) }   // TODO 3-d array: nrOfCtrlGroups/supportedBodies/factor k
         val totals = Array(supportedBodies.size) {IntArray(5)}
         for (i in 0 until nrOfCtrlGroups) {
             for (j in supportedBodies.indices) {
@@ -737,7 +697,6 @@ class PrincipleHandler(
                 }
             }
         }
-
         val averages = Array(supportedBodies.size) { DoubleArray(5) }
         for (i in 0 until nrOfCtrlGroups) {
             for (j in supportedBodies.indices) {
@@ -745,14 +704,12 @@ class PrincipleHandler(
                     averages[j][k] = totals[j][k].toDouble() / nrOfCtrlGroups
                 }
             }
-
         }
         val priAverages = PrincipleAverages(supportedBodies, averages)
         resultsWriter.writeResults(testName + "_" + index + "_" +fileNamePostfixSCGTotals, priAverages)
     }
 
     private fun defineDetails(index: Int, allCharts: AllCharts): List<PrincipleChartDetails> {
-
         val descr = "Planet in own sign - asp/planet - in house - asp/lord - asp asc/mc (if appl.) - total"
         val players = definePlayers(index)
         val chartDetails: MutableList<PrincipleChartDetails> = ArrayList()
