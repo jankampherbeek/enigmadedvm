@@ -9,17 +9,14 @@ package com.radixpro.enigma.dedvm.persistency
 import com.radixpro.enigma.dedvm.core.ChartInputData
 import com.radixpro.enigma.dedvm.core.DateTimeParts
 import com.radixpro.enigma.dedvm.core.Location
-import com.radixpro.enigma.dedvm.ui.Dashboard
 import org.apache.log4j.Logger
 import java.security.SecureRandom
-import java.time.LocalDateTime
-import java.util.*
 import kotlin.collections.ArrayList
 
 /**
  * Creates a set of controldata.
  */
-class ControlDataCreator(private val randomizer: ListRandomizer,
+class ControlDataCreator(private val listRandomizer: ListRandomizer,
                          private val controlDataCalendar: ControlDataCalendar) {
     private val log: Logger = Logger.getLogger(ControlDataCreator::class.java)
     private var controlInputData: MutableList<ChartInputData> = ArrayList()
@@ -32,11 +29,12 @@ class ControlDataCreator(private val randomizer: ListRandomizer,
     private var latitudes: MutableList<Double> = ArrayList()
     private var longitudes: MutableList<Double> = ArrayList()
 
-    fun createControlData(inputData: List<ChartInputData>): List<ChartInputData> {
-        log.info("Creating standard control data.")
+    private fun createControlData(inputData: List<ChartInputData>, random: SecureRandom): List<ChartInputData> {
         controlInputData.clear()
         processInputData(inputData)
-        sortDaysAndShuffleOtherItems()
+        log.info("Start sorting and shuffling.")
+        sortDaysAndShuffleOtherItems(random)
+        log.info("Sorting and shuffling completed.")
         processData()
         return controlInputData.toList()
     }
@@ -44,9 +42,12 @@ class ControlDataCreator(private val randomizer: ListRandomizer,
     fun createMultipleControlData(inputData: List<ChartInputData>, multiplicity: Int): List<List<ChartInputData>> {
         log.info("Creating a set for multiple control data using multiplicity $multiplicity.")
         val allSubControlData: MutableList<List<ChartInputData>> = ArrayList()
+        val randomizer = SecureRandom()
         for(i in 0 until multiplicity) {
-            val controlDataForOneSet = createControlData(inputData)
+            log.info("Start generation of control group: $i")
+            val controlDataForOneSet = createControlData(inputData, randomizer)
             allSubControlData.add(controlDataForOneSet)
+            log.info("Created control group: $i")
         }
         return allSubControlData.toList()
     }
@@ -76,16 +77,16 @@ class ControlDataCreator(private val randomizer: ListRandomizer,
     }
 
 
-    private fun sortDaysAndShuffleOtherItems() {
+    private fun sortDaysAndShuffleOtherItems(random: SecureRandom) {
         days.sort()
         days.reverse()
-        randomizer.randomize(years)
-        randomizer.randomize(months)
-        randomizer.randomize(utHours)
-        randomizer.randomize(utMinutes)
-        randomizer.randomize(utSeconds)
-        randomizer.randomize(latitudes)
-        randomizer.randomize(longitudes)
+        listRandomizer.randomize(years, random)
+        listRandomizer.randomize(months, random)
+        listRandomizer.randomize(utHours, random)
+        listRandomizer.randomize(utMinutes, random)
+        listRandomizer.randomize(utSeconds, random)
+        listRandomizer.randomize(latitudes, random)
+        listRandomizer.randomize(longitudes, random)
     }
 
     private fun processData() {   // use only UT
@@ -167,33 +168,21 @@ class ControlDataCalendar {
  * Uses the nanoseconds of the current time as seed for the randomizer.
  */
 class ListRandomizer {
-    private val log: Logger = Logger.getLogger(ListRandomizer::class.java)
 
     /**
      * Perform the randomization.
      * @param shuffleThis The list to randomize.
      * @return The randomized list.
      */
-    fun randomize(shuffleThis: MutableList<*>): List<*> {
-        return shuffle(shuffleThis)
+    fun randomize(shuffleThis: MutableList<*>, random: SecureRandom): List<*> {
+        return shuffle(shuffleThis, random)
     }
 
-    private fun shuffle(shuffleThis: MutableList<*>): List<*> {
-        val random = SecureRandom()
-        random.reseed()
+    private fun shuffle(shuffleThis: MutableList<*>, random: SecureRandom): List<*> {
+//        val random = SecureRandom()
+//        random.reseed()
         shuffleThis.shuffle(random)
         return shuffleThis
     }
-
-    private fun generateSeedFromTime(): Long {
-        return LocalDateTime.now().nano.toLong()
-    }
-
-    private fun createRandomizer(seed: Long): Random {
-        val random = Random()
-        random.setSeed(seed)
-        return random
-    }
-
 
 }

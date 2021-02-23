@@ -31,13 +31,9 @@ class InputDataHandler(
 
     fun handleData(fileAndPath: String) {
         val fileNameForData = ".${SEPARATOR}data${SEPARATOR}calculatedcharts.json"
-        val fileNameForCtrlData = ".${SEPARATOR}data${SEPARATOR}controlcharts.json"
         val inputDataRecords = csvInputDataReader.readInputData(fileAndPath)
         val calculatedCharts = chartsCalculator.processInputData(inputDataRecords)
         chartsWriter.writeCharts(calculatedCharts, fileNameForData)
-        val controlDataRecords = controlDataCreator.createControlData(inputDataRecords)
-        val calculatedControlCharts = chartsCalculator.processInputData(controlDataRecords)
-        chartsWriter.writeCharts(calculatedControlCharts, fileNameForCtrlData)
     }
 
 

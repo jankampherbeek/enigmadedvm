@@ -266,10 +266,13 @@ class Dashboard(
     }
 
     private fun saveProperty() {
+        nrOfCtrlGroups = tfNrOfCtrlGroups.text.toInt()
         propWriter.writeProperty(ctrlGroupKey, nrOfCtrlGroups.toString())
     }
 
     private fun onDataFile() {
+        saveProperty()
+        log.info("Creating data using $nrOfCtrlGroups control groups.")
         val dataFile = FileChooser().showOpenDialog(stage)
         if (null != dataFile) {
             try {
@@ -285,7 +288,6 @@ class Dashboard(
     }
 
     private fun onPerformTests() {
-        saveProperty()
         try {
             if (cbSma.isSelected) smaInSignHandler.processCharts(nrOfCtrlGroups)
             if (cbBam.isSelected) bodiesInHouseHandler.processCharts(nrOfCtrlGroups)
