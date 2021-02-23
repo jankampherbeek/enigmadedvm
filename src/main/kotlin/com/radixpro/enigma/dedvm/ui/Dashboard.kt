@@ -273,9 +273,7 @@ class Dashboard(
         val dataFile = FileChooser().showOpenDialog(stage)
         if (null != dataFile) {
             try {
-//                inputDataHandler.handleData(dataFile)
-                if (nrOfCtrlGroups == 1) inputDataHandler.handleData(dataFile)
-                else inputDataHandler.handleDataForMultipleSubControlGroups(dataFile, nrOfCtrlGroups)
+                inputDataHandler.handleDataForMultipleSubControlGroups(dataFile, nrOfCtrlGroups)
                 showFeedback(getText("dashboard.msg_dataimported"))
                 log.info("Data has been imported.")
             } catch (e: Exception) {

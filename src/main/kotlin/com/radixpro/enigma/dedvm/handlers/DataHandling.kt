@@ -12,6 +12,8 @@ import com.radixpro.enigma.dedvm.persistency.AllChartsReader
 import com.radixpro.enigma.dedvm.persistency.ChartsWriter
 import com.radixpro.enigma.dedvm.persistency.ControlDataCreator
 import com.radixpro.enigma.dedvm.persistency.CsvInputDataReader
+import com.radixpro.enigma.dedvm.ui.Dashboard
+import org.apache.log4j.Logger
 import java.io.File
 import java.io.File.separator as SEPARATOR
 
@@ -25,6 +27,8 @@ class InputDataHandler(
     private val chartsWriter: ChartsWriter
 ) {
 
+    private val log: Logger = Logger.getLogger(InputDataHandler::class.java)
+
     fun handleData(fileAndPath: String) {
         val fileNameForData = ".${SEPARATOR}data${SEPARATOR}calculatedcharts.json"
         val fileNameForCtrlData = ".${SEPARATOR}data${SEPARATOR}controlcharts.json"
@@ -36,16 +40,6 @@ class InputDataHandler(
         chartsWriter.writeCharts(calculatedControlCharts, fileNameForCtrlData)
     }
 
-    fun handleData(inputDataFile: File) {
-        val fileNameForData = ".${SEPARATOR}data${SEPARATOR}calculatedcharts.json"
-        val fileNameForCtrlData = ".${SEPARATOR}data${SEPARATOR}controlcharts.json"
-        val inputDataRecords = csvInputDataReader.readInputData(inputDataFile)
-        val calculatedCharts = chartsCalculator.processInputData(inputDataRecords)
-        chartsWriter.writeCharts(calculatedCharts, fileNameForData)
-        val controlDataRecords = controlDataCreator.createControlData(inputDataRecords)
-        val calculatedControlCharts = chartsCalculator.processInputData(controlDataRecords)
-        chartsWriter.writeCharts(calculatedControlCharts, fileNameForCtrlData)
-    }
 
     fun handleDataForMultipleSubControlGroups(inputDataFile: File, multiplicity: Int) {
         val fileNameForData = ".${SEPARATOR}data${SEPARATOR}calculatedcharts.json"
@@ -56,8 +50,8 @@ class InputDataHandler(
         val controlDataSubRecords = controlDataCreator.createMultipleControlData(inputDataRecords, multiplicity)
         for((counter, subset) in controlDataSubRecords.withIndex()) {
             var calculatedSubControlCharts = chartsCalculator.processInputData(subset)
+            log.info("Writing ctrl-data subset  $fileNamePrefixForCtrlData$counter.json" )
             chartsWriter.writeCharts(calculatedSubControlCharts, "$fileNamePrefixForCtrlData$counter.json")
-
         }
     }
 

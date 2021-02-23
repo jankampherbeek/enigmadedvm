@@ -706,7 +706,7 @@ class PrincipleHandler(
             }
         }
         val priAverages = PrincipleAverages(supportedBodies, averages)
-        resultsWriter.writeResults(testName + "_" + index + "_" +fileNamePostfixSCGTotals, priAverages)
+        resultsWriter.writeResults(testName + "_" + index + fileNamePostfixSCGTotals, priAverages)
     }
 
     private fun defineDetails(index: Int, allCharts: AllCharts): List<PrincipleChartDetails> {
